@@ -38,7 +38,7 @@ func (s *authService) Login(cpf, secret string) (retVal entity.Authentication, e
 		return retVal, err
 	}
 
-	account, err := s.svc.dm.MySQL().Account().GetAccountByDocument(encryptedDocumentNumber)
+	account, err := s.svc.dm.Account().GetAccountByDocument(encryptedDocumentNumber)
 	if err != nil {
 		log.Error("Login: ", err)
 		return retVal, resterrors.NewUnauthorizedError(wrongLogin)

@@ -9,7 +9,7 @@ import (
 	"github.com/GuiaBolso/darwin"
 	"github.com/labstack/gommon/log"
 
-	"github.com/diegoclair/go-boilerplate/contract"
+	"github.com/diegoclair/go-boilerplate/domain/repo"
 	"github.com/diegoclair/go-boilerplate/infra/data/migrations"
 	"github.com/diegoclair/go-boilerplate/util/config"
 	"github.com/diegoclair/go_utils-lib/logger"
@@ -28,7 +28,7 @@ type mysqlConn struct {
 }
 
 //Instance returns an instance of a MySQLRepo
-func Instance() (contract.MySQLRepo, error) {
+func Instance() (repo.Manager, error) {
 	onceDB.Do(func() {
 		cfg := config.GetConfigEnvironment()
 
@@ -86,8 +86,8 @@ func Instance() (contract.MySQLRepo, error) {
 	return conn, connErr
 }
 
-// Begin starts a transaction
-func (c *mysqlConn) Begin() (contract.MysqlTransaction, error) {
+// Begin starts a mysql transaction
+func (c *mysqlConn) Begin() (repo.Transaction, error) {
 	tx, err := c.db.Begin()
 	if err != nil {
 		return nil, err
@@ -100,6 +100,6 @@ func (c *mysqlConn) Close() (err error) {
 	return c.db.Close()
 }
 
-func (c *mysqlConn) Account() contract.AccountRepo {
+func (c *mysqlConn) Account() repo.AccountRepo {
 	return newAccountRepo(c.db)
 }

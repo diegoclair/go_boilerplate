@@ -32,7 +32,7 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 		return err
 	}
 
-	_, err = s.svc.dm.MySQL().Account().GetAccountByDocument(account.CPF)
+	_, err = s.svc.dm.Account().GetAccountByDocument(account.CPF)
 	if err != nil && !errors.SQLNotFound(err.Error()) {
 		log.Error("CreateAccount: ", err)
 		return err
@@ -44,7 +44,7 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 	account.Secret = s.getHashedPassword(account.Secret)
 	account.UUID = uuid.NewV4().String()
 
-	err = s.svc.dm.MySQL().Account().CreateAccount(account)
+	err = s.svc.dm.Account().CreateAccount(account)
 	if err != nil {
 		log.Error("CreateAccount: ", err)
 		return err
@@ -64,7 +64,7 @@ func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
 	log.Info("GetAccounts: Process Started")
 	defer log.Info("GetAccounts: Process Finished")
 
-	accounts, err = s.svc.dm.MySQL().Account().GetAccounts()
+	accounts, err = s.svc.dm.Account().GetAccounts()
 	if err != nil {
 		log.Error("GetAccounts: ", err)
 		return accounts, err
@@ -86,7 +86,7 @@ func (s *accountService) GetAccountByUUID(accountUUID string) (account entity.Ac
 	log.Info("GetAccountByUUID: Process Started")
 	defer log.Info("GetAccountByUUID: Process Finished")
 
-	account, err = s.svc.dm.MySQL().Account().GetAccountByUUID(accountUUID)
+	account, err = s.svc.dm.Account().GetAccountByUUID(accountUUID)
 	if err != nil {
 		log.Error("GetAccountByUUID: ", err)
 		return account, err

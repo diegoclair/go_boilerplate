@@ -26,7 +26,7 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 	defer log.Info("CreateTransfer: Process Finished")
 
 	loggedAccountUUID := appContext.Value(auth.AccountUUIDKey)
-	account, err := s.svc.dm.MySQL().Account().GetAccountByUUID(loggedAccountUUID.(string))
+	account, err := s.svc.dm.Account().GetAccountByUUID(loggedAccountUUID.(string))
 	if err != nil {
 		log.Error("CreateTransfer: ", err)
 		return err
@@ -36,7 +36,7 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
 	}
 
-	destAccount, err := s.svc.dm.MySQL().Account().GetAccountByUUID(transfer.AccountDestinationUUID)
+	destAccount, err := s.svc.dm.Account().GetAccountByUUID(transfer.AccountDestinationUUID)
 	if err != nil {
 		log.Error("CreateTransfer: ", err)
 		return err
@@ -46,7 +46,7 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 	transfer.AccountOriginID = account.ID
 	transfer.TransferUUID = uuid.NewV4().String()
 
-	tx, err := s.svc.dm.MySQL().Begin()
+	tx, err := s.svc.dm.Begin()
 	if err != nil {
 		log.Error("CreateTransfer: error to get db transaction", err)
 		return err
@@ -89,20 +89,20 @@ func (s *transferService) GetTransfers(appContext context.Context) (transfers []
 
 	loggedAccountUUID := appContext.Value(auth.AccountUUIDKey)
 
-	account, err := s.svc.dm.MySQL().Account().GetAccountByUUID(loggedAccountUUID.(string))
+	account, err := s.svc.dm.Account().GetAccountByUUID(loggedAccountUUID.(string))
 	if err != nil {
 		log.Error("GetTransfers: ", err)
 		return transfers, err
 	}
 
-	trasnfersMade, err := s.svc.dm.MySQL().Account().GetTransfersByAccountID(account.ID, true)
+	trasnfersMade, err := s.svc.dm.Account().GetTransfersByAccountID(account.ID, true)
 	if err != nil {
 		log.Error("GetTransfers: ", err)
 		return transfers, err
 	}
 	transfers = append(transfers, trasnfersMade...)
 
-	trasnfersReceived, err := s.svc.dm.MySQL().Account().GetTransfersByAccountID(account.ID, false)
+	trasnfersReceived, err := s.svc.dm.Account().GetTransfersByAccountID(account.ID, false)
 	if err != nil {
 		log.Error("GetTransfers: ", err)
 		return transfers, err
