@@ -9,7 +9,7 @@ import (
 	"github.com/GuiaBolso/darwin"
 	"github.com/labstack/gommon/log"
 
-	"github.com/diegoclair/go-boilerplate/domain/repo"
+	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/infra/data/migrations"
 	"github.com/diegoclair/go-boilerplate/util/config"
 	"github.com/diegoclair/go_utils-lib/logger"
@@ -28,16 +28,16 @@ type mysqlConn struct {
 }
 
 //Instance returns an instance of a MySQLRepo
-func Instance() (repo.Manager, error) {
+func Instance(cfg *config.Config) (contract.Manager, error) {
 	onceDB.Do(func() {
-		cfg := config.GetConfigEnvironment()
 
 		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
 			cfg.MySQL.Username, cfg.MySQL.Host, cfg.MySQL.Port, cfg.MySQL.DBName,
 		)
 
+		var db *sql.DB
 		log.Info("Connecting to database...")
-		db, connErr := sql.Open("mysql", dataSourceName)
+		db, connErr = sql.Open("mysql", dataSourceName)
 		if connErr != nil {
 			return
 		}
@@ -87,7 +87,7 @@ func Instance() (repo.Manager, error) {
 }
 
 // Begin starts a mysql transaction
-func (c *mysqlConn) Begin() (repo.Transaction, error) {
+func (c *mysqlConn) Begin() (contract.Transaction, error) {
 	tx, err := c.db.Begin()
 	if err != nil {
 		return nil, err
@@ -100,6 +100,6 @@ func (c *mysqlConn) Close() (err error) {
 	return c.db.Close()
 }
 
-func (c *mysqlConn) Account() repo.AccountRepo {
+func (c *mysqlConn) Account() contract.AccountRepo {
 	return newAccountRepo(c.db)
 }

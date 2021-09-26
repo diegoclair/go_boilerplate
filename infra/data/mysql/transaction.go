@@ -2,9 +2,8 @@ package mysql
 
 import (
 	"database/sql"
-	"log"
 
-	"github.com/diegoclair/go-boilerplate/domain/repo"
+	"github.com/diegoclair/go-boilerplate/domain/contract"
 )
 
 type mysqlTransaction struct {
@@ -18,18 +17,10 @@ func newTransaction(tx *sql.Tx) *mysqlTransaction {
 	return instance
 }
 
-func (t *mysqlTransaction) Begin() (repo.Transaction, error) {
+func (t *mysqlTransaction) Begin() (contract.Transaction, error) {
 	return &mysqlTransaction{
 		tx: t.tx,
 	}, nil
-}
-
-func (t *mysqlTransaction) MySQL() repo.Manager {
-	mysqlRepo, err := Instance()
-	if err != nil {
-		log.Fatalf("Error to start mysql instance: %v", err)
-	}
-	return mysqlRepo
 }
 
 // Commit persists changes to database
@@ -58,6 +49,6 @@ func (t *mysqlTransaction) Rollback() error {
 	return nil
 }
 
-func (t *mysqlTransaction) Account() repo.AccountRepo {
+func (t *mysqlTransaction) Account() contract.AccountRepo {
 	return newAccountRepo(t.tx)
 }

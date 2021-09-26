@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"github.com/IQ-tech/go-crypto-layer/datacrypto"
+	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/domain/entity"
-	"github.com/diegoclair/go-boilerplate/domain/repo"
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
 type Service struct {
-	dm     repo.Manager
+	dm     contract.Manager
 	cfg    *config.Config
 	cipher datacrypto.Crypto
 }
 
-func New(dm repo.Manager, cfg *config.Config, cipher datacrypto.Crypto) *Service {
+func New(dm contract.Manager, cfg *config.Config, cipher datacrypto.Crypto) *Service {
 	svc := new(Service)
 	svc.dm = dm
 	svc.cfg = cfg

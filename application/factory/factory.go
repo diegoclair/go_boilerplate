@@ -11,7 +11,7 @@ import (
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
-type Services struct {
+type services struct {
 	Cfg             *config.Config
 	Mapper          mapper.Mapper
 	AccountService  service.AccountService
@@ -20,22 +20,22 @@ type Services struct {
 }
 
 var (
-	instance *Services
+	instance *services
 	once     sync.Once
 )
 
 //GetDomainServices to get instace of all services
-func GetDomainServices() *Services {
+func GetDomainServices() *services {
 
 	once.Do(func() {
+		cfg := config.GetConfigEnvironment()
 
-		data, err := data.Connect()
+		data, err := data.Connect(cfg)
 		if err != nil {
 			log.Fatalf("Error to connect data repositories: %v", err)
 		}
 
-		instance = &Services{}
-		cfg := config.GetConfigEnvironment()
+		instance = &services{}
 		cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.MySQL.CryptoKey)
 		svc := service.New(data, cfg, cipher)
 		svm := service.NewServiceManager()

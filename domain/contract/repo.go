@@ -1,4 +1,4 @@
-package repo
+package contract
 
 import "github.com/diegoclair/go-boilerplate/domain/entity"
 

@@ -1,11 +1,12 @@
 package data
 
 import (
-	"github.com/diegoclair/go-boilerplate/domain/repo"
+	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/infra/data/mysql"
+	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
 // Connect returns a instace of mysql db
-func Connect() (repo.Manager, error) {
-	return mysql.Instance()
+func Connect(cfg *config.Config) (contract.Manager, error) {
+	return mysql.Instance(cfg)
 }

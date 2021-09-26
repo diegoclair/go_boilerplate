@@ -34,7 +34,7 @@ services:
       - ./.docker/dbdata:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=bank_db
+      - MYSQL_DATABASE=boiler_db
       - MYSQL_USER=root
       - MYSQL_PASSWORD=root
     networks:
