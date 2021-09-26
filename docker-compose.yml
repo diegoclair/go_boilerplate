@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  app:
+    container_name: boiler-app
+    build: .
+    command: ./.docker/entrypoint.sh
+    ports:
+      - 5000:5000
+    environment:
+      WAIT_HOSTS: db:3306
+      WAIT_HOSTS_TIMEOUT: 300
+      WAIT_SLEEP_INTERVAL: 10
+      WAIT_HOST_CONNECT_TIMEOUT: 30
+    volumes:
+      - ./:/app   #use this volume to set the live reload
+    depends_on:
+      - db
+    networks:
+      - app-network
+  
+  db:
+    container_name: boiler-mysql
+    build: .docker/mysql
+    command: --innodb-use-native-aio=0
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE - this is to not show the error 'mbind: Operation not permitted' in database docker log
+    restart: always
+    tty: true
+    ports:
+      - 3306:3306
+    volumes:
+      - ./.docker/dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=bank_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+    networks:
+      - app-network
+    
+networks:
+  app-network:
+    driver: bridge

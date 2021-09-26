@@ -1,0 +1,357 @@
+openapi: 3.0.0
+info:
+  title: Go Boilerplate API
+  contact: {}
+  version: '1.0'
+servers:
+- url: http://localhost:5000
+
+tags:
+- name: Auth
+  description: 'Auth related resources'
+- name: Account
+  description: 'Account related resources'
+- name: Transfer
+  description: 'Transfer related resources'
+- name: Ping
+  description: 'Tests if the api is running'
+
+
+paths:
+  /ping:
+    get:
+      tags:
+      - Ping
+      summary: /ping/
+      operationId: /ping/
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      summary: /auth/login
+      operationId: /auth/login
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+            example:
+              cpf: 01234567890
+              secret: '15412345'
+        required: true
+        
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
+  /accounts:
+    post:
+      tags:
+      - Account
+      summary: /accounts
+      operationId: /accounts
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountsRequest'
+            example:
+              name: Diego Clair
+              cpf: 01234567890
+              secret: '15412345'
+        required: true
+      responses:
+        201:
+          description: 'Account successfully created'
+          headers: {}
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
+    get:
+      tags:
+      - Account
+      summary: /accounts
+      operationId: Get/accounts
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf: 
+                  - $ref: '#/components/schemas/GetAccountsResponse'
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
+  /accounts/{account_id}:
+    get:
+      tags:
+      - Account
+      summary: /accounts/:account_id
+      operationId: /accounts/:account_id
+      parameters:
+      - name: account_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccountsResponse'
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
+     
+  /accounts/{account_id}/balance:
+    get:
+      tags:
+      - Account
+      summary: /accounts/:account_id/balance
+      operationId: /accounts/:account_id/balance
+      parameters:
+      - name: account_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                properties:
+                  balance:
+                    type: integer
+                    example: 27.35
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
+  /transfers:
+    get:
+      tags:
+      - Transfer
+      summary: get all transfers (reiceved and sent) from an user
+      operationId: /transfers
+      parameters:
+      - name: Token
+        in: header
+        description: 'Token got after login'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: Bearer {{token}}
+
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf: 
+                  - $ref: '#/components/schemas/GetTransfersResponse'
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
+      
+    post:
+      tags:
+      - Transfer
+      summary: /transfers
+      operationId: Post/transfers
+      parameters:
+      - name: Token
+        in: header
+        description: 'Token got after login'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: Bearer {{token}}
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransfersRequest'
+            example:
+              account_destination_id: cf23a0bb-56e8-4d31-8b40-516724d85a3c
+              amount: 0.1
+        required: true
+      responses:
+        201:
+          description: 'Transfer executed with success'
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
+
+components:
+  schemas:
+    AuthLoginRequest:
+      title: /auth/loginrequest
+      required:
+      - cpf
+      - secret
+      type: object
+      properties:
+        cpf:
+          type: string
+        secret:
+          type: string
+      example:
+        cpf: 01234567890
+        secret: '15412345'
+    
+    AuthResponse:
+      description: Response from application authrization
+      type: object
+      properties:
+        token:
+          type: string
+          description: The token string for app authorization
+        valid_time:
+          type: integer
+          description: Token expiration time in Unix time format
+          format: int64
+        server_time:
+          type: integer
+          description: Server time in Unix time format
+          format: int64
+
+    
+    CreateAccountsRequest:
+      title: /accountsrequest
+      required:
+      - name
+      - cpf
+      - secret
+      type: object
+      properties:
+        name:
+          type: string
+        cpf:
+          type: string
+        secret:
+          type: string
+      example:
+        name: Diego Clair
+        cpf: 01234567890
+        secret: '15412345'
+    
+    GetAccountsResponse:
+      properties:
+        transfer_id:
+          type: string
+          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
+        name:
+          type: string
+          example: Diego Clair
+        cpf:
+          type: string
+          example: 01234567890
+        balance:
+          type: string
+          example: 399.59
+        create_at:
+          type: string
+          example: "2021-08-23T03:19:38Z"
+
+    GetTransfersResponse:
+      properties:
+        id:
+          type: string
+          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
+        account_origin_id:
+          type: string
+          example: 663b806a-04b8-4fa9-bff8-ffa6fe445ef3
+        account_destination_id:
+          type: string
+          example: 774b806a-04b8-4fa9-bff8-gga6fe445ef5
+        amount:
+          type: string
+          example: 399.59
+        create_at:
+          type: string
+          example: "2021-08-23T03:19:38Z"
+
+    TransfersRequest:
+      title: /transfersrequest
+      required:
+      - account_destination_id
+      - amount
+      type: object
+      properties:
+        account_destination_id:
+          type: string
+        amount:
+          type: number
+      example:
+        account_destination_id: cf23a0bb-56e8-4d31-8b40-516724d85a3c
+        amount: 0.1
+
+    DefaultErrorResponse:
+      title: Default error response
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid request
+        status_code:
+          type: number
+          example: 422
+        error:
+          type: string
+          example: unprocessable_entity
