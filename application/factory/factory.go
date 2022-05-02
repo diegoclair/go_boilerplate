@@ -28,7 +28,10 @@ var (
 func GetDomainServices() *services {
 
 	once.Do(func() {
-		cfg := config.GetConfigEnvironment()
+		cfg, err := config.GetConfigEnvironment()
+		if err != nil {
+			log.Fatalf("Error to load config: %v", err)
+		}
 
 		data, err := data.Connect(cfg)
 		if err != nil {
@@ -36,7 +39,7 @@ func GetDomainServices() *services {
 		}
 
 		instance = &services{}
-		cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.MySQL.CryptoKey)
+		cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.DB.MySQL.CryptoKey)
 		svc := service.New(data, cfg, cipher)
 		svm := service.NewServiceManager()
 

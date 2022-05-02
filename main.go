@@ -18,5 +18,5 @@ package main
 import "github.com/diegoclair/go-boilerplate/application/rest"
 
 func main() {
-	rest.StartRestServer()
+	rest.StartRestServer() //TODO: receive command for what server it will starts
 }

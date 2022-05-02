@@ -8,62 +8,59 @@ import (
 )
 
 var (
-	config *Config
-	once   sync.Once
+	config      *Config
+	configError error
+	once        sync.Once
 )
 
 // GetConfigEnvironment to read initial config
-func GetConfigEnvironment() *Config {
+func GetConfigEnvironment() (*Config, error) {
 	once.Do(func() {
 
-		viper.SetConfigFile(".env")
+		viper.SetConfigFile("config.toml")
 		viper.AutomaticEnv()
 
-		err := viper.ReadInConfig()
-		if err != nil {
-			log.Error("Error to read configs: ", err)
-			panic(err)
+		configError = viper.ReadInConfig()
+		if configError != nil {
+			log.Error("Error to read configs: ", configError)
+			return
 		}
 
 		config = &Config{}
-
-		config.App.Auth.PrivateKey = viper.GetString("JWT_PRIVATE_KEY")
-
-		config.MySQL.Username = viper.GetString("DB_USER")
-		config.MySQL.Password = viper.GetString("DB_PASSWORD")
-		config.MySQL.Host = viper.GetString("DB_HOST")
-		config.MySQL.Port = viper.GetString("DB_PORT")
-		config.MySQL.DBName = viper.GetString("DB_NAME")
-		config.MySQL.CryptoKey = viper.GetString("DB_CRYPTO_KEY")
-		config.MySQL.MaxLifeInMinutes = viper.GetInt("MAX_LIFE_IN_MINUTES")
-		config.MySQL.MaxIdleConns = viper.GetInt("MAX_IDLE_CONNS")
-		config.MySQL.MaxOpenConns = viper.GetInt("MAX_OPEN_CONNS")
-
+		configError = viper.Unmarshal(config)
+		if configError != nil {
+			log.Error("Error to unmarshal configs: ", configError)
+			return
+		}
 	})
 
-	return config
+	return config, configError
 }
 
 type Config struct {
-	App   AppConfig
-	MySQL MysqlConfig
+	App AppConfig `mapstructure:"app"`
+	DB  DBConfig  `mapstructure:"db"`
 }
 
 type AppConfig struct {
-	Auth AuthConfig
+	Auth AuthConfig `mapstructure:"auth"`
 }
 type AuthConfig struct {
-	PrivateKey string
+	JWTPrivateKey string `mapstructure:"jwt-private-key"`
 }
 
-type MysqlConfig struct {
-	Username         string
-	Password         string
-	Host             string
-	Port             string
-	DBName           string
-	CryptoKey        string
-	MaxLifeInMinutes int
-	MaxIdleConns     int
-	MaxOpenConns     int
+type DBConfig struct {
+	MySQL MySQLConfig `mapstructure:"mysql"`
+}
+
+type MySQLConfig struct {
+	Username           string `mapstructure:"username"`
+	Password           string `mapstructure:"password"`
+	Host               string `mapstructure:"host"`
+	Port               string `mapstructure:"port"`
+	DBName             string `mapstructure:"db-name"`
+	CryptoKey          string `mapstructure:"crypto-key"`
+	MaxLifeInMinutes   int    `mapstructure:"max-life-in-minutes"`
+	MaxIdleConnections int    `mapstructure:"max-idle-connections"`
+	MaxOpenConnections int    `mapstructure:"max-open-connections"`
 }

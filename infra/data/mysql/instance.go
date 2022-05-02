@@ -32,7 +32,7 @@ func Instance(cfg *config.Config) (contract.Manager, error) {
 	onceDB.Do(func() {
 
 		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
-			cfg.MySQL.Username, cfg.MySQL.Host, cfg.MySQL.Port, cfg.MySQL.DBName,
+			cfg.DB.MySQL.Username, cfg.DB.MySQL.Host, cfg.DB.MySQL.Port, cfg.DB.MySQL.DBName,
 		)
 
 		var db *sql.DB
@@ -49,12 +49,12 @@ func Instance(cfg *config.Config) (contract.Manager, error) {
 		}
 
 		log.Info("Creating database...")
-		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", cfg.MySQL.DBName)); connErr != nil {
+		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", cfg.DB.MySQL.DBName)); connErr != nil {
 			logger.Error("Create Database error: ", connErr)
 			return
 		}
 
-		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", cfg.MySQL.DBName)); connErr != nil {
+		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", cfg.DB.MySQL.DBName)); connErr != nil {
 			logger.Error("Default Database error: ", connErr)
 			return
 		}

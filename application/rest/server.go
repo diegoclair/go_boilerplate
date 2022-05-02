@@ -28,7 +28,8 @@ type Router struct {
 func StartRestServer() {
 	server := initServer()
 
-	port := os.Getenv("PORT")
+	//TODO: create log package that we can pass sessionID and than we can trace user processes
+	port := os.Getenv("PORT") //TODO: get this port from config file
 	if port == "" {
 		port = "5000"
 	}
@@ -74,7 +75,7 @@ func (r *Router) registerAppRouters(srv *echo.Echo, cfg *config.Config) *echo.Ec
 
 	appGroup := srv.Group("/")
 	privateGroup := appGroup.Group("",
-		servermiddleware.JWTMiddlewareWithConfig(servermiddleware.JWTConfig{PrivateKey: cfg.App.Auth.PrivateKey}),
+		servermiddleware.JWTMiddlewareWithConfig(servermiddleware.JWTConfig{PrivateKey: cfg.App.Auth.JWTPrivateKey}),
 		servermiddleware.JWTMiddlewarePrivateRoute())
 
 	for _, appRouter := range r.routers {

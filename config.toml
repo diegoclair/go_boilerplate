@@ -1,0 +1,15 @@
+[app]
+  [app.auth]
+  jwt-private-key = "0z6eQbA4EZVcEbmyyojJ8FXhy0cd1jrv"
+
+[db]
+  [db.mysql]
+  username = "root"
+  password = "root"
+  host = "boiler-mysql"
+  port = 3306
+  db-name = "boiler_db"
+  cryptoKey = "2q59xev6bWhm"
+  max-life-in-minutes = 1
+  max-idle-connections = 5
+  max-open-connections = 100

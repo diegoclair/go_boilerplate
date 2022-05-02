@@ -23,7 +23,7 @@ var (
 
 func GenerateToken(authCfg config.AuthConfig, claims jwt.Claims) (tokenString string, err error) {
 
-	key := []byte(authCfg.PrivateKey)
+	key := []byte(authCfg.JWTPrivateKey)
 
 	token := jwt.NewWithClaims(TokenSigningMethod, claims)
 	tokenString, err = token.SignedString(key)
