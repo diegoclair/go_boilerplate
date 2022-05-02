@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.17
 
 # Add Maintainer info
 LABEL maintainer="Rodrigues Diego <diego93rodrigues@gmail.com>"
