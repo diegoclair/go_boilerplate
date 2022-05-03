@@ -1,4 +1,5 @@
 [app]
+  environment = "local"
   [app.auth]
   jwt-private-key = "0z6eQbA4EZVcEbmyyojJ8FXhy0cd1jrv"
 

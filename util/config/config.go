@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"strings"
 	"sync"
 
 	"github.com/labstack/gommon/log"
@@ -13,6 +15,9 @@ var (
 	once        sync.Once
 )
 
+// EnvKeyReplacer replace for environment variable parse
+var EnvKeyReplacer = strings.NewReplacer(".", "_", "-", "_")
+
 // GetConfigEnvironment to read initial config
 func GetConfigEnvironment() (*Config, error) {
 	once.Do(func() {
@@ -24,6 +29,14 @@ func GetConfigEnvironment() (*Config, error) {
 		if configError != nil {
 			log.Error("Error to read configs: ", configError)
 			return
+		}
+
+		for _, k := range viper.AllKeys() {
+			key := strings.ToLower(EnvKeyReplacer.Replace(k))
+			envValue := os.Getenv(key)
+			if envValue != "" {
+				viper.Set(k, envValue)
+			}
 		}
 
 		config = &Config{}
@@ -43,7 +56,8 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Auth AuthConfig `mapstructure:"auth"`
+	Environment string     `mapstructure:"environment"`
+	Auth        AuthConfig `mapstructure:"auth"`
 }
 type AuthConfig struct {
 	JWTPrivateKey string `mapstructure:"jwt-private-key"`
