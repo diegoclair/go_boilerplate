@@ -32,7 +32,7 @@ func GetConfigEnvironment() (*Config, error) {
 		}
 
 		for _, k := range viper.AllKeys() {
-			key := strings.ToLower(EnvKeyReplacer.Replace(k))
+			key := strings.ToUpper(EnvKeyReplacer.Replace(k))
 			envValue := os.Getenv(key)
 			if envValue != "" {
 				viper.Set(k, envValue)
