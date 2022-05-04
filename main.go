@@ -24,7 +24,7 @@ import (
 
 func main() {
 
-	cfg, err := config.GetConfigEnvironment()
+	cfg, err := config.GetConfigEnvironment(config.ConfigDefaultFilepath)
 	if err != nil {
 		log.Fatalf("Error to load config: %v", err)
 	}

@@ -5,6 +5,8 @@ import (
 	"github.com/diegoclair/go_utils-lib/v2/mysqlutils"
 )
 
+//TODO: passar o context para as funcões aqui dentro
+
 type accountRepo struct {
 	db connection
 }

@@ -9,6 +9,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	ConfigDefaultFilepath = "config.toml"
+)
+
 var (
 	config      *Config
 	configError error
@@ -19,10 +23,10 @@ var (
 var EnvKeyReplacer = strings.NewReplacer(".", "_", "-", "_")
 
 // GetConfigEnvironment to read initial config
-func GetConfigEnvironment() (*Config, error) {
+func GetConfigEnvironment(filepath string) (*Config, error) {
 	once.Do(func() {
 
-		viper.SetConfigFile("config.toml")
+		viper.SetConfigFile(filepath)
 		viper.AutomaticEnv()
 
 		configError = viper.ReadInConfig()

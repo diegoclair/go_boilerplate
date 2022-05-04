@@ -1,10 +1,8 @@
 package service
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-
 	"github.com/diegoclair/go-boilerplate/domain/entity"
+	"github.com/diegoclair/go-boilerplate/util/crypto"
 	"github.com/diegoclair/go-boilerplate/util/errors"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/gommon/log"
@@ -41,7 +39,7 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 		return resterrors.NewConflictError("The cpf is already in use")
 	}
 
-	account.Secret = s.getHashedPassword(account.Secret)
+	account.Secret = crypto.GetMd5(account.Secret)
 	account.UUID = uuid.NewV4().String()
 
 	err = s.svc.dm.Account().CreateAccount(account)
@@ -51,12 +49,6 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 	}
 
 	return nil
-}
-
-func (s *accountService) getHashedPassword(password string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(password))
-	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
