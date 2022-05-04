@@ -29,5 +29,7 @@ func main() {
 		log.Fatalf("Error to load config: %v", err)
 	}
 
+	//TODO: create log package that we can pass sessionID and than we can trace user processes
+
 	rest.StartRestServer(cfg) //TODO: receive command for what server it will starts
 }

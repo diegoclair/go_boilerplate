@@ -21,6 +21,7 @@ var (
 	TokenSigningMethod = jwt.SigningMethodHS256
 )
 
+//TODO: add token generation with paseto instead of jwt
 func GenerateToken(authCfg config.AuthConfig, claims jwt.Claims) (tokenString string, err error) {
 
 	key := []byte(authCfg.JWTPrivateKey)

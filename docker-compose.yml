@@ -3,7 +3,7 @@ version: '3'
 services:
 
   app:
-    container_name: boiler-app
+    container_name: go-boilerplate-app
     build: .
     command: .docker/entrypoint.sh
     ports:
@@ -18,7 +18,7 @@ services:
       - app-network
   
   db:
-    container_name: boiler-mysql
+    container_name: go-boilerplate-mysql
     build: .docker/mysql
     command: --innodb-use-native-aio=0
     cap_add:

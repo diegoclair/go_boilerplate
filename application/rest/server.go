@@ -27,7 +27,6 @@ type Router struct {
 func StartRestServer(cfg *config.Config) {
 	server := initServer(cfg)
 
-	//TODO: create log package that we can pass sessionID and than we can trace user processes
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
