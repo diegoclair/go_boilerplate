@@ -57,6 +57,7 @@ type Config struct {
 
 type AppConfig struct {
 	Environment string     `mapstructure:"environment"`
+	Port        string     `mapstructure:"port"`
 	Auth        AuthConfig `mapstructure:"auth"`
 }
 type AuthConfig struct {

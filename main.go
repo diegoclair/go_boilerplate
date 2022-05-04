@@ -15,8 +15,19 @@ limitations under the License.
 */
 package main
 
-import "github.com/diegoclair/go-boilerplate/application/rest"
+import (
+	"log"
+
+	"github.com/diegoclair/go-boilerplate/application/rest"
+	"github.com/diegoclair/go-boilerplate/util/config"
+)
 
 func main() {
-	rest.StartRestServer() //TODO: receive command for what server it will starts
+
+	cfg, err := config.GetConfigEnvironment()
+	if err != nil {
+		log.Fatalf("Error to load config: %v", err)
+	}
+
+	rest.StartRestServer(cfg) //TODO: receive command for what server it will starts
 }

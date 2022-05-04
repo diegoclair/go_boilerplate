@@ -12,7 +12,6 @@ import (
 )
 
 type services struct {
-	Cfg             *config.Config
 	Mapper          mapper.Mapper
 	AccountService  service.AccountService
 	AuthService     service.AuthService
@@ -25,13 +24,9 @@ var (
 )
 
 //GetDomainServices to get instace of all services
-func GetDomainServices() *services {
+func GetDomainServices(cfg *config.Config) *services {
 
 	once.Do(func() {
-		cfg, err := config.GetConfigEnvironment()
-		if err != nil {
-			log.Fatalf("Error to load config: %v", err)
-		}
 
 		data, err := data.Connect(cfg)
 		if err != nil {
@@ -43,7 +38,6 @@ func GetDomainServices() *services {
 		svc := service.New(data, cfg, cipher)
 		svm := service.NewServiceManager()
 
-		instance.Cfg = cfg
 		instance.Mapper = mapper.New()
 		instance.AccountService = svm.AccountService(svc)
 		instance.AuthService = svm.AuthService(svc)

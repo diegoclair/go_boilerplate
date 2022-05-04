@@ -2,7 +2,6 @@ package rest
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/diegoclair/go-boilerplate/application/factory"
 	"github.com/diegoclair/go-boilerplate/application/rest/routes/accountroute"
@@ -25,11 +24,11 @@ type Router struct {
 	routers []IRouter
 }
 
-func StartRestServer() {
-	server := initServer()
+func StartRestServer(cfg *config.Config) {
+	server := initServer(cfg)
 
 	//TODO: create log package that we can pass sessionID and than we can trace user processes
-	port := os.Getenv("PORT") //TODO: get this port from config file
+	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
 	}
@@ -41,9 +40,9 @@ func StartRestServer() {
 	}
 }
 
-func initServer() *echo.Echo {
+func initServer(cfg *config.Config) *echo.Echo {
 
-	factory := factory.GetDomainServices()
+	factory := factory.GetDomainServices(cfg)
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
@@ -64,7 +63,7 @@ func initServer() *echo.Echo {
 	appRouter.addRouters(pingRoute)
 	appRouter.addRouters(transferRoute)
 
-	return appRouter.registerAppRouters(srv, factory.Cfg)
+	return appRouter.registerAppRouters(srv, cfg)
 }
 
 func (r *Router) addRouters(router IRouter) {
