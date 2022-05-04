@@ -8,7 +8,7 @@ port = "5000"
   [db.mysql]
   username = "root"
   password = "root"
-  host = "go-boilerplate-mysql"
+  host = "localhost"
   port = 3306
   db-name = "boiler_db"
   cryptoKey = "2q59xev6bWhm"
