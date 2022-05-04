@@ -12,7 +12,7 @@ jobs:
         with:
           go-version: 1.18
 
-      - name: Setup Mysql to run the t
+      - name: Setup MySQL to run the tests
         uses: mirromutth/mysql-action@v1.1
         with:
           #host port: 3800 # Optional, default value is 3306. The port of host
@@ -24,5 +24,6 @@ jobs:
           mysql root password: root
           mysql user: 'root'
           mysql password: root
+          
       - name: Run tests
         run: make test
