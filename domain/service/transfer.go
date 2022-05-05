@@ -6,7 +6,6 @@ import (
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/infra/auth"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
-	"github.com/labstack/gommon/log"
 	"github.com/twinj/uuid"
 )
 
@@ -20,13 +19,14 @@ func newTransferService(svc *Service) TransferService {
 	}
 }
 
-func (s *transferService) CreateTransfer(appContext context.Context, transfer entity.Transfer) (err error) {
+func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Transfer) (err error) {
 
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("CreateTransfer: Process Started")
 	defer log.Info("CreateTransfer: Process Finished")
 
-	loggedAccountUUID := appContext.Value(auth.AccountUUIDKey)
-	account, err := s.svc.dm.Account().GetAccountByUUID(loggedAccountUUID.(string))
+	loggedAccountUUID := ctx.Value(auth.AccountUUIDKey)
+	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID.(string))
 	if err != nil {
 		log.Error("CreateTransfer: ", err)
 		return err
@@ -36,7 +36,7 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
 	}
 
-	destAccount, err := s.svc.dm.Account().GetAccountByUUID(transfer.AccountDestinationUUID)
+	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
 		log.Error("CreateTransfer: ", err)
 		return err
@@ -53,21 +53,21 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 	}
 	defer tx.Rollback()
 
-	err = tx.Account().AddTransfer(transfer)
+	err = tx.Account().AddTransfer(ctx, transfer)
 	if err != nil {
 		log.Error("CreateTransfer: ", err)
 		return err
 	}
 
 	account.Balance -= transfer.Amount
-	err = tx.Account().UpdateAccountBalance(account)
+	err = tx.Account().UpdateAccountBalance(ctx, account)
 	if err != nil {
 		log.Error("CreateTransfer: ", err)
 		return err
 	}
 
 	destAccount.Balance += transfer.Amount
-	err = tx.Account().UpdateAccountBalance(destAccount)
+	err = tx.Account().UpdateAccountBalance(ctx, destAccount)
 	if err != nil {
 		log.Error("CreateTransfer: ", err)
 		return err
@@ -82,27 +82,28 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 	return nil
 }
 
-func (s *transferService) GetTransfers(appContext context.Context) (transfers []entity.Transfer, err error) {
+func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.Transfer, err error) {
 
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("GetTransfers: Process Started")
 	defer log.Info("GetTransfers: Process Finished")
 
-	loggedAccountUUID := appContext.Value(auth.AccountUUIDKey)
+	loggedAccountUUID := ctx.Value(auth.AccountUUIDKey)
 
-	account, err := s.svc.dm.Account().GetAccountByUUID(loggedAccountUUID.(string))
+	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID.(string))
 	if err != nil {
 		log.Error("GetTransfers: ", err)
 		return transfers, err
 	}
 
-	trasnfersMade, err := s.svc.dm.Account().GetTransfersByAccountID(account.ID, true)
+	trasnfersMade, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, true)
 	if err != nil {
 		log.Error("GetTransfers: ", err)
 		return transfers, err
 	}
 	transfers = append(transfers, trasnfersMade...)
 
-	trasnfersReceived, err := s.svc.dm.Account().GetTransfersByAccountID(account.ID, false)
+	trasnfersReceived, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
 	if err != nil {
 		log.Error("GetTransfers: ", err)
 		return transfers, err

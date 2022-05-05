@@ -6,6 +6,7 @@ import (
 	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/domain/entity"
+	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
@@ -13,13 +14,15 @@ type Service struct {
 	dm     contract.Manager
 	cfg    *config.Config
 	cipher datacrypto.Crypto
+	log    logger.Logger
 }
 
-func New(dm contract.Manager, cfg *config.Config, cipher datacrypto.Crypto) *Service {
+func New(dm contract.Manager, cfg *config.Config, cipher datacrypto.Crypto, log logger.Logger) *Service {
 	svc := new(Service)
 	svc.dm = dm
 	svc.cfg = cfg
 	svc.cipher = cipher
+	svc.log = log
 
 	return svc
 }
@@ -34,18 +37,18 @@ type PingService interface {
 }
 
 type AccountService interface {
-	CreateAccount(account entity.Account) (err error)
-	GetAccounts() (accounts []entity.Account, err error)
-	GetAccountByUUID(accountUUID string) (account entity.Account, err error)
+	CreateAccount(ctx context.Context, account entity.Account) (err error)
+	GetAccounts(ctx context.Context) (accounts []entity.Account, err error)
+	GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error)
 }
 
 type AuthService interface {
-	Login(cpf, secret string) (retVal entity.Authentication, err error)
+	Login(ctx context.Context, cpf, secret string) (retVal entity.Authentication, err error)
 }
 
 type TransferService interface {
-	CreateTransfer(appContext context.Context, transfer entity.Transfer) (err error)
-	GetTransfers(appContext context.Context) (transfers []entity.Transfer, err error)
+	CreateTransfer(ctx context.Context, transfer entity.Transfer) (err error)
+	GetTransfers(ctx context.Context) (transfers []entity.Transfer, err error)
 }
 
 type serviceManager struct {

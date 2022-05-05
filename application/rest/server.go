@@ -9,10 +9,10 @@ import (
 	"github.com/diegoclair/go-boilerplate/application/rest/routes/pingroute"
 	"github.com/diegoclair/go-boilerplate/application/rest/routes/transferroute"
 	servermiddleware "github.com/diegoclair/go-boilerplate/application/rest/serverMiddleware"
+	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
 )
 
 // IRouter interface for routers
@@ -24,9 +24,8 @@ type Router struct {
 	routers []IRouter
 }
 
-func StartRestServer(cfg *config.Config) {
-	server := initServer(cfg)
-
+func StartRestServer(cfg *config.Config, services *factory.DomainServices, log logger.Logger) {
+	server := initServer(cfg, services)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -39,17 +38,15 @@ func StartRestServer(cfg *config.Config) {
 	}
 }
 
-func initServer(cfg *config.Config) *echo.Echo {
-
-	factory := factory.GetDomainServices(cfg)
+func initServer(cfg *config.Config, services *factory.DomainServices) *echo.Echo {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	pingController := pingroute.NewController()
-	accountController := accountroute.NewController(factory.AccountService, factory.Mapper)
-	authController := authroute.NewController(factory.AuthService, factory.Mapper)
-	transferController := transferroute.NewController(factory.TransferService, factory.Mapper)
+	accountController := accountroute.NewController(services.AccountService, services.Mapper)
+	authController := authroute.NewController(services.AuthService, services.Mapper)
+	transferController := transferroute.NewController(services.TransferService, services.Mapper)
 
 	pingRoute := pingroute.NewRouter(pingController, "ping")
 	accountRoute := accountroute.NewRouter(accountController, "accounts")

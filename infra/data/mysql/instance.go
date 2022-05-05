@@ -7,12 +7,11 @@ import (
 	"sync"
 
 	"github.com/GuiaBolso/darwin"
-	"github.com/labstack/gommon/log"
 
 	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/infra/data/migrations"
+	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
-	"github.com/diegoclair/go_utils-lib/logger"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 
@@ -28,7 +27,7 @@ type mysqlConn struct {
 }
 
 //Instance returns an instance of a MySQLRepo
-func Instance(cfg *config.Config) (contract.Manager, error) {
+func Instance(cfg *config.Config, log logger.Logger) (contract.Manager, error) {
 	onceDB.Do(func() {
 
 		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
@@ -50,33 +49,33 @@ func Instance(cfg *config.Config) (contract.Manager, error) {
 
 		log.Info("Creating database...")
 		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", cfg.DB.MySQL.DBName)); connErr != nil {
-			logger.Error("Create Database error: ", connErr)
+			log.Error("Create Database error: ", connErr)
 			return
 		}
 
 		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", cfg.DB.MySQL.DBName)); connErr != nil {
-			logger.Error("Default Database error: ", connErr)
+			log.Error("Default Database error: ", connErr)
 			return
 		}
 
-		connErr = mysqlDriver.SetLogger(logger.GetLogger())
+		connErr = mysqlDriver.SetLogger(log)
 		if connErr != nil {
 			return
 		}
-		logger.Info("Database successfully configured")
+		log.Info("Database successfully configured")
 
-		logger.Info("Running the migrations")
+		log.Info("Running the migrations")
 		driver := darwin.NewGenericDriver(db, darwin.MySQLDialect{})
 
 		d := darwin.New(driver, migrations.Migrations, nil)
 
 		connErr = d.Migrate()
 		if connErr != nil {
-			logger.Error("Migrate Error: ", connErr)
+			log.Error("Migrate Error: ", connErr)
 			return
 		}
 
-		logger.Info("Migrations executed")
+		log.Info("Migrations executed")
 
 		conn = &mysqlConn{
 			db: db,

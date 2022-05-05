@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/infra/auth"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
-	"github.com/labstack/gommon/log"
 )
 
 const (
@@ -27,8 +27,9 @@ func newAuthService(svc *Service) AuthService {
 	}
 }
 
-func (s *authService) Login(cpf, secret string) (retVal entity.Authentication, err error) {
+func (s *authService) Login(ctx context.Context, cpf, secret string) (retVal entity.Authentication, err error) {
 
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("Login: Process Started")
 	defer log.Info("Login: Process Finished")
 
@@ -38,7 +39,7 @@ func (s *authService) Login(cpf, secret string) (retVal entity.Authentication, e
 		return retVal, err
 	}
 
-	account, err := s.svc.dm.Account().GetAccountByDocument(encryptedDocumentNumber)
+	account, err := s.svc.dm.Account().GetAccountByDocument(ctx, encryptedDocumentNumber)
 	if err != nil {
 		log.Error("Login: ", err)
 		return retVal, resterrors.NewUnauthorizedError(wrongLogin)

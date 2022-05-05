@@ -1,11 +1,12 @@
 package service
 
 import (
+	"context"
+
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/util/crypto"
 	"github.com/diegoclair/go-boilerplate/util/errors"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
-	"github.com/labstack/gommon/log"
 	"github.com/twinj/uuid"
 )
 
@@ -19,8 +20,9 @@ func newAccountService(svc *Service) AccountService {
 	}
 }
 
-func (s *accountService) CreateAccount(account entity.Account) (err error) {
+func (s *accountService) CreateAccount(ctx context.Context, account entity.Account) (err error) {
 
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("CreateAccount: Process Started")
 	defer log.Info("CreateAccount: Process Finished")
 
@@ -30,7 +32,7 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 		return err
 	}
 
-	_, err = s.svc.dm.Account().GetAccountByDocument(account.CPF)
+	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
 	if err != nil && !errors.SQLNotFound(err.Error()) {
 		log.Error("CreateAccount: ", err)
 		return err
@@ -42,7 +44,7 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 	account.Secret = crypto.GetMd5(account.Secret)
 	account.UUID = uuid.NewV4().String()
 
-	err = s.svc.dm.Account().CreateAccount(account)
+	err = s.svc.dm.Account().CreateAccount(ctx, account)
 	if err != nil {
 		log.Error("CreateAccount: ", err)
 		return err
@@ -51,12 +53,13 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 	return nil
 }
 
-func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
+func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Account, err error) {
 
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("GetAccounts: Process Started")
 	defer log.Info("GetAccounts: Process Finished")
 
-	accounts, err = s.svc.dm.Account().GetAccounts()
+	accounts, err = s.svc.dm.Account().GetAccounts(ctx)
 	if err != nil {
 		log.Error("GetAccounts: ", err)
 		return accounts, err
@@ -73,12 +76,13 @@ func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
 	return accounts, nil
 }
 
-func (s *accountService) GetAccountByUUID(accountUUID string) (account entity.Account, err error) {
+func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("GetAccountByUUID: Process Started")
 	defer log.Info("GetAccountByUUID: Process Finished")
 
-	account, err = s.svc.dm.Account().GetAccountByUUID(accountUUID)
+	account, err = s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
 		log.Error("GetAccountByUUID: ", err)
 		return account, err

@@ -18,7 +18,9 @@ package main
 import (
 	"log"
 
+	"github.com/diegoclair/go-boilerplate/application/factory"
 	"github.com/diegoclair/go-boilerplate/application/rest"
+	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
@@ -29,7 +31,11 @@ func main() {
 		log.Fatalf("Error to load config: %v", err)
 	}
 
-	//TODO: create log package that we can pass sessionID and than we can trace user processes
+	log := logger.New(cfg.Log, cfg.App.Name)
+	services, err := factory.GetDomainServices(cfg, log)
+	if err != nil {
+		log.Fatal("error to get domain services: ", err)
+	}
 
-	rest.StartRestServer(cfg) //TODO: receive command for what server it will starts
+	rest.StartRestServer(cfg, services, log) //TODO: receive flags for what server it will starts
 }

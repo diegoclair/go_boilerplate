@@ -1,6 +1,10 @@
 package contract
 
-import "github.com/diegoclair/go-boilerplate/domain/entity"
+import (
+	"context"
+
+	"github.com/diegoclair/go-boilerplate/domain/entity"
+)
 
 // Manager holds the methods that manipulates the main data.
 type Manager interface {
@@ -15,11 +19,11 @@ type Transaction interface {
 }
 
 type AccountRepo interface {
-	AddTransfer(transfer entity.Transfer) (err error)
-	CreateAccount(account entity.Account) (err error)
-	GetAccountByDocument(encryptedCPF string) (account entity.Account, err error)
-	GetAccounts() (accounts []entity.Account, err error)
-	GetAccountByUUID(accountUUID string) (account entity.Account, err error)
-	GetTransfersByAccountID(accountID int64, origin bool) (transfers []entity.Transfer, err error)
-	UpdateAccountBalance(account entity.Account) (err error)
+	AddTransfer(ctx context.Context, transfer entity.Transfer) (err error)
+	CreateAccount(ctx context.Context, account entity.Account) (err error)
+	GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error)
+	GetAccounts(ctx context.Context) (accounts []entity.Account, err error)
+	GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error)
+	GetTransfersByAccountID(ctx context.Context, accountID int64, origin bool) (transfers []entity.Transfer, err error)
+	UpdateAccountBalance(ctx context.Context, account entity.Account) (err error)
 }

@@ -1,11 +1,11 @@
 package mysql
 
 import (
+	"context"
+
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go_utils-lib/v2/mysqlutils"
 )
-
-//TODO: passar o context para as funcões aqui dentro
 
 type accountRepo struct {
 	db connection
@@ -48,7 +48,7 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 
 	return account, nil
 }
-func (r *accountRepo) AddTransfer(transfer entity.Transfer) (err error) {
+func (r *accountRepo) AddTransfer(ctx context.Context, transfer entity.Transfer) (err error) {
 	query := `
 		INSERT INTO tab_transfer (
 			transfer_uuid,
@@ -78,7 +78,7 @@ func (r *accountRepo) AddTransfer(transfer entity.Transfer) (err error) {
 	return nil
 }
 
-func (r *accountRepo) CreateAccount(account entity.Account) (err error) {
+func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account) (err error) {
 	query := `
 		INSERT INTO tab_account (
 			account_uuid,
@@ -108,7 +108,7 @@ func (r *accountRepo) CreateAccount(account entity.Account) (err error) {
 	return nil
 }
 
-func (r *accountRepo) GetAccountByDocument(encryptedCPF string) (account entity.Account, err error) {
+func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error) {
 
 	query := querySelectBase + `
 		WHERE  	ta.cpf 	= ?
@@ -132,7 +132,7 @@ func (r *accountRepo) GetAccountByDocument(encryptedCPF string) (account entity.
 	return account, nil
 }
 
-func (r *accountRepo) GetAccounts() (accounts []entity.Account, err error) {
+func (r *accountRepo) GetAccounts(ctx context.Context) (accounts []entity.Account, err error) {
 
 	query := querySelectBase
 
@@ -157,7 +157,7 @@ func (r *accountRepo) GetAccounts() (accounts []entity.Account, err error) {
 	return accounts, nil
 }
 
-func (r *accountRepo) GetAccountByUUID(accountUUID string) (account entity.Account, err error) {
+func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
 	query := querySelectBase + `
 		WHERE ta.account_uuid = ?
@@ -182,7 +182,7 @@ func (r *accountRepo) GetAccountByUUID(accountUUID string) (account entity.Accou
 	return account, nil
 }
 
-func (r *accountRepo) GetTransfersByAccountID(accountID int64, origin bool) (transfers []entity.Transfer, err error) {
+func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int64, origin bool) (transfers []entity.Transfer, err error) {
 	query := ` 
 		SELECT 
 			tt.transfer_id,
@@ -245,7 +245,7 @@ func (r *accountRepo) GetTransfersByAccountID(accountID int64, origin bool) (tra
 	return transfers, nil
 }
 
-func (r *accountRepo) UpdateAccountBalance(account entity.Account) (err error) {
+func (r *accountRepo) UpdateAccountBalance(ctx context.Context, account entity.Account) (err error) {
 
 	query := `
 		UPDATE 	tab_account

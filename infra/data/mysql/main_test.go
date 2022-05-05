@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go-boilerplate/domain/contract"
+	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
@@ -17,8 +18,9 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("cannot get config: ", err)
 	}
+	log := logger.New(cfg.Log, cfg.App.Name)
 
-	mysql, err := Instance(cfg)
+	mysql, err := Instance(cfg, log)
 	if err != nil {
 		log.Fatal("cannot connect to mysql: ", err)
 	}

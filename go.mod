@@ -13,6 +13,8 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.6.0
 	github.com/labstack/gommon v0.3.0
+	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	github.com/twinj/uuid v1.0.0
@@ -33,7 +35,6 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
-	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21 // indirect
 	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

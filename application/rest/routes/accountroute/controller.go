@@ -34,6 +34,8 @@ func NewController(accountService service.AccountService, mapper mapper.Mapper) 
 
 func (s *Controller) handleAddAccount(c echo.Context) error {
 
+	ctx := routeutils.GetContext(c)
+
 	input := viewmodel.AddAccount{}
 	err := c.Bind(&input)
 	if err != nil {
@@ -51,7 +53,7 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 		Secret: input.Secret,
 	}
 
-	err = s.accountService.CreateAccount(account)
+	err = s.accountService.CreateAccount(ctx, account)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -60,7 +62,9 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 
 func (s *Controller) handleGetAccounts(c echo.Context) error {
 
-	accounts, err := s.accountService.GetAccounts()
+	ctx := routeutils.GetContext(c)
+
+	accounts, err := s.accountService.GetAccounts(ctx)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -76,12 +80,14 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 
 func (s *Controller) handleGetAccountByID(c echo.Context) error {
 
+	ctx := routeutils.GetContext(c)
+
 	accountUUID, err := routeutils.GetAndValidateParam(c, "account_id", "Invalid account_id")
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	account, err := s.accountService.GetAccountByUUID(accountUUID)
+	account, err := s.accountService.GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -97,12 +103,14 @@ func (s *Controller) handleGetAccountByID(c echo.Context) error {
 
 func (s *Controller) handleGetAccountBalanceByID(c echo.Context) error {
 
+	ctx := routeutils.GetContext(c)
+
 	accountUUID, err := routeutils.GetAndValidateParam(c, "account_id", "Invalid account_id")
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	account, err := s.accountService.GetAccountByUUID(accountUUID)
+	account, err := s.accountService.GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}

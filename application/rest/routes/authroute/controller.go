@@ -33,6 +33,8 @@ func NewController(authService service.AuthService, mapper mapper.Mapper) *Contr
 
 func (s *Controller) handleLogin(c echo.Context) error {
 
+	ctx := routeutils.GetContext(c)
+
 	input := viewmodel.Login{}
 	err := c.Bind(&input)
 	if err != nil {
@@ -43,7 +45,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	auth, err := s.authService.Login(input.CPF, input.Secret)
+	auth, err := s.authService.Login(ctx, input.CPF, input.Secret)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
