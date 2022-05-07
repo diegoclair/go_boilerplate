@@ -12,5 +12,4 @@ type Authentication struct {
 type TokenData struct {
 	jwt.StandardClaims
 	AccountUUID string
-	LoggedIn    bool
 }

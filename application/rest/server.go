@@ -9,6 +9,7 @@ import (
 	"github.com/diegoclair/go-boilerplate/application/rest/routes/pingroute"
 	"github.com/diegoclair/go-boilerplate/application/rest/routes/transferroute"
 	servermiddleware "github.com/diegoclair/go-boilerplate/application/rest/serverMiddleware"
+	"github.com/diegoclair/go-boilerplate/infra/auth"
 	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
 	"github.com/labstack/echo/v4"
@@ -24,8 +25,8 @@ type Router struct {
 	routers []IRouter
 }
 
-func StartRestServer(cfg *config.Config, services *factory.DomainServices, log logger.Logger) {
-	server := initServer(cfg, services)
+func StartRestServer(cfg *config.Config, services *factory.Services, log logger.Logger, authToken auth.AuthToken) {
+	server := initServer(cfg, services, authToken)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -38,14 +39,14 @@ func StartRestServer(cfg *config.Config, services *factory.DomainServices, log l
 	}
 }
 
-func initServer(cfg *config.Config, services *factory.DomainServices) *echo.Echo {
+func initServer(cfg *config.Config, services *factory.Services, authToken auth.AuthToken) *echo.Echo {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	pingController := pingroute.NewController()
 	accountController := accountroute.NewController(services.AccountService, services.Mapper)
-	authController := authroute.NewController(services.AuthService, services.Mapper)
+	authController := authroute.NewController(services.AuthService, services.Mapper, authToken)
 	transferController := transferroute.NewController(services.TransferService, services.Mapper)
 
 	pingRoute := pingroute.NewRouter(pingController, "ping")
@@ -59,19 +60,18 @@ func initServer(cfg *config.Config, services *factory.DomainServices) *echo.Echo
 	appRouter.addRouters(pingRoute)
 	appRouter.addRouters(transferRoute)
 
-	return appRouter.registerAppRouters(srv, cfg)
+	return appRouter.registerAppRouters(srv, cfg, authToken)
 }
 
 func (r *Router) addRouters(router IRouter) {
 	r.routers = append(r.routers, router)
 }
 
-func (r *Router) registerAppRouters(srv *echo.Echo, cfg *config.Config) *echo.Echo {
+func (r *Router) registerAppRouters(srv *echo.Echo, cfg *config.Config, authToken auth.AuthToken) *echo.Echo {
 
 	appGroup := srv.Group("/")
 	privateGroup := appGroup.Group("",
-		servermiddleware.JWTMiddlewareWithConfig(servermiddleware.JWTConfig{PrivateKey: cfg.App.Auth.JWTPrivateKey}),
-		servermiddleware.JWTMiddlewarePrivateRoute())
+		servermiddleware.AuthMiddlewarePrivateRoute(authToken))
 
 	for _, appRouter := range r.routers {
 		appRouter.RegisterRoutes(appGroup, privateGroup)

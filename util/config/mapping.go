@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 type Config struct {
 	App AppConfig `mapstructure:"app"`
 	DB  DBConfig  `mapstructure:"db"`
@@ -7,13 +9,17 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name        string     `mapstructure:"name"`
+	Name        string
 	Environment string     `mapstructure:"environment"`
 	Port        string     `mapstructure:"port"`
 	Auth        AuthConfig `mapstructure:"auth"`
 }
 type AuthConfig struct {
-	JWTPrivateKey string `mapstructure:"jwt-private-key"`
+	AccessTokenType      string        `mapstructure:"access-token-type"`
+	AccessTokenDuration  time.Duration `mapstructure:"access-token-duration"`
+	RefreshTokenDuration time.Duration `mapstructure:"refresh-token-duration"`
+	JWTPrivateKey        string        `mapstructure:"jwt-private-key"`
+	PasetoSymmetricKey   string        `mapstructure:"paseto-symmetric-key"`
 }
 
 type DBConfig struct {

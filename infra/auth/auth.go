@@ -1,8 +1,32 @@
 package auth
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"errors"
+	"time"
+
 	"github.com/diegoclair/go-boilerplate/util/config"
+)
+
+type AuthToken interface {
+	CreateToken(accountUUID string) (string, *tokenPayload, error)
+	CreateRefreshToken(accountUUID string) (string, *tokenPayload, error)
+	VerifyToken(token string) (*tokenPayload, error)
+}
+
+const (
+	tokenTypeJWT     = "jwt"
+	tokenTypePaseto  = "paseto"
+	minSecretKeySize = 32
+)
+
+var (
+	accessTokenDurationTime  time.Duration
+	refreshTokenDurationTime time.Duration
+)
+
+var (
+	errExpiredToken = errors.New("token has expired")
+	errInvalidToken = errors.New("token is invalid")
 )
 
 type Key string
@@ -18,20 +42,14 @@ const (
 	SessionKey      Key = "Session"
 )
 
-var (
-	TokenSigningMethod = jwt.SigningMethodHS256
-)
-
 //TODO: add token generation with paseto instead of jwt and add session key as token payload
-func GenerateToken(authCfg config.AuthConfig, claims jwt.Claims) (tokenString string, err error) {
+func NewAuthToken(cfg config.AuthConfig) (AuthToken, error) {
+	accessTokenDurationTime = cfg.AccessTokenDuration
+	refreshTokenDurationTime = cfg.RefreshTokenDuration
 
-	key := []byte(authCfg.JWTPrivateKey)
-
-	token := jwt.NewWithClaims(TokenSigningMethod, claims)
-	tokenString, err = token.SignedString(key)
-	if err != nil {
-		return tokenString, err
+	if cfg.AccessTokenType == tokenTypePaseto {
+		return newPasetoAuth(cfg.PasetoSymmetricKey)
 	}
+	return newJwtAuth(cfg.JWTPrivateKey)
 
-	return tokenString, nil
 }

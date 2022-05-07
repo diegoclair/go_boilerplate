@@ -5,16 +5,12 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 
-	"time"
-
 	"github.com/diegoclair/go-boilerplate/domain/entity"
-	"github.com/diegoclair/go-boilerplate/infra/auth"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 )
 
 const (
-	tokenExpirationTime        = 30 * time.Minute
-	wrongLogin          string = "Document or password are wrong"
+	wrongLogin string = "Document or password are wrong"
 )
 
 type authService struct {
@@ -27,7 +23,7 @@ func newAuthService(svc *Service) AuthService {
 	}
 }
 
-func (s *authService) Login(ctx context.Context, cpf, secret string) (retVal entity.Authentication, err error) {
+func (s *authService) Login(ctx context.Context, cpf, secret string) (account entity.Account, err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("Login: Process Started")
@@ -36,13 +32,13 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (retVal ent
 	encryptedDocumentNumber, err := s.svc.cipher.Encrypt(cpf)
 	if err != nil {
 		log.Error("Login: ", err)
-		return retVal, err
+		return account, err
 	}
 
-	account, err := s.svc.dm.Account().GetAccountByDocument(ctx, encryptedDocumentNumber)
+	account, err = s.svc.dm.Account().GetAccountByDocument(ctx, encryptedDocumentNumber)
 	if err != nil {
 		log.Error("Login: ", err)
-		return retVal, resterrors.NewUnauthorizedError(wrongLogin)
+		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
 	log.Info("Login: account_id: ", account.ID)
@@ -55,28 +51,8 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (retVal ent
 
 	if pass != account.Secret {
 		log.Error("Login: wrong password")
-		return retVal, resterrors.NewUnauthorizedError(wrongLogin)
+		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
-	issuedAt := time.Now()
-	expiresAt := issuedAt.Add(tokenExpirationTime)
-
-	claims := &entity.TokenData{}
-	claims.AccountUUID = account.UUID
-	claims.LoggedIn = true
-	claims.IssuedAt = issuedAt.Unix()
-	claims.ExpiresAt = expiresAt.Unix()
-	claims.Issuer = "ST-go-boilerplate"
-
-	newToken, err := auth.GenerateToken(s.svc.cfg.App.Auth, claims)
-	if err != nil {
-		log.Error("Login: error to generate token: ", err)
-		return retVal, err
-	}
-
-	retVal.Token = newToken
-	retVal.ServerTime = issuedAt.Unix()
-	retVal.ValidTime = expiresAt.Unix()
-
-	return retVal, nil
+	return account, nil
 }

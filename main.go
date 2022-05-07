@@ -18,8 +18,10 @@ package main
 import (
 	"log"
 
+	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/go-boilerplate/application/factory"
 	"github.com/diegoclair/go-boilerplate/application/rest"
+	"github.com/diegoclair/go-boilerplate/infra/auth"
 	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
@@ -32,10 +34,17 @@ func main() {
 	}
 
 	log := logger.New(cfg.Log, cfg.App.Name)
-	services, err := factory.GetDomainServices(cfg, log)
+	cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.DB.MySQL.CryptoKey)
+
+	authToken, err := auth.NewAuthToken(cfg.App.Auth)
+	if err != nil {
+		log.Fatalf("Error to load config: %v", err)
+	}
+
+	services, err := factory.GetServices(cfg, log, cipher)
 	if err != nil {
 		log.Fatal("error to get domain services: ", err)
 	}
 
-	rest.StartRestServer(cfg, services, log) //TODO: receive flags for what server it will starts
+	rest.StartRestServer(cfg, services, log, authToken) //TODO: receive flags for what server it will starts
 }

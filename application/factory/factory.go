@@ -9,15 +9,15 @@ import (
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
-type DomainServices struct {
+type Services struct {
 	Mapper          mapper.Mapper
 	AccountService  service.AccountService
 	AuthService     service.AuthService
 	TransferService service.TransferService
 }
 
-//GetDomainServices to get instace of all services
-func GetDomainServices(cfg *config.Config, log logger.Logger) (*DomainServices, error) {
+//GetServices to get instace of all services
+func GetServices(cfg *config.Config, log logger.Logger, cipher datacrypto.Crypto) (*Services, error) {
 
 	data, err := data.Connect(cfg, log)
 	if err != nil {
@@ -25,8 +25,7 @@ func GetDomainServices(cfg *config.Config, log logger.Logger) (*DomainServices, 
 		return nil, err
 	}
 
-	services := &DomainServices{}
-	cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.DB.MySQL.CryptoKey)
+	services := &Services{}
 	svc := service.New(data, cfg, cipher, log)
 	svm := service.NewServiceManager()
 

@@ -43,7 +43,7 @@ type AccountService interface {
 }
 
 type AuthService interface {
-	Login(ctx context.Context, cpf, secret string) (retVal entity.Authentication, err error)
+	Login(ctx context.Context, cpf, secret string) (account entity.Account, err error)
 }
 
 type TransferService interface {
