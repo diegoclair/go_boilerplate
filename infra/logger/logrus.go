@@ -61,7 +61,7 @@ func (l *LogrusLogger) NewSessionLogger(ctx context.Context) (context.Context, L
 	if vl != nil {
 		return ctx, vl.(Logger)
 	}
-	instance = newLogrusLogger(l.cfg)
+
 	instance = instance.WithFields(map[string]interface{}{
 		"session_code": sessionCode.(string),
 	})
