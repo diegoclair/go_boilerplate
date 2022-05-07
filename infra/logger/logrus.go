@@ -3,7 +3,6 @@ package logger
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/diegoclair/go-boilerplate/infra/auth"
@@ -98,59 +97,10 @@ func (l *LogrusLogger) SetLevel(level Level) {
 	l.Logger.Level = logrus.Level(level)
 }
 
-// Output returns the echo logging output
-func (l *LogrusLogger) Output() io.Writer {
-	return l.Logger.Writer()
-}
-
-// SetOutput sets the echo logging output
-func (l *LogrusLogger) SetOutput(output io.Writer) {
-	l.Logger.Out = output
-}
-
-// RecordID return the entry ID
-func (l *LogrusLogger) RecordID() string {
-	recordID, ok := l.Entry.Data[entryKeyRecordID]
-	if !ok {
-		return ""
-	}
-
-	return recordID.(string)
-}
-
-// SetRecordID sets the entry ID
-func (l *LogrusLogger) SetRecordID(id string) {
-	if id == "" {
-		delete(l.Entry.Data, entryKeyRecordID)
-	} else {
-		l.Entry.Data[entryKeyRecordID] = id
-	}
-}
-
-// InfoWriter returns the io.Writer for info level
-func (l *LogrusLogger) InfoWriter() io.Writer {
-	return l.WriterLevel(logrus.InfoLevel)
-}
-
-// ErrorWriter returns the io.Writer for error level
-func (l *LogrusLogger) ErrorWriter() io.Writer {
-	return l.WriterLevel(logrus.ErrorLevel)
-}
-
-// FatalWriter returns the io.Writer for fatal level
-func (l *LogrusLogger) FatalWriter() io.Writer {
-	return l.WriterLevel(logrus.FatalLevel)
-}
-
 // WithFields adds fields to the log and returns the logger
 func (l *LogrusLogger) WithFields(fields map[string]interface{}) Logger {
 	newLogger := newLogrusLogger(l.cfg).(*LogrusLogger)
 	newLogger.Entry = l.Entry.WithFields(fields)
 
 	return newLogger
-}
-
-// Fields returns the logger fields
-func (l *LogrusLogger) Fields() map[string]interface{} {
-	return l.Entry.Data
 }

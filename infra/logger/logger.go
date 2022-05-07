@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"io"
 
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
@@ -27,12 +26,6 @@ type Logger interface {
 
 	AppName() string
 	SetAppName(name string)
-
-	RecordID() string
-	SetRecordID(id string)
-
-	Output() io.Writer
-	SetOutput(output io.Writer)
 
 	Debugf(format string, args ...interface{})
 	Infof(format string, args ...interface{})
@@ -60,13 +53,7 @@ type Logger interface {
 	Errorln(args ...interface{})
 	Fatalln(args ...interface{})
 	Panicln(args ...interface{})
-
-	InfoWriter() io.Writer
-	ErrorWriter() io.Writer
-	FatalWriter() io.Writer
-
 	WithFields(map[string]interface{}) Logger
-	Fields() map[string]interface{}
 
 	NewSessionLogger(appContext context.Context) (context.Context, Logger)
 }
