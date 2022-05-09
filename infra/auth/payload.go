@@ -9,7 +9,7 @@ import (
 type tokenPayload struct {
 	ID          uuid.UUID `json:"id"`
 	AccountUUID string    `json:"account_uuid"`
-	SessionID   string    `json:"session_id"`
+	SessionUUID string    `json:"session_uuid"`
 	IssuedAt    time.Time `json:"issued_at"`
 	ExpiredAt   time.Time `json:"expired_at"`
 }

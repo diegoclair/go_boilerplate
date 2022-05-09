@@ -11,8 +11,9 @@ import (
 
 // GetContext returns a fulled appcontext
 func GetContext(ctx echo.Context) (appContext context.Context) {
-	appContext = context.WithValue(context.Background(), auth.AccountUUIDKey, ctx.Get(auth.AccountUUIDKey.String()))
-	appContext = context.WithValue(context.Background(), auth.SessionKey, ctx.Get(auth.SessionKey.String()))
+	appContext = context.Background()
+	appContext = context.WithValue(appContext, auth.AccountUUIDKey, ctx.Get(auth.AccountUUIDKey.String()))
+	appContext = context.WithValue(appContext, auth.SessionKey, ctx.Get(auth.SessionKey.String()))
 	return appContext
 }
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
@@ -44,6 +45,7 @@ func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 	if err != nil {
 		verr, ok := err.(*jwt.ValidationError)
 		if ok && errors.Is(verr.Inner, errExpiredToken) {
+			log.Error("expired token: ", err)
 			return nil, errExpiredToken
 		}
 		return nil, errInvalidToken
@@ -51,6 +53,7 @@ func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 
 	payload, ok := jwtToken.Claims.(*tokenPayload)
 	if !ok {
+		log.Error("could not parse jwt token: ", err)
 		return nil, errInvalidToken
 	}
 	return payload, nil
@@ -62,6 +65,9 @@ func (a *jwtAuth) createToken(accountUUID string, duration time.Duration) (strin
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	tokenString, err := token.SignedString(key)
+	if err != nil {
+		log.Error("error to encrypt token: ", err)
+	}
 
 	return tokenString, payload, err
 }

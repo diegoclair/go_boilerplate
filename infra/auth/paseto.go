@@ -2,9 +2,10 @@ package auth
 
 import (
 	"fmt"
-	"log"
+
 	"time"
 
+	"github.com/labstack/gommon/log"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -38,12 +39,13 @@ func (a *pasetoAuth) VerifyToken(token string) (*tokenPayload, error) {
 
 	err := a.paseto.Decrypt(token, a.symmetricKey, payload, nil)
 	if err != nil {
-		log.Println("error to decrypt token: ", err)
+		log.Error("error to decrypt token: ", err)
 		return nil, errInvalidToken
 	}
 	err = payload.Valid()
 	if err != nil {
-		return nil, err
+		log.Error("token not valid: ", err)
+		return nil, errInvalidToken
 	}
 
 	return payload, nil
@@ -52,5 +54,8 @@ func (a *pasetoAuth) VerifyToken(token string) (*tokenPayload, error) {
 func (a *pasetoAuth) createToken(accountUUID string, duration time.Duration) (string, *tokenPayload, error) {
 	payload := newPayload(accountUUID, duration)
 	token, err := a.paseto.Encrypt(a.symmetricKey, payload, nil)
+	if err != nil {
+		log.Error("error to encrypt token: ", err)
+	}
 	return token, payload, err
 }

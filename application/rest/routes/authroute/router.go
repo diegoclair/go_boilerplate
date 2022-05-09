@@ -21,6 +21,7 @@ func NewRouter(ctrl *Controller, routeName string) *AccountRouter {
 }
 
 func (r *AccountRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
+	//TODO: create route for refresh token
 	router := appGroup.Group(r.routeName)
 	router.POST(loginRoute, r.ctrl.handleLogin)
 }

@@ -61,8 +61,9 @@ func (s *Controller) handleAddTransfer(c echo.Context) error {
 
 func (s *Controller) handleGetTransfers(c echo.Context) error {
 
-	appContext := routeutils.GetContext(c)
-	transfers, err := s.transferService.GetTransfers(appContext)
+	ctx := routeutils.GetContext(c)
+
+	transfers, err := s.transferService.GetTransfers(ctx)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}

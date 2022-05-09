@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/util/crypto"
@@ -66,11 +67,12 @@ func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Acc
 	}
 
 	for i := 0; i < len(accounts); i++ {
-		_, err = s.svc.cipher.DecryptStruct(&accounts[i])
-		if err != nil {
-			log.Error("GetAccounts: error to decrypt account struct: ", err)
-			return accounts, err
-		}
+		fmt.Println(accounts[i])
+		// _, err = s.svc.cipher.DecryptStruct(&accounts[i])
+		// if err != nil {
+		// 	log.Error("GetAccounts: error to decrypt account struct: ", err)
+		// 	return accounts, err
+		// }
 	}
 
 	return accounts, nil
