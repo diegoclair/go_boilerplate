@@ -60,6 +60,33 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 	return routeutils.ResponseCreated(c)
 }
 
+func (s *Controller) handleAddBalance(c echo.Context) error {
+
+	ctx := routeutils.GetContext(c)
+
+	input := viewmodel.AddBalance{}
+	err := c.Bind(&input)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	err = input.Validate()
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	accountUUID, err := routeutils.GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	err = s.accountService.AddBalance(ctx, accountUUID, input.Amount)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+	return routeutils.ResponseCreated(c)
+}
+
 func (s *Controller) handleGetAccounts(c echo.Context) error {
 
 	ctx := routeutils.GetContext(c)
@@ -82,7 +109,7 @@ func (s *Controller) handleGetAccountByID(c echo.Context) error {
 
 	ctx := routeutils.GetContext(c)
 
-	accountUUID, err := routeutils.GetAndValidateParam(c, "account_id", "Invalid account_id")
+	accountUUID, err := routeutils.GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}

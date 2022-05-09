@@ -18,6 +18,7 @@ type Transaction interface {
 	Commit() error
 }
 
+//TODO: check if transfer should go to a transfer repo
 type AccountRepo interface {
 	AddTransfer(ctx context.Context, transfer entity.Transfer) (err error)
 	CreateAccount(ctx context.Context, account entity.Account) (err error)
