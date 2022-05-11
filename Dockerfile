@@ -1,4 +1,4 @@
-FROM golang:1.17
+FROM golang:latest
 
 # Add Maintainer info
 LABEL maintainer="Rodrigues Diego <diego93rodrigues@gmail.com>"
@@ -17,6 +17,6 @@ RUN chmod +x /wait
 EXPOSE 5000
 
 #This is used to run the application with live reload
-RUN go get github.com/githubnemo/CompileDaemon
+RUN go install github.com/githubnemo/CompileDaemon@latest
 
 ENTRYPOINT /wait && CompileDaemon --build="go build -o myapp ." --command="./myapp"
