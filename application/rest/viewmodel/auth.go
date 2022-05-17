@@ -1,6 +1,8 @@
 package viewmodel
 
 import (
+	"time"
+
 	"github.com/diegoclair/go-boilerplate/util/validator"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/diegoclair/go_utils-lib/v2/validstruct"
@@ -32,4 +34,23 @@ type LoginResponse struct {
 	AccessTokenExpiresAt  int64  `json:"access_token_expires_at"`
 	RefreshToken          string `json:"refresh_token"`
 	RefreshTokenExpiresAt int64  `json:"refresh_token_expires_at"`
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
+}
+
+func (t *RefreshTokenRequest) Validate() error {
+
+	err := validstruct.ValidateStruct(t)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type RefreshTokenResponse struct {
+	AccessToken          string    `json:"access_token"`
+	AccessTokenExpiresAt time.Time `json:"access_token_expires_at"`
 }

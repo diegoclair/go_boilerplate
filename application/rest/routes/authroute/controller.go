@@ -41,11 +41,11 @@ func (s *Controller) handleLogin(c echo.Context) error {
 	input := viewmodel.Login{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 	err = input.Validate()
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	account, err := s.authService.Login(ctx, input.CPF, input.Secret)
@@ -70,5 +70,62 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt.Unix(),
 	}
 
+	return routeutils.ResponseAPIOK(c, response)
+}
+
+func (s *Controller) handleRefreshToken(c echo.Context) error {
+
+	input := viewmodel.RefreshTokenRequest{}
+	err := c.Bind(&input)
+	if err != nil {
+		return routeutils.ResponseBadRequestError(c, err)
+	}
+	err = input.Validate()
+	if err != nil {
+		return routeutils.ResponseBadRequestError(c, err)
+	}
+
+	refreshPayload, err := s.authToken.VerifyToken(input.RefreshToken)
+	if err != nil {
+		return routeutils.ResponseUnauthorizedError(c, err)
+	}
+
+	//TODO: handle session here
+	// session, err := s.store.GetSession(ctx, refreshPayload.ID)
+	// if err != nil {
+	// 	if err == sql.ErrNoRows {
+	// 		ctx.JSON(http.StatusNotFound, errorResponse(err))
+	// 		return
+	// 	}
+	// 	ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	// 	return
+	// }
+	// if session.IsBlocked {
+	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("blocked session")))
+	// 	return
+	// }
+	// if session.Username != refreshPayload.Username {
+	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("incorrect session user")))
+	// 	return
+	// }
+
+	// if session.RefreshToken != input.RefreshToken {
+	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("mismatched session token")))
+	// 	return
+	// }
+	// if time.Now().After(session.ExpiresAt) {
+	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("expired session")))
+	// 	return
+	// }
+
+	accessToken, accessPayload, err := s.authToken.CreateToken(refreshPayload.AccountUUID)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	response := viewmodel.RefreshTokenResponse{
+		AccessToken:          accessToken,
+		AccessTokenExpiresAt: accessPayload.ExpiredAt,
+	}
 	return routeutils.ResponseAPIOK(c, response)
 }
