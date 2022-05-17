@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/diegoclair/go-boilerplate/infra/auth"
+	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 )
 
 // JWTConfig defines the config for JWT middleware.
@@ -19,13 +19,12 @@ func AuthMiddlewarePrivateRoute(authToken auth.AuthToken) echo.MiddlewareFunc {
 
 			accessToken := ctx.Request().Header.Get(auth.ContextTokenKey.String())
 			if len(accessToken) == 0 {
-				return echo.NewHTTPError(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+				return echo.NewHTTPError(http.StatusUnauthorized, resterrors.NewUnauthorizedError("access token is required"))
 			}
 
 			payload, err := authToken.VerifyToken(accessToken)
 			if err != nil {
-				log.Error("Erro")
-				return echo.NewHTTPError(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+				return echo.NewHTTPError(http.StatusUnauthorized, err)
 			}
 
 			//TODO: add session here too

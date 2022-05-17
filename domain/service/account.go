@@ -6,7 +6,7 @@ import (
 
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/util/crypto"
-	"github.com/diegoclair/go-boilerplate/util/errors"
+	utilerrors "github.com/diegoclair/go-boilerplate/util/errors"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
 )
@@ -34,7 +34,7 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 	}
 
 	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
-	if err != nil && !errors.SQLNotFound(err.Error()) {
+	if err != nil && !utilerrors.SQLNotFound(err.Error()) {
 		log.Error("CreateAccount: ", err)
 		return err
 	} else if err == nil {
@@ -90,6 +90,7 @@ func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Acc
 	}
 
 	for i := 0; i < len(accounts); i++ {
+		//TODO: check if I'll remove this or update the test to encrypt before create account
 		fmt.Println(accounts[i])
 		// _, err = s.svc.cipher.DecryptStruct(&accounts[i])
 		// if err != nil {

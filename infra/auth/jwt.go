@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/chacha20poly1305"
@@ -32,11 +33,12 @@ func (a *jwtAuth) CreateRefreshToken(accountUUID string) (string, *tokenPayload,
 	return a.createToken(accountUUID, refreshTokenDurationTime)
 }
 
+//TODO: Checar se podemos passar o log para cá
 func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
-			return nil, errInvalidToken
+			return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
 		}
 		return []byte(a.jwtPrivateKey), nil
 	}
@@ -46,15 +48,15 @@ func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 		verr, ok := err.(*jwt.ValidationError)
 		if ok && errors.Is(verr.Inner, errExpiredToken) {
 			log.Error("expired token: ", err)
-			return nil, errExpiredToken
+			return nil, resterrors.NewUnauthorizedError(errExpiredToken.Error())
 		}
-		return nil, errInvalidToken
+		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
 	}
 
 	payload, ok := jwtToken.Claims.(*tokenPayload)
 	if !ok {
-		log.Error("could not parse jwt token: ", err)
-		return nil, errInvalidToken
+		log.Error("VerifyToken: could not parse jwt token: ", err)
+		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
 	}
 	return payload, nil
 }
@@ -66,8 +68,9 @@ func (a *jwtAuth) createToken(accountUUID string, duration time.Duration) (strin
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		log.Error("error to encrypt token: ", err)
+		log.Error("createToken: error to encrypt token: ", err)
+		return tokenString, payload, resterrors.NewUnauthorizedError(err.Error())
 	}
 
-	return tokenString, payload, err
+	return tokenString, payload, nil
 }

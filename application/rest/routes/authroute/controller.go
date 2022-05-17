@@ -75,6 +75,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 
 func (s *Controller) handleRefreshToken(c echo.Context) error {
 
+	//TODO: login retorna expires_at de uma forma e aqui está retornando de outra
 	input := viewmodel.RefreshTokenRequest{}
 	err := c.Bind(&input)
 	if err != nil {
@@ -87,7 +88,7 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 
 	refreshPayload, err := s.authToken.VerifyToken(input.RefreshToken)
 	if err != nil {
-		return routeutils.ResponseUnauthorizedError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	//TODO: handle session here
