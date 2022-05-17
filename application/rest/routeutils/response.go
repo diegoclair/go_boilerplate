@@ -10,27 +10,30 @@ import (
 
 const ErrorMessageServiceUnavailable = "Service temporarily unavailable"
 
-// ResponseNoContent returns a standard API success with no content response
 func ResponseNoContent(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// ResponseCreated returns a standard API successful as a result with created code
 func ResponseCreated(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
 
-// ResponseAPIOK returns a standard API success response
 func ResponseAPIOK(c echo.Context, data interface{}) error {
 	return c.JSON(http.StatusOK, data)
 }
 
-// ResponseAPINotFoundError returns a standard API not found error
-func ResponseAPINotFoundError(c echo.Context) error {
-	return ResponseAPIError(c, http.StatusNotFound, "Not Found", "", nil)
+func ResponseNotFoundError(c echo.Context, err error) error {
+	return ResponseAPIError(c, http.StatusNotFound, "Not Found", err.Error(), nil)
 }
 
-// ResponseAPIError returns a standard API error
+func ResponseBadRequestError(c echo.Context, err error) error {
+	return ResponseAPIError(c, http.StatusBadRequest, "Bad request", err.Error(), nil)
+}
+
+func ResponseUnauthorizedError(c echo.Context, err error) error {
+	return ResponseAPIError(c, http.StatusUnauthorized, "Unauthorized", err.Error(), nil)
+}
+
 func ResponseAPIError(c echo.Context, status int, message string, err string, causes interface{}) error {
 	returnValue := resterrors.NewRestError(message, status, err, causes)
 	return c.JSON(status, returnValue)
