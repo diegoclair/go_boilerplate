@@ -91,6 +91,7 @@ func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Acc
 
 	for i := 0; i < len(accounts); i++ {
 		//TODO: check if I'll remove this or update the test to encrypt before create account
+		//if I remove the cipher and now I will save the document as string, I need to change the database cpf field type
 		fmt.Println(accounts[i])
 		// _, err = s.svc.cipher.DecryptStruct(&accounts[i])
 		// if err != nil {
