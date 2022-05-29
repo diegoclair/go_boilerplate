@@ -120,9 +120,6 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 	}
 	defer stmt.Close()
 	row := stmt.QueryRow(encryptedCPF)
-	if err != nil {
-		return account, mysqlutils.HandleMySQLError(err)
-	}
 
 	account, err = r.parseAccount(row)
 	if err != nil {
@@ -170,10 +167,6 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 	defer stmt.Close()
 
 	row := stmt.QueryRow(accountUUID)
-	if err != nil {
-		return account, mysqlutils.HandleMySQLError(err)
-	}
-
 	account, err = r.parseAccount(row)
 	if err != nil {
 		return account, mysqlutils.HandleMySQLError(err)
