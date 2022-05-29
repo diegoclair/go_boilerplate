@@ -11,13 +11,13 @@ import (
 )
 
 type Service struct {
-	dm     contract.Manager
+	dm     contract.DataManager
 	cfg    *config.Config
 	cipher datacrypto.Crypto
 	log    logger.Logger
 }
 
-func New(dm contract.Manager, cfg *config.Config, cipher datacrypto.Crypto, log logger.Logger) *Service {
+func New(dm contract.DataManager, cfg *config.Config, cipher datacrypto.Crypto, log logger.Logger) *Service {
 	svc := new(Service)
 	svc.dm = dm
 	svc.cfg = cfg

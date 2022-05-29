@@ -6,14 +6,14 @@ import (
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 )
 
-// Manager holds the methods that manipulates the main data.
-type Manager interface {
+// DataManager holds the methods that manipulates the main data.
+type DataManager interface {
 	Begin() (Transaction, error)
 	Account() AccountRepo
 }
 
 type Transaction interface {
-	Manager
+	DataManager
 	Rollback() error
 	Commit() error
 }

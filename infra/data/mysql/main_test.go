@@ -10,7 +10,7 @@ import (
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
-var testMysql contract.Manager
+var testMysql contract.DataManager
 
 func TestMain(m *testing.M) {
 

@@ -27,7 +27,7 @@ type mysqlConn struct {
 }
 
 //Instance returns an instance of a MySQLRepo
-func Instance(cfg *config.Config, log logger.Logger) (contract.Manager, error) {
+func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
 	onceDB.Do(func() {
 
 		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/%s?charset=utf8&parseTime=true",

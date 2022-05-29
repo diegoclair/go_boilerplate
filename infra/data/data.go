@@ -8,6 +8,6 @@ import (
 )
 
 // Connect returns a instace of mysql db
-func Connect(cfg *config.Config, log logger.Logger) (contract.Manager, error) {
+func Connect(cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
 	return mysql.Instance(cfg, log)
 }
