@@ -21,7 +21,9 @@ import (
 	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/go-boilerplate/application/factory"
 	"github.com/diegoclair/go-boilerplate/application/rest"
+	"github.com/diegoclair/go-boilerplate/domain/service"
 	"github.com/diegoclair/go-boilerplate/infra/auth"
+	"github.com/diegoclair/go-boilerplate/infra/data"
 	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
 )
@@ -41,7 +43,15 @@ func main() {
 		log.Fatalf("Error to load config: %v", err)
 	}
 
-	services, err := factory.GetServices(cfg, log, cipher)
+	data, err := data.Connect(cfg, log)
+	if err != nil {
+		log.Fatal("Error to connect dataManager repositories: %v", err)
+	}
+
+	svc := service.New(data, cfg, cipher, log)
+	svm := service.NewServiceManager()
+
+	services, err := factory.GetServices(cfg, data, svc, svm, log, cipher)
 	if err != nil {
 		log.Fatal("error to get domain services: ", err)
 	}
