@@ -47,7 +47,7 @@ func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, erro
 			return
 		}
 
-		log.Info("Creating database...")
+		log.Info("Creating database if not exists...")
 		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", cfg.DB.MySQL.DBName)); connErr != nil {
 			log.Error("Create Database error: ", connErr)
 			return
