@@ -7,7 +7,6 @@
 
 # Tools
 .vscode
-bank-transfer
 myapp
 
 # Test binary, built with `go test -c`
