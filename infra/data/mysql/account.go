@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 
+	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go_utils-lib/v2/mysqlutils"
 )
@@ -11,7 +12,7 @@ type accountRepo struct {
 	db connection
 }
 
-func newAccountRepo(db connection) *accountRepo {
+func newAccountRepo(db connection) contract.AccountRepo {
 	return &accountRepo{
 		db: db,
 	}
