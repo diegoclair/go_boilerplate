@@ -157,6 +157,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context) (accounts []entity.Accoun
 
 func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
+	//TODO: usar params = []interface{}{} igual redsales para receber e passar os parametros em todas as queries
 	query := querySelectBase + `
 		WHERE ta.account_uuid = ?
 	`
