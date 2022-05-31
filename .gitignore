@@ -16,3 +16,4 @@ myapp
 *.out
 
 .docker/dbdata
+.docker/cachedata
