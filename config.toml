@@ -10,6 +10,14 @@ port = "5000"
   jwt-private-key = "0z6eQbA4EZVcEbmyyojJ8FXhy0cd1jrv"
   paseto-symmetric-key = "dFRpaeCkdLuKpv65vN7QDSGm5M4H6EWe"
 
+[cache]
+  [cache.redis]
+  host = "localhost"
+  port = 6379
+  db = 0
+  pass = "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
+  default-expiration = "24h"
+  
 [db]
   [db.mysql]
   username = "root"

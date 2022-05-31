@@ -39,7 +39,7 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 	input := viewmodel.AddAccount{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err) //TODO: it is not a API error
 	}
 
 	err = input.Validate()
@@ -67,7 +67,7 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 	input := viewmodel.AddBalance{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err) //TODO: should use here the responseBadRequest .. check if have other locations with this error (it is not a API error)
 	}
 
 	err = input.Validate()

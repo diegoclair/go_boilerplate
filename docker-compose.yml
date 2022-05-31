@@ -11,10 +11,24 @@ services:
     environment:
       WAIT_HOSTS: db:3306
       DB_MYSQL_HOST: go-boilerplate-mysql
+      CACHE_REDIS_HOST: cache-redis
     volumes:
       - ./:/app   #use this volume to set the live reload
     depends_on:
       - db
+      - cache
+    networks:
+      - app-network
+
+  cache:
+    container_name: cache-redis
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - ./.docker/cachedata:/data
     networks:
       - app-network
   

@@ -23,6 +23,7 @@ import (
 	"github.com/diegoclair/go-boilerplate/application/rest"
 	"github.com/diegoclair/go-boilerplate/domain/service"
 	"github.com/diegoclair/go-boilerplate/infra/auth"
+	"github.com/diegoclair/go-boilerplate/infra/cache"
 	"github.com/diegoclair/go-boilerplate/infra/data"
 	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/util/config"
@@ -45,10 +46,16 @@ func main() {
 
 	data, err := data.Connect(cfg, log)
 	if err != nil {
-		log.Fatal("Error to connect dataManager repositories: %v", err)
+		log.Fatalf("Error to connect dataManager repositories: %v", err)
 	}
 
-	svc := service.New(data, cfg, cipher, log)
+	log.Printf("Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
+	cache, err := cache.Instance(cfg.Cache.Redis, log)
+	if err != nil {
+		log.Fatal("Error connecting to cache server:", err)
+	}
+
+	svc := service.New(data, cfg, cache, cipher, log)
 	svm := service.NewServiceManager()
 
 	services, err := factory.GetServices(cfg, data, svc, svm, log, cipher)

@@ -14,13 +14,15 @@ type Service struct {
 	dm     contract.DataManager
 	cfg    *config.Config
 	cipher datacrypto.Crypto
+	cache  contract.CacheManager
 	log    logger.Logger
 }
 
-func New(dm contract.DataManager, cfg *config.Config, cipher datacrypto.Crypto, log logger.Logger) *Service {
+func New(dm contract.DataManager, cfg *config.Config, cache contract.CacheManager, cipher datacrypto.Crypto, log logger.Logger) *Service {
 	svc := new(Service)
 	svc.dm = dm
 	svc.cfg = cfg
+	svc.cache = cache
 	svc.cipher = cipher
 	svc.log = log
 

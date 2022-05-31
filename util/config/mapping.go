@@ -3,9 +3,10 @@ package config
 import "time"
 
 type Config struct {
-	App AppConfig `mapstructure:"app"`
-	DB  DBConfig  `mapstructure:"db"`
-	Log LogConfig `mapstructure:"log"`
+	App   AppConfig   `mapstructure:"app"`
+	Cache CacheConfig `mapstructure:"cache"`
+	DB    DBConfig    `mapstructure:"db"`
+	Log   LogConfig   `mapstructure:"log"`
 }
 
 type AppConfig struct {
@@ -20,6 +21,10 @@ type AuthConfig struct {
 	RefreshTokenDuration time.Duration `mapstructure:"refresh-token-duration"`
 	JWTPrivateKey        string        `mapstructure:"jwt-private-key"`
 	PasetoSymmetricKey   string        `mapstructure:"paseto-symmetric-key"`
+}
+
+type CacheConfig struct {
+	Redis RedisConfig `mapstructure:"redis"`
 }
 
 type DBConfig struct {
@@ -42,4 +47,13 @@ type LogConfig struct {
 	Debug     bool   `mapstructure:"debug"`
 	LogToFile bool   `mapstructure:"log-to-file"`
 	Path      string `mapstructure:"path"`
+}
+
+type RedisConfig struct {
+	Host              string        `mapstructure:"host"`
+	Port              int           `mapstructure:"port"`
+	DB                int           `mapstructure:"db"`
+	Pass              string        `mapstructure:"pass"`
+	Prefix            string        `mapstructure:"prefix"`
+	DefaultExpiration time.Duration `mapstructure:"default-expiration"`
 }
