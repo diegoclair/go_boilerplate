@@ -58,7 +58,7 @@ func main() {
 	svc := service.New(data, cfg, cache, cipher, log)
 	svm := service.NewServiceManager()
 
-	services, err := factory.GetServices(cfg, data, svc, svm, log, cipher)
+	services, err := factory.GetServices(svc, svm)
 	if err != nil {
 		log.Fatal("error to get domain services: ", err)
 	}

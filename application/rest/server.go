@@ -21,12 +21,13 @@ type IRouter interface {
 	RegisterRoutes(appGroup, privateGroup *echo.Group)
 }
 
-type Router struct {
+type Server struct {
 	routers []IRouter
+	server  *echo.Echo
 }
 
 func StartRestServer(cfg *config.Config, services *factory.Services, log logger.Logger, authToken auth.AuthToken) {
-	server := initServer(cfg, services, authToken)
+	server := newRestServer(services, authToken)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -34,12 +35,12 @@ func StartRestServer(cfg *config.Config, services *factory.Services, log logger.
 
 	log.Info(fmt.Sprintf("About to start the application on port: %s...", port))
 
-	if err := server.Start(fmt.Sprintf(":%s", port)); err != nil {
+	if err := server.Start(port); err != nil {
 		panic(err)
 	}
 }
 
-func initServer(cfg *config.Config, services *factory.Services, authToken auth.AuthToken) *echo.Echo {
+func newRestServer(services *factory.Services, authToken auth.AuthToken) *Server {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
@@ -54,22 +55,23 @@ func initServer(cfg *config.Config, services *factory.Services, authToken auth.A
 	authRoute := authroute.NewRouter(authController, "auth")
 	transferRoute := transferroute.NewRouter(transferController, "transfers")
 
-	appRouter := &Router{}
-	appRouter.addRouters(accountRoute)
-	appRouter.addRouters(authRoute)
-	appRouter.addRouters(pingRoute)
-	appRouter.addRouters(transferRoute)
+	server := &Server{server: srv}
+	server.addRouters(accountRoute)
+	server.addRouters(authRoute)
+	server.addRouters(pingRoute)
+	server.addRouters(transferRoute)
+	server.registerAppRouters(authToken)
 
-	return appRouter.registerAppRouters(srv, cfg, authToken)
+	return server
 }
 
-func (r *Router) addRouters(router IRouter) {
+func (r *Server) addRouters(router IRouter) {
 	r.routers = append(r.routers, router)
 }
 
-func (r *Router) registerAppRouters(srv *echo.Echo, cfg *config.Config, authToken auth.AuthToken) *echo.Echo {
+func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 
-	appGroup := srv.Group("/")
+	appGroup := r.server.Group("/")
 	privateGroup := appGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(authToken))
 
@@ -77,5 +79,9 @@ func (r *Router) registerAppRouters(srv *echo.Echo, cfg *config.Config, authToke
 		appRouter.RegisterRoutes(appGroup, privateGroup)
 	}
 
-	return srv
+	return
+}
+
+func (r *Server) Start(port string) error {
+	return r.server.Start(fmt.Sprintf(":%s", port))
 }

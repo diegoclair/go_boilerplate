@@ -1,12 +1,8 @@
 package factory
 
 import (
-	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/IQ-tech/go-mapper"
-	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/domain/service"
-	"github.com/diegoclair/go-boilerplate/infra/logger"
-	"github.com/diegoclair/go-boilerplate/util/config"
 )
 
 type Services struct {
@@ -17,7 +13,7 @@ type Services struct {
 }
 
 //GetServices to get instace of all services
-func GetServices(cfg *config.Config, data contract.DataManager, svc *service.Service, svm service.Manager, log logger.Logger, cipher datacrypto.Crypto) (*Services, error) {
+func GetServices(svc *service.Service, svm service.Manager) (*Services, error) {
 
 	services := &Services{}
 

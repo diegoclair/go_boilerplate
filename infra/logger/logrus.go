@@ -16,6 +16,7 @@ const (
 	entryKeyRecordID = "id"
 )
 
+//TODO: improve this logger to log filename of the log and the function executed
 func newLogrusLogger(cfg config.LogConfig) Logger {
 	if cfg.LogToFile {
 		file, err := os.Create(cfg.Path)
