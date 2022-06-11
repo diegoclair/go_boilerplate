@@ -36,7 +36,7 @@ func main() {
 		log.Fatalf("Error to load config: %v", err)
 	}
 
-	log := logger.New(cfg.Log, cfg.App.Name)
+	log := logger.New(*cfg)
 	cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.DB.MySQL.CryptoKey)
 
 	authToken, err := auth.NewAuthToken(cfg.App.Auth)

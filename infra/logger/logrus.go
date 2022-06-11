@@ -17,9 +17,11 @@ const (
 )
 
 //TODO: improve this logger to log filename of the log and the function executed
-func newLogrusLogger(cfg config.LogConfig) Logger {
-	if cfg.LogToFile {
-		file, err := os.Create(cfg.Path)
+func newLogrusLogger(cfg config.Config) Logger {
+	logger := &LogrusLogger{cfg: cfg}
+
+	if cfg.Log.LogToFile {
+		file, err := os.Create(cfg.Log.Path)
 		if err != nil {
 			fmt.Printf("Error to create log file for library: %s\n", err.Error())
 			panic(err)
@@ -27,23 +29,31 @@ func newLogrusLogger(cfg config.LogConfig) Logger {
 		logrus.SetOutput(file)
 	}
 
-	logrus.SetFormatter(&customJSONFormatter{cfg: cfg})
+	logrus.SetFormatter(&customJSONFormatter{cfg: cfg.Log})
 
 	hostname, err := os.Hostname()
 	if err != nil {
 		logrus.Errorf("Error obtaining host name: %v", err)
 	}
 
-	entry := logrus.WithFields(logrus.Fields{
+	logger.Entry = logrus.WithFields(logrus.Fields{
 		"hostname": hostname,
 	})
 
-	return &LogrusLogger{cfg, entry}
+	logger.SetAppName(cfg.App.Name)
+
+	if cfg.Log.Debug {
+		logger.SetLevel(DEBUG)
+	} else {
+		logger.SetLevel(INFO)
+	}
+
+	return logger
 }
 
 // LogrusLogger is the default application logger
 type LogrusLogger struct {
-	cfg config.LogConfig
+	cfg config.Config
 	*logrus.Entry
 }
 

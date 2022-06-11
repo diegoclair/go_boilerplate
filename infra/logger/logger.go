@@ -59,16 +59,7 @@ type Logger interface {
 }
 
 // New returns a new logger instance
-func New(cfg config.LogConfig, appName string) Logger {
+func New(cfg config.Config) Logger {
 	logger := newLogrusLogger(cfg)
-
-	logger.SetAppName(appName)
-
-	if cfg.Debug {
-		logger.SetLevel(DEBUG)
-	} else {
-		logger.SetLevel(INFO)
-	}
-
 	return logger
 }

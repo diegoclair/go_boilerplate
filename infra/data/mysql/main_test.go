@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("cannot get config: ", err)
 	}
-	log := logger.New(cfg.Log, cfg.App.Name)
+	log := logger.New(*cfg)
 
 	mysql, err := mysql.Instance(cfg, log)
 	if err != nil {
