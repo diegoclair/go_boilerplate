@@ -6,8 +6,8 @@ import (
 
 const (
 	rootRoute          = ""
-	accountByID        = "/:account_id"
-	accountBalanceByID = "/:account_id/balance"
+	accountByID        = "/:account_uuid"
+	accountBalanceByID = "/:account_uuid/balance"
 )
 
 type UserRouter struct {
