@@ -41,7 +41,7 @@ type PingService interface {
 type AccountService interface {
 	CreateAccount(ctx context.Context, account entity.Account) (err error)
 	AddBalance(ctx context.Context, accountUUID string, amount float64) (err error)
-	GetAccounts(ctx context.Context) (accounts []entity.Account, err error)
+	GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error)
 	GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error)
 }
 

@@ -77,16 +77,16 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 	return nil
 }
 
-func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Account, err error) {
+func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("Process Started")
 	defer log.Info("Process Finished")
 
-	accounts, err = s.svc.dm.Account().GetAccounts(ctx)
+	accounts, totalRecords, err = s.svc.dm.Account().GetAccounts(ctx, take, skip)
 	if err != nil {
 		log.Error(err)
-		return accounts, err
+		return accounts, totalRecords, err
 	}
 
 	for i := 0; i < len(accounts); i++ {
@@ -100,7 +100,7 @@ func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Acc
 		// }
 	}
 
-	return accounts, nil
+	return accounts, totalRecords, nil
 }
 
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {

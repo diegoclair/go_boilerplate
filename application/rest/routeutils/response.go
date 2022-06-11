@@ -1,12 +1,27 @@
 package routeutils
 
 import (
+	"math"
 	"net/http"
 
+	"github.com/diegoclair/go-boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
+
+// BuildPaginatedResult returns a paginatedResult instance
+func BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult {
+	return viewmodel.PaginatedResult{
+		List: list,
+		Pagination: viewmodel.ReturnPagination{
+			CurrentPage:    (skip / take) + 1,
+			RecordsPerPage: take,
+			TotalRecords:   totalRecords,
+			TotalPages:     int64(math.Ceil(float64(totalRecords) / float64(take))),
+		},
+	}
+}
 
 const ErrorMessageServiceUnavailable = "Service temporarily unavailable"
 

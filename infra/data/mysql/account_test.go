@@ -57,11 +57,12 @@ func TestGetAccountByDocument(t *testing.T) {
 func TestGetAccounts(t *testing.T) {
 	createRandomAccount(t)
 
-	accounts, err := testMysql.Account().GetAccounts(context.Background())
+	accounts, totalRecords, err := testMysql.Account().GetAccounts(context.Background(), 10, 0)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
 
 	require.LessOrEqual(t, 1, len(accounts))
+	require.Equal(t, int64(1), totalRecords)
 
 	require.Equal(t, float64(0), accounts[0].Balance)
 	require.NotEmpty(t, accounts[0].UUID)

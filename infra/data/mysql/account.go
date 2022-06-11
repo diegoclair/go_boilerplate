@@ -130,29 +130,65 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 	return account, nil
 }
 
-func (r *accountRepo) GetAccounts(ctx context.Context) (accounts []entity.Account, err error) {
+func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
+
+	var params = []interface{}{}
 
 	query := querySelectBase
 
-	stmt, err := r.db.Prepare(query)
+	var queryCount = `
+		SELECT COUNT(*) FROM (
+	` + query + `) as count`
+
+	stmt, err := r.db.Prepare(queryCount)
 	if err != nil {
-		return accounts, mysqlutils.HandleMySQLError(err)
+		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query()
+	row := stmt.QueryRow()
+	err = row.Scan(&totalRecords)
 	if err != nil {
-		return accounts, mysqlutils.HandleMySQLError(err)
+		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
+	}
+
+	if totalRecords < 1 {
+		return accounts, totalRecords, nil
+	}
+
+	if take > 0 {
+		query += `
+			LIMIT ?
+		`
+		params = append(params, take)
+	}
+
+	if skip > 0 {
+		query += `
+			OFFSET ?
+		`
+		params = append(params, skip)
+	}
+
+	stmt, err = r.db.Prepare(query)
+	if err != nil {
+		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(params...)
+	if err != nil {
+		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
 	account := entity.Account{}
 	for rows.Next() {
 		account, err = r.parseAccount(rows)
 		if err != nil {
-			return accounts, mysqlutils.HandleMySQLError(err)
+			return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 		}
 		accounts = append(accounts, account)
 	}
-	return accounts, nil
+	return accounts, totalRecords, nil
 }
 
 func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {

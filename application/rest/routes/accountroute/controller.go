@@ -89,10 +89,11 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 
 func (s *Controller) handleGetAccounts(c echo.Context) error {
 
-	//TODO: implementar paginação
 	ctx := routeutils.GetContext(c)
 
-	accounts, err := s.accountService.GetAccounts(ctx)
+	take, skip := routeutils.GetPagingParams(c, "page", "quantity")
+
+	accounts, totalRecords, err := s.accountService.GetAccounts(ctx, take, skip)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -103,7 +104,9 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	return routeutils.ResponseAPIOK(c, response)
+	responsePaginated := routeutils.BuildPaginatedResult(response, skip, take, totalRecords)
+
+	return routeutils.ResponseAPIOK(c, responsePaginated)
 }
 
 func (s *Controller) handleGetAccountByID(c echo.Context) error {

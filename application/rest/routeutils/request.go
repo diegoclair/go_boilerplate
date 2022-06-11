@@ -29,8 +29,8 @@ func GetAndValidateParam(c echo.Context, paramName string, errorMessage string) 
 	return paramValue, nil
 }
 
-// GetPagingParams gets the standard paging params from the URL, returning a validation error in case it's invalid
-func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (page int64, quantity int64) {
+// GetPagingParams gets the standard paging params from the URL, returning how much data to take and skip
+func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (take int64, skip int64) {
 
 	if pageParameter == "" {
 		pageParameter = "page"
@@ -42,8 +42,8 @@ func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (p
 	pg := c.QueryParam(pageParameter)
 	ipp := c.QueryParam(quantityParameter)
 
-	page, _ = strconv.ParseInt(pg, 10, 64)
-	quantity, _ = strconv.ParseInt(ipp, 10, 64)
+	page, _ := strconv.ParseInt(pg, 10, 64)
+	quantity, _ := strconv.ParseInt(ipp, 10, 64)
 
 	if page < 1 {
 		page = 1
@@ -52,6 +52,9 @@ func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (p
 	if quantity < 1 || quantity > 1000 {
 		quantity = 10
 	}
+
+	take = quantity // itens per page
+	skip = (page - 1) * quantity
 
 	return
 }
