@@ -35,6 +35,7 @@ func (formatter *customJSONFormatter) Format(entry *logrus.Entry) ([]byte, error
 		levelUpper := strings.ToUpper(level)
 		levelColor := level
 		clr := color.New()
+		clr.Enable()
 
 		switch level {
 		case logrus.DebugLevel.String():
