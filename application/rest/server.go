@@ -23,7 +23,7 @@ type IRouter interface {
 
 type Server struct {
 	routers []IRouter
-	server  *echo.Echo
+	router  *echo.Echo
 }
 
 func StartRestServer(cfg *config.Config, services *factory.Services, log logger.Logger, authToken auth.AuthToken) {
@@ -55,7 +55,7 @@ func newRestServer(services *factory.Services, authToken auth.AuthToken) *Server
 	authRoute := authroute.NewRouter(authController, "auth")
 	transferRoute := transferroute.NewRouter(transferController, "transfers")
 
-	server := &Server{server: srv}
+	server := &Server{router: srv}
 	server.addRouters(accountRoute)
 	server.addRouters(authRoute)
 	server.addRouters(pingRoute)
@@ -71,7 +71,7 @@ func (r *Server) addRouters(router IRouter) {
 
 func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 
-	appGroup := r.server.Group("/")
+	appGroup := r.router.Group("/")
 	privateGroup := appGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(authToken))
 
@@ -83,5 +83,5 @@ func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 }
 
 func (r *Server) Start(port string) error {
-	return r.server.Start(fmt.Sprintf(":%s", port))
+	return r.router.Start(fmt.Sprintf(":%s", port))
 }
