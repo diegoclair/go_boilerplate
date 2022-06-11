@@ -16,7 +16,6 @@ const (
 	entryKeyRecordID = "id"
 )
 
-//TODO: improve this logger to log filename of the log and the function executed
 func newLogrusLogger(cfg config.Config) Logger {
 	logger := &LogrusLogger{cfg: cfg}
 
@@ -38,6 +37,7 @@ func newLogrusLogger(cfg config.Config) Logger {
 
 	logger.Entry = logrus.WithFields(logrus.Fields{
 		"hostname": hostname,
+		"file":     "",
 	})
 
 	logger.SetAppName(cfg.App.Name)
