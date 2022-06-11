@@ -89,6 +89,7 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 
 func (s *Controller) handleGetAccounts(c echo.Context) error {
 
+	//TODO: implementar paginação
 	ctx := routeutils.GetContext(c)
 
 	accounts, err := s.accountService.GetAccounts(ctx)
