@@ -10,7 +10,7 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name        string
+	Name        string     `mapstructure:"name"`
 	Environment string     `mapstructure:"environment"`
 	Port        string     `mapstructure:"port"`
 	Auth        AuthConfig `mapstructure:"auth"`

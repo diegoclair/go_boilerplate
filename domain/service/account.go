@@ -24,21 +24,21 @@ func newAccountService(svc *Service) AccountService {
 func (s *accountService) CreateAccount(ctx context.Context, account entity.Account) (err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("CreateAccount: Process Started")
-	defer log.Info("CreateAccount: Process Finished")
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
 
 	account.CPF, err = s.svc.cipher.Encrypt(account.CPF)
 	if err != nil {
-		log.Error("CreateAccount: ", err)
+		log.Error(err)
 		return err
 	}
 
 	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
 	if err != nil && !utilerrors.SQLNotFound(err.Error()) {
-		log.Error("CreateAccount: ", err)
+		log.Error(err)
 		return err
 	} else if err == nil {
-		log.Error("CreateAccount: The document number is already in use")
+		log.Error("The document number is already in use")
 		return resterrors.NewConflictError("The cpf is already in use")
 	}
 
@@ -47,7 +47,7 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 
 	err = s.svc.dm.Account().CreateAccount(ctx, account)
 	if err != nil {
-		log.Error("CreateAccount: ", err)
+		log.Error(err)
 		return err
 	}
 
@@ -58,19 +58,19 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amount float64) (err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("AddBalance: Process Started")
-	defer log.Info("AddBalance: Process Finished")
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
 
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		log.Error("AddBalance: error to get account", err)
+		log.Error("error to get account", err)
 		return err
 	}
 	account.Balance += amount
 
 	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account)
 	if err != nil {
-		log.Error("AddBalance: error to update account balance", err)
+		log.Error("error to update account balance", err)
 		return err
 	}
 
@@ -80,19 +80,19 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Account, err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("GetAccounts: Process Started")
-	defer log.Info("GetAccounts: Process Finished")
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
 
 	accounts, err = s.svc.dm.Account().GetAccounts(ctx)
 	if err != nil {
-		log.Error("GetAccounts: ", err)
+		log.Error(err)
 		return accounts, err
 	}
 
 	for i := 0; i < len(accounts); i++ {
 		//TODO: check if I'll remove this or update the test to encrypt before create account
 		//if I remove the cipher and now I will save the document as string, I need to change the database cpf field type
-		fmt.Println(accounts[i])
+		fmt.Println(i)
 		// _, err = s.svc.cipher.DecryptStruct(&accounts[i])
 		// if err != nil {
 		// 	log.Error("GetAccounts: error to decrypt account struct: ", err)
@@ -106,18 +106,18 @@ func (s *accountService) GetAccounts(ctx context.Context) (accounts []entity.Acc
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("GetAccountByUUID: Process Started")
-	defer log.Info("GetAccountByUUID: Process Finished")
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
 
 	account, err = s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		log.Error("GetAccountByUUID: ", err)
+		log.Error(err)
 		return account, err
 	}
 
 	_, err = s.svc.cipher.DecryptStruct(&account)
 	if err != nil {
-		log.Error("GetAccountByUUID: error to decrypt account struct: ", err)
+		log.Error("error to decrypt account struct: ", err)
 		return account, err
 	}
 

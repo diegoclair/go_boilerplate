@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -10,21 +11,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// coloredJSONFormatter formats output in JSON with colored strings
-type coloredJSONFormatter struct {
+// customJSONFormatter formats output in JSON with custom formats
+type customJSONFormatter struct {
 	logrus.JSONFormatter
 	cfg config.LogConfig
 }
 
 // Format formats the log output, coloring status and level fields if output is not in a file
-func (formatter *coloredJSONFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (formatter *customJSONFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	resultSlice, err := formatter.JSONFormatter.Format(entry)
 	if err != nil {
 		return nil, err
 	}
 
+	result := string(resultSlice)
+
+	msg := formatter.getFuncName() + ": " + entry.Message
+	result = strings.Replace(result, `"msg":"`+entry.Message+`"`, `"msg":"`+msg+`"`, 1)
+
 	if !formatter.cfg.LogToFile {
-		result := string(resultSlice)
 
 		level := entry.Level.String()
 		levelUpper := strings.ToUpper(level)
@@ -64,9 +69,29 @@ func (formatter *coloredJSONFormatter) Format(entry *logrus.Entry) ([]byte, erro
 
 			result = strings.Replace(result, `"status":`+strconv.Itoa(status), `"status":`+statusColor, 1)
 		}
-
-		resultSlice = []byte(result)
 	}
+	resultSlice = []byte(result)
 
 	return resultSlice, nil
+}
+
+func (formatter *customJSONFormatter) getFuncName() string {
+	pc, _, _, ok := runtime.Caller(6)
+	if !ok {
+		panic("Could not get context info for logger!")
+	}
+	funcPath := runtime.FuncForPC(pc).Name()
+
+	funcName := funcPath[strings.LastIndex(funcPath, ".")+1:]
+
+	//handle go func called inside of a function
+	/*
+		for example, we have a func Example() and inside of it, we have a go func() without a name, the it will output funcname as func1, with this handle, it will
+		output func name as Example.func1
+	*/
+	if strings.Contains(funcName, "func") {
+		funcBefore := funcPath[:strings.LastIndex(funcPath, ".")]
+		funcName = funcPath[strings.LastIndex(funcBefore, ".")+1:]
+	}
+	return funcName
 }

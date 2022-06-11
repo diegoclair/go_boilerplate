@@ -22,13 +22,13 @@ func newTransferService(svc *Service) TransferService {
 func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Transfer) (err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("CreateTransfer: Process Started")
-	defer log.Info("CreateTransfer: Process Finished")
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
 
 	loggedAccountUUID := ctx.Value(auth.AccountUUIDKey)
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID.(string))
 	if err != nil {
-		log.Error("CreateTransfer: ", err)
+		log.Error(err)
 		return err
 	}
 
@@ -38,7 +38,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 
 	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
-		log.Error("CreateTransfer: ", err)
+		log.Error(err)
 		return err
 	}
 
@@ -48,34 +48,34 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 
 	tx, err := s.svc.dm.Begin()
 	if err != nil {
-		log.Error("CreateTransfer: error to get db transaction", err)
+		log.Error("error to get db transaction", err)
 		return err
 	}
 	defer tx.Rollback()
 
 	err = tx.Account().AddTransfer(ctx, transfer)
 	if err != nil {
-		log.Error("CreateTransfer: ", err)
+		log.Error(err)
 		return err
 	}
 
 	account.Balance -= transfer.Amount
 	err = tx.Account().UpdateAccountBalance(ctx, account)
 	if err != nil {
-		log.Error("CreateTransfer: ", err)
+		log.Error(err)
 		return err
 	}
 
 	destAccount.Balance += transfer.Amount
 	err = tx.Account().UpdateAccountBalance(ctx, destAccount)
 	if err != nil {
-		log.Error("CreateTransfer: ", err)
+		log.Error(err)
 		return err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		log.Error("CreateTransfer: ", err)
+		log.Error(err)
 		return err
 	}
 
@@ -85,27 +85,27 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.Transfer, err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("GetTransfers: Process Started")
-	defer log.Info("GetTransfers: Process Finished")
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
 
 	loggedAccountUUID := ctx.Value(auth.AccountUUIDKey)
 
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID.(string))
 	if err != nil {
-		log.Error("GetTransfers: ", err)
+		log.Error(err)
 		return transfers, err
 	}
 
 	trasnfersMade, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, true)
 	if err != nil {
-		log.Error("GetTransfers: ", err)
+		log.Error(err)
 		return transfers, err
 	}
 	transfers = append(transfers, trasnfersMade...)
 
 	trasnfersReceived, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
 	if err != nil {
-		log.Error("GetTransfers: ", err)
+		log.Error(err)
 		return transfers, err
 	}
 	transfers = append(transfers, trasnfersReceived...)

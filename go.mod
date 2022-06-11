@@ -7,12 +7,12 @@ require (
 	github.com/IQ-tech/go-crypto-layer v1.1.0
 	github.com/IQ-tech/go-mapper v1.0.5
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/diegoclair/go_utils-lib/v2 v2.4.5
-	github.com/diegoclair/go-boilerplate v0.0.0-20220531024146-36e35dde58a6
+	github.com/diegoclair/go_utils-lib/v2 v2.4.6
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.6.0
 	github.com/labstack/gommon v0.3.0
+	github.com/mattn/go-colorable v0.1.8
 	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
 	github.com/o1egl/paseto v1.0.0
 	github.com/sirupsen/logrus v1.8.1
@@ -24,21 +24,13 @@ require (
 )
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/IQ-tech/go-errors v0.1.0 // indirect
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/aead/chacha20poly1305 v0.0.0-20170617001512-233f39982aeb // indirect
 	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect
-	github.com/cznic/b v0.0.0-20180115125044-35e9bbe41f07 // indirect
-	github.com/cznic/fileutil v0.0.0-20180108211300-6a051e75936f // indirect
-	github.com/cznic/golex v0.0.0-20170803123110-4ab7c5e190e4 // indirect
-	github.com/cznic/internal v0.0.0-20180608152220-f44710a21d00 // indirect
-	github.com/cznic/lldb v1.1.0 // indirect
-	github.com/cznic/mathutil v0.0.0-20180504122225-ca4c9f2c1369 // indirect
-	github.com/cznic/sortutil v0.0.0-20150617083342-4c7342852e65 // indirect
-	github.com/cznic/strutil v0.0.0-20171016134553-529a34b1c186 // indirect
-	github.com/cznic/zappy v0.0.0-20160723133515-2533cb5b45cc // indirect
+	github.com/cznic/ql v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
@@ -46,7 +38,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/myesui/uuid v1.0.0 // indirect

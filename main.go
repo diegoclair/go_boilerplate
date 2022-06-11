@@ -49,7 +49,7 @@ func main() {
 		log.Fatalf("Error to connect dataManager repositories: %v", err)
 	}
 
-	log.Printf("Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
+	log.Info("Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
 	cache, err := cache.Instance(cfg.Cache.Redis, log)
 	if err != nil {
 		log.Fatal("Error connecting to cache server:", err)

@@ -7,7 +7,6 @@
 
 # Tools
 .vscode
-myapp
 
 # Test binary, built with `go test -c`
 *.test
@@ -17,3 +16,7 @@ myapp
 
 .docker/dbdata
 .docker/cachedata
+
+# binaries
+myapp
+go-boilerplate

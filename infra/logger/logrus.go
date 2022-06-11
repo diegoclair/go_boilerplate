@@ -27,7 +27,7 @@ func newLogrusLogger(cfg config.LogConfig) Logger {
 		logrus.SetOutput(file)
 	}
 
-	logrus.SetFormatter(&coloredJSONFormatter{cfg: cfg})
+	logrus.SetFormatter(&customJSONFormatter{cfg: cfg})
 
 	hostname, err := os.Hostname()
 	if err != nil {
