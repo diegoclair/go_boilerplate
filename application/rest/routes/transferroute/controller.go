@@ -37,7 +37,7 @@ func (s *Controller) handleAddTransfer(c echo.Context) error {
 	input := viewmodel.Transfer{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	err = input.Validate()
