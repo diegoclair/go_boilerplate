@@ -62,7 +62,7 @@ func TestGetAccounts(t *testing.T) {
 	require.NotEmpty(t, accounts)
 
 	require.LessOrEqual(t, 1, len(accounts))
-	require.Equal(t, int64(1), totalRecords)
+	require.NotZero(t, totalRecords)
 
 	require.Equal(t, float64(0), accounts[0].Balance)
 	require.NotEmpty(t, accounts[0].UUID)
