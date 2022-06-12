@@ -13,7 +13,7 @@ import (
 type Service struct {
 	dm     contract.DataManager
 	cfg    *config.Config
-	cipher datacrypto.Crypto
+	cipher datacrypto.Crypto //TODO: remove chiper processes
 	cache  contract.CacheManager
 	log    logger.Logger
 }

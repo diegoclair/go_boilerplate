@@ -33,7 +33,6 @@ func (a *jwtAuth) CreateRefreshToken(accountUUID string) (string, *tokenPayload,
 	return a.createToken(accountUUID, refreshTokenDurationTime)
 }
 
-//TODO: Checar se podemos passar o log para cá
 func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)

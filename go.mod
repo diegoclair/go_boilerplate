@@ -10,9 +10,9 @@ require (
 	github.com/diegoclair/go_utils-lib/v2 v2.4.6
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang/mock v1.6.0
 	github.com/labstack/echo/v4 v4.6.0
 	github.com/labstack/gommon v0.3.0
-	github.com/mattn/go-colorable v0.1.8
 	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
 	github.com/o1egl/paseto v1.0.0
 	github.com/sirupsen/logrus v1.8.1
@@ -38,6 +38,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
+	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/myesui/uuid v1.0.0 // indirect
