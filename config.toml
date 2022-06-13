@@ -25,7 +25,6 @@ port = "5000"
   host = "localhost"
   port = 3306
   db-name = "boiler_db"
-  cryptoKey = "2q59xev6bWhm"
   max-life-in-minutes = 1
   max-idle-connections = 5
   max-open-connections = 100

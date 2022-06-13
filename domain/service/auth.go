@@ -29,13 +29,7 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 	log.Info("Process Started")
 	defer log.Info("Process Finished")
 
-	encryptedDocumentNumber, err := s.svc.cipher.Encrypt(cpf)
-	if err != nil {
-		log.Error(err)
-		return account, err
-	}
-
-	account, err = s.svc.dm.Account().GetAccountByDocument(ctx, encryptedDocumentNumber)
+	account, err = s.svc.dm.Account().GetAccountByDocument(ctx, cpf)
 	if err != nil {
 		log.Error(err)
 		return account, resterrors.NewUnauthorizedError(wrongLogin)

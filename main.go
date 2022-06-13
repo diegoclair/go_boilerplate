@@ -18,7 +18,6 @@ package main
 import (
 	"log"
 
-	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/go-boilerplate/application/factory"
 	"github.com/diegoclair/go-boilerplate/application/rest"
 	"github.com/diegoclair/go-boilerplate/domain/service"
@@ -37,7 +36,6 @@ func main() {
 	}
 
 	log := logger.New(*cfg)
-	cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.DB.MySQL.CryptoKey)
 
 	authToken, err := auth.NewAuthToken(cfg.App.Auth)
 	if err != nil {
@@ -55,7 +53,7 @@ func main() {
 		log.Fatal("Error connecting to cache server:", err)
 	}
 
-	svc := service.New(data, cfg, cache, cipher, log)
+	svc := service.New(data, cfg, cache, log)
 	svm := service.NewServiceManager()
 
 	services, err := factory.GetServices(svc, svm)

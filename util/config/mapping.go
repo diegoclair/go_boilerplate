@@ -37,7 +37,6 @@ type MySQLConfig struct {
 	Host               string `mapstructure:"host"`
 	Port               string `mapstructure:"port"`
 	DBName             string `mapstructure:"db-name"`
-	CryptoKey          string `mapstructure:"crypto-key"`
 	MaxLifeInMinutes   int    `mapstructure:"max-life-in-minutes"`
 	MaxIdleConnections int    `mapstructure:"max-idle-connections"`
 	MaxOpenConnections int    `mapstructure:"max-open-connections"`

@@ -4,7 +4,6 @@ import (
 	"log"
 	"testing"
 
-	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/infra/logger"
 	"github.com/diegoclair/go-boilerplate/mock"
@@ -42,9 +41,8 @@ func newServiceMock(t *testing.T) (mocks, *Service) {
 	}
 
 	serviceSetup.dataManagerMock = newDataMock(serviceSetup.ctrl, serviceSetup.mocks.mar)
-	cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.DB.MySQL.CryptoKey)
 
-	svc := New(serviceSetup.dataManagerMock, cfg, serviceSetup.mocks.mcm, cipher, serviceSetup.log)
+	svc := New(serviceSetup.dataManagerMock, cfg, serviceSetup.mocks.mcm, serviceSetup.log)
 
 	return serviceSetup.mocks, svc
 }

@@ -12,7 +12,7 @@ var (
 				CREATE TABLE IF NOT EXISTS tab_account (
 					account_id INT NOT NULL AUTO_INCREMENT,
 					account_uuid CHAR(36) NOT NULL,
-					cpf VARBINARY(16) NOT NULL,
+					cpf VARCHAR(11) NOT NULL,
 					name VARCHAR(450) NOT NULL,
 					secret VARCHAR(200) NOT NULL,
 					balance DECIMAL(7,2) NULL DEFAULT 0.00,

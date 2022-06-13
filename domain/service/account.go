@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/util/crypto"
@@ -26,12 +25,6 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("Process Started")
 	defer log.Info("Process Finished")
-
-	account.CPF, err = s.svc.cipher.Encrypt(account.CPF)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
 
 	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
 	if err != nil && !utilerrors.SQLNotFound(err.Error()) {
@@ -89,16 +82,7 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 		return accounts, totalRecords, err
 	}
 
-	for i := 0; i < len(accounts); i++ {
-		//TODO: check if I'll remove this or update the test to encrypt before create account
-		//if I remove the cipher and now I will save the document as string, I need to change the database cpf field type
-		fmt.Println(i)
-		// _, err = s.svc.cipher.DecryptStruct(&accounts[i])
-		// if err != nil {
-		// 	log.Error("GetAccounts: error to decrypt account struct: ", err)
-		// 	return accounts, err
-		// }
-	}
+	log.Infof("Found %d accounts", totalRecords)
 
 	return accounts, totalRecords, nil
 }
@@ -106,18 +90,12 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started")
-	defer log.Info("Process Finished")
+	log.Info("Process Started with accountUUID: ", accountUUID)
+	defer log.Info("Process Finished for accountUUID: ", accountUUID)
 
 	account, err = s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
 		log.Error(err)
-		return account, err
-	}
-
-	_, err = s.svc.cipher.DecryptStruct(&account)
-	if err != nil {
-		log.Error("error to decrypt account struct: ", err)
 		return account, err
 	}
 

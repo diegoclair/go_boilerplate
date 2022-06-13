@@ -48,8 +48,6 @@ github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20O
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244 h1:dqzm54OhCqY8RinR/cx+Ppb0y56Ds5I3wwWhx4XybDg=
 github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244/go.mod h1:3sqgkckuISJ5rs1EpOp6vCvwOUKe/z9vPmyuIlq8Q/A=
-github.com/IQ-tech/go-crypto-layer v1.1.0 h1:QXM630hqRCQEDzGsGHJ3PhOFIX71GyIVXKY8G3zyt/s=
-github.com/IQ-tech/go-crypto-layer v1.1.0/go.mod h1:6OtR+Bwb90P/Un4nCj50YNgaaeOIyoh/U1NSsr6iUG8=
 github.com/IQ-tech/go-errors v0.1.0 h1:C320GMu9xuiqNnjuOle/FeNWjndvH8nZTpOCDej/ybU=
 github.com/IQ-tech/go-errors v0.1.0/go.mod h1:qgv1mXc6/4Tq7Zln30l/BrZjvTpzBNB40nPh55xr4V4=
 github.com/IQ-tech/go-mapper v1.0.5 h1:h/Srshcq8Hys0AG4T7j5u4QL719H7DWXQyDJ68XHqug=

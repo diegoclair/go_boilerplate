@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/go-boilerplate/domain/contract"
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/infra/logger"
@@ -11,19 +10,17 @@ import (
 )
 
 type Service struct {
-	dm     contract.DataManager
-	cfg    *config.Config
-	cipher datacrypto.Crypto //TODO: remove chiper processes
-	cache  contract.CacheManager
-	log    logger.Logger
+	dm    contract.DataManager
+	cfg   *config.Config
+	cache contract.CacheManager
+	log   logger.Logger
 }
 
-func New(dm contract.DataManager, cfg *config.Config, cache contract.CacheManager, cipher datacrypto.Crypto, log logger.Logger) *Service {
+func New(dm contract.DataManager, cfg *config.Config, cache contract.CacheManager, log logger.Logger) *Service {
 	svc := new(Service)
 	svc.dm = dm
 	svc.cfg = cfg
 	svc.cache = cache
-	svc.cipher = cipher
 	svc.log = log
 
 	return svc
