@@ -10,12 +10,18 @@ import (
 type DataManager interface {
 	Begin() (Transaction, error)
 	Account() AccountRepo
+	Auth() AuthRepo
 }
 
 type Transaction interface {
 	DataManager
 	Rollback() error
 	Commit() error
+}
+
+type AuthRepo interface {
+	CreateSession(ctx context.Context, session entity.Session) (err error)
+	GetSessionByUUID(ctx context.Context, sessionUUID string) (session entity.Session, err error)
 }
 
 //TODO: check if transfer should go to a transfer repo

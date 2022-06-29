@@ -48,8 +48,9 @@ func newServiceMock(t *testing.T) (mocks, *Service) {
 }
 
 type dataMock struct {
-	ctrl *gomock.Controller
-	mar  *mock.MockAccountRepo
+	ctrl   *gomock.Controller
+	mar    *mock.MockAccountRepo
+	mauthr *mock.MockAuthRepo
 }
 
 func newDataMock(ctrl *gomock.Controller, mar *mock.MockAccountRepo) contract.DataManager {
@@ -65,4 +66,8 @@ func (d *dataMock) Begin() (contract.Transaction, error) {
 
 func (d *dataMock) Account() contract.AccountRepo {
 	return d.mar
+}
+
+func (d *dataMock) Auth() contract.AuthRepo {
+	return d.mauthr
 }

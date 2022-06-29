@@ -117,6 +117,35 @@ func (m *MockAuthService) EXPECT() *MockAuthServiceMockRecorder {
 	return m.recorder
 }
 
+// CreateSession mocks base method.
+func (m *MockAuthService) CreateSession(arg0 context.Context, arg1 entity.Session) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSession", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateSession indicates an expected call of CreateSession.
+func (mr *MockAuthServiceMockRecorder) CreateSession(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockAuthService)(nil).CreateSession), arg0, arg1)
+}
+
+// GetSessionByUUID mocks base method.
+func (m *MockAuthService) GetSessionByUUID(arg0 context.Context, arg1 string) (entity.Session, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSessionByUUID", arg0, arg1)
+	ret0, _ := ret[0].(entity.Session)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSessionByUUID indicates an expected call of GetSessionByUUID.
+func (mr *MockAuthServiceMockRecorder) GetSessionByUUID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionByUUID", reflect.TypeOf((*MockAuthService)(nil).GetSessionByUUID), arg0, arg1)
+}
+
 // Login mocks base method.
 func (m *MockAuthService) Login(arg0 context.Context, arg1, arg2 string) (entity.Account, error) {
 	m.ctrl.T.Helper()

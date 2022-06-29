@@ -44,6 +44,8 @@ type AccountService interface {
 
 type AuthService interface {
 	Login(ctx context.Context, cpf, secret string) (account entity.Account, err error)
+	CreateSession(ctx context.Context, session entity.Session) (err error)
+	GetSessionByUUID(ctx context.Context, sessionUUID string) (session entity.Session, err error)
 }
 
 type TransferService interface {

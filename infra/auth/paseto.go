@@ -27,12 +27,12 @@ func newPasetoAuth(symmetricKey string) (AuthToken, error) {
 	}, nil
 }
 
-func (a *pasetoAuth) CreateToken(accountUUID string) (string, *tokenPayload, error) {
-	return a.createToken(accountUUID, accessTokenDurationTime)
+func (a *pasetoAuth) CreateAccessToken(accountUUID, sessionUUID string) (string, *tokenPayload, error) {
+	return a.createToken(accountUUID, sessionUUID, accessTokenDurationTime)
 }
 
-func (a *pasetoAuth) CreateRefreshToken(accountUUID string) (string, *tokenPayload, error) {
-	return a.createToken(accountUUID, refreshTokenDurationTime)
+func (a *pasetoAuth) CreateRefreshToken(accountUUID, sessionUUID string) (string, *tokenPayload, error) {
+	return a.createToken(accountUUID, sessionUUID, refreshTokenDurationTime)
 }
 
 func (a *pasetoAuth) VerifyToken(token string) (*tokenPayload, error) {
@@ -47,8 +47,8 @@ func (a *pasetoAuth) VerifyToken(token string) (*tokenPayload, error) {
 	return payload, payload.Valid()
 }
 
-func (a *pasetoAuth) createToken(accountUUID string, duration time.Duration) (string, *tokenPayload, error) {
-	payload := newPayload(accountUUID, duration)
+func (a *pasetoAuth) createToken(accountUUID, sessionUUID string, duration time.Duration) (string, *tokenPayload, error) {
+	payload := newPayload(accountUUID, sessionUUID, duration)
 	token, err := a.paseto.Encrypt(a.symmetricKey, payload, nil)
 	if err != nil {
 		log.Error("createToken: error to encrypt token: ", err)

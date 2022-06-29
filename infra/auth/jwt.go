@@ -25,12 +25,12 @@ func newJwtAuth(jwtPrivateKey string) (AuthToken, error) {
 	}, nil
 }
 
-func (a *jwtAuth) CreateToken(accountUUID string) (string, *tokenPayload, error) {
-	return a.createToken(accountUUID, accessTokenDurationTime)
+func (a *jwtAuth) CreateAccessToken(accountUUID, sessionUUID string) (string, *tokenPayload, error) {
+	return a.createToken(accountUUID, sessionUUID, accessTokenDurationTime)
 }
 
-func (a *jwtAuth) CreateRefreshToken(accountUUID string) (string, *tokenPayload, error) {
-	return a.createToken(accountUUID, refreshTokenDurationTime)
+func (a *jwtAuth) CreateRefreshToken(accountUUID, sessionUUID string) (string, *tokenPayload, error) {
+	return a.createToken(accountUUID, sessionUUID, refreshTokenDurationTime)
 }
 
 func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
@@ -60,9 +60,9 @@ func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 	return payload, nil
 }
 
-func (a *jwtAuth) createToken(accountUUID string, duration time.Duration) (string, *tokenPayload, error) {
+func (a *jwtAuth) createToken(accountUUID, sessionUUID string, duration time.Duration) (string, *tokenPayload, error) {
 	key := []byte(a.jwtPrivateKey)
-	payload := newPayload(accountUUID, duration)
+	payload := newPayload(accountUUID, sessionUUID, duration)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	tokenString, err := token.SignedString(key)

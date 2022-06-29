@@ -10,12 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetContext returns a fulled appcontext
-func GetContext(ctx echo.Context) (appContext context.Context) {
-	appContext = context.Background()
-	appContext = context.WithValue(appContext, auth.AccountUUIDKey, ctx.Get(auth.AccountUUIDKey.String()))
-	appContext = context.WithValue(appContext, auth.SessionKey, ctx.Get(auth.SessionKey.String()))
-	return appContext
+// GetContext returns a fulled ctx
+func GetContext(c echo.Context) (ctx context.Context) {
+	ctx = context.Background()
+	ctx = context.WithValue(ctx, auth.AccountUUIDKey, c.Get(auth.AccountUUIDKey.String()))
+	ctx = context.WithValue(ctx, auth.SessionKey, c.Get(auth.SessionKey.String()))
+	return ctx
 }
 
 // GetAndValidateParam gets the param value and validates it, returning a validation error in case it's invalid

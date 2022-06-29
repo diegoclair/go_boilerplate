@@ -50,3 +50,33 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 
 	return account, nil
 }
+
+func (s *authService) CreateSession(ctx context.Context, session entity.Session) (err error) {
+
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
+
+	err = s.svc.dm.Auth().CreateSession(ctx, session)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *authService) GetSessionByUUID(ctx context.Context, sessionUUID string) (session entity.Session, err error) {
+
+	ctx, log := s.svc.log.NewSessionLogger(ctx)
+	log.Info("Process Started")
+	defer log.Info("Process Finished")
+
+	session, err = s.svc.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
+	if err != nil {
+		log.Error(err)
+		return session, err
+	}
+
+	return session, nil
+}

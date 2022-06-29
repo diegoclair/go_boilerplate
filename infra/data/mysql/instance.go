@@ -102,3 +102,7 @@ func (c *mysqlConn) Close() (err error) {
 func (c *mysqlConn) Account() contract.AccountRepo {
 	return newAccountRepo(c.db)
 }
+
+func (c *mysqlConn) Auth() contract.AuthRepo {
+	return newAuthRepo(c.db)
+}

@@ -52,3 +52,7 @@ func (t *mysqlTransaction) Rollback() error {
 func (t *mysqlTransaction) Account() contract.AccountRepo {
 	return newAccountRepo(t.tx)
 }
+
+func (t *mysqlTransaction) Auth() contract.AuthRepo {
+	return newAuthRepo(t.tx)
+}

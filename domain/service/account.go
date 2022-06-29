@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/util/crypto"
@@ -82,7 +83,7 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 		return accounts, totalRecords, err
 	}
 
-	log.Infof("Found %d accounts", totalRecords)
+	log.Info(fmt.Sprintf("Found %d accounts", totalRecords))
 
 	return accounts, totalRecords, nil
 }

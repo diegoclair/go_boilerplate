@@ -1,13 +1,17 @@
 package authroute
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go-boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go-boilerplate/application/rest/viewmodel"
+	"github.com/diegoclair/go-boilerplate/domain/entity"
 	"github.com/diegoclair/go-boilerplate/domain/service"
 	"github.com/diegoclair/go-boilerplate/infra/auth"
+	"github.com/twinj/uuid"
 
 	"github.com/labstack/echo/v4"
 )
@@ -53,21 +57,36 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	token, tokenPayload, err := s.authToken.CreateToken(account.UUID)
+	sessionUUID := uuid.NewV4().String()
+	token, tokenPayload, err := s.authToken.CreateAccessToken(account.UUID, sessionUUID)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(account.UUID)
+	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(account.UUID, sessionUUID)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	sessionReq := entity.Session{
+		SessionUUID:           sessionUUID,
+		AccountID:             account.ID,
+		RefreshToken:          refreshToken,
+		UserAgent:             c.Request().UserAgent(),
+		ClientIP:              c.RealIP(),
+		RefreshTokenExpiredAt: refreshTokenPayload.ExpiredAt,
+	}
+
+	err = s.authService.CreateSession(ctx, sessionReq)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
 
 	response := viewmodel.LoginResponse{
 		AccessToken:           token,
-		AccessTokenExpiresAt:  tokenPayload.ExpiredAt.Unix(),
+		AccessTokenExpiresAt:  tokenPayload.ExpiredAt,
 		RefreshToken:          refreshToken,
-		RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt.Unix(),
+		RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt,
 	}
 
 	return routeutils.ResponseAPIOK(c, response)
@@ -75,7 +94,8 @@ func (s *Controller) handleLogin(c echo.Context) error {
 
 func (s *Controller) handleRefreshToken(c echo.Context) error {
 
-	//TODO: login retorna expires_at de uma forma e aqui está retornando de outra
+	ctx := routeutils.GetContext(c)
+
 	input := viewmodel.RefreshTokenRequest{}
 	err := c.Bind(&input)
 	if err != nil {
@@ -91,35 +111,22 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	//TODO: handle session here
-	// session, err := s.store.GetSession(ctx, refreshPayload.ID)
-	// if err != nil {
-	// 	if err == sql.ErrNoRows {
-	// 		ctx.JSON(http.StatusNotFound, errorResponse(err))
-	// 		return
-	// 	}
-	// 	ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-	// 	return
-	// }
-	// if session.IsBlocked {
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("blocked session")))
-	// 	return
-	// }
-	// if session.Username != refreshPayload.Username {
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("incorrect session user")))
-	// 	return
-	// }
+	session, err := s.authService.GetSessionByUUID(ctx, refreshPayload.SessionUUID)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
 
-	// if session.RefreshToken != input.RefreshToken {
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("mismatched session token")))
-	// 	return
-	// }
-	// if time.Now().After(session.ExpiresAt) {
-	// 	ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("expired session")))
-	// 	return
-	// }
+	if session.IsBlocked {
+		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("blocked session"))
+	}
+	if session.RefreshToken != input.RefreshToken {
+		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("mismatched session token"))
+	}
+	if time.Now().After(session.RefreshTokenExpiredAt) {
+		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
+	}
 
-	accessToken, accessPayload, err := s.authToken.CreateToken(refreshPayload.AccountUUID)
+	accessToken, accessPayload, err := s.authToken.CreateAccessToken(refreshPayload.AccountUUID, refreshPayload.SessionUUID)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}

@@ -1,15 +1,14 @@
 package entity
 
-import "github.com/dgrijalva/jwt-go"
+import "time"
 
-// Authentication data model
-type Authentication struct {
-	Token      string
-	ValidTime  int64
-	ServerTime int64
-}
-
-type TokenData struct {
-	jwt.StandardClaims
-	AccountUUID string
+type Session struct {
+	SessionID             int64
+	SessionUUID           string
+	AccountID             int64
+	RefreshToken          string
+	UserAgent             string
+	ClientIP              string
+	IsBlocked             bool
+	RefreshTokenExpiredAt time.Time
 }

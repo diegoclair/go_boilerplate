@@ -5,20 +5,19 @@ import (
 
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/gommon/log"
-	"github.com/twinj/uuid"
 )
 
 type tokenPayload struct {
-	ID          uuid.UUID `json:"id"`
-	AccountUUID string    `json:"account_uuid"`
-	SessionUUID string    `json:"session_uuid"`
-	IssuedAt    time.Time `json:"issued_at"`
-	ExpiredAt   time.Time `json:"expired_at"`
+	AccountUUID  string
+	SessionUUID  string
+	RefreshToken string
+	IssuedAt     time.Time
+	ExpiredAt    time.Time
 }
 
-func newPayload(accountUUID string, duration time.Duration) *tokenPayload {
+func newPayload(accountUUID, sessionUUID string, duration time.Duration) *tokenPayload {
 	return &tokenPayload{
-		ID:          uuid.NewV4(),
+		SessionUUID: sessionUUID,
 		AccountUUID: accountUUID,
 		IssuedAt:    time.Now(),
 		ExpiredAt:   time.Now().Add(duration),

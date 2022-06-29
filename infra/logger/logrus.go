@@ -60,11 +60,9 @@ type LogrusLogger struct {
 // NewSessionLogger returns an instance of log with session code field
 func (l *LogrusLogger) NewSessionLogger(ctx context.Context) (context.Context, Logger) {
 
-	var instance Logger
 	sessionCode := ctx.Value(auth.SessionKey)
 	if sessionCode == nil {
-		instance = newLogrusLogger(l.cfg)
-		return ctx, instance
+		return ctx, newLogrusLogger(l.cfg)
 	}
 
 	var sessionCodeKey = "logger-" + sessionCode.(string)
@@ -73,6 +71,7 @@ func (l *LogrusLogger) NewSessionLogger(ctx context.Context) (context.Context, L
 		return ctx, vl.(Logger)
 	}
 
+	instance := newLogrusLogger(l.cfg)
 	instance = instance.WithFields(map[string]interface{}{
 		"session_code": sessionCode.(string),
 	})

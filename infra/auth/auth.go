@@ -8,8 +8,8 @@ import (
 )
 
 type AuthToken interface {
-	CreateToken(accountUUID string) (string, *tokenPayload, error)
-	CreateRefreshToken(accountUUID string) (string, *tokenPayload, error)
+	CreateAccessToken(accountUUID, sessionUUID string) (string, *tokenPayload, error)
+	CreateRefreshToken(accountUUID, sessionUUID string) (string, *tokenPayload, error)
 	VerifyToken(token string) (*tokenPayload, error)
 }
 

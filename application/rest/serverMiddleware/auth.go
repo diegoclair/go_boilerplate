@@ -27,9 +27,9 @@ func AuthMiddlewarePrivateRoute(authToken auth.AuthToken) echo.MiddlewareFunc {
 				return echo.NewHTTPError(http.StatusUnauthorized, err)
 			}
 
-			//TODO: add session here too
-			// Add information to context
+			// Add information to the echo context
 			ctx.Set(auth.AccountUUIDKey.String(), payload.AccountUUID)
+			ctx.Set(auth.SessionKey.String(), payload.SessionUUID)
 
 			return next(ctx)
 		}
