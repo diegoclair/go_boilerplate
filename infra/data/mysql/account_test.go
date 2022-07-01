@@ -56,8 +56,16 @@ func TestGetAccountByDocument(t *testing.T) {
 
 func TestGetAccounts(t *testing.T) {
 	createRandomAccount(t)
+	createRandomAccount(t)
 
 	accounts, totalRecords, err := testMysql.Account().GetAccounts(context.Background(), 10, 0)
+	require.NoError(t, err)
+	require.NotEmpty(t, accounts)
+
+	require.LessOrEqual(t, 2, len(accounts))
+	require.NotZero(t, totalRecords)
+
+	accounts, totalRecords, err = testMysql.Account().GetAccounts(context.Background(), 10, 1)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
 
@@ -92,6 +100,7 @@ func TestAddTransfer(t *testing.T) {
 		AccountOriginID:      account.ID,
 		AccountDestinationID: account2.ID,
 		TransferUUID:         uuid.NewV4().String(),
+		Amount:               50,
 	}
 	err := testMysql.Account().AddTransfer(context.Background(), args)
 	require.NoError(t, err)
@@ -109,4 +118,41 @@ func TestUpdateBalance(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, balance, updatedAccount.Balance)
+}
+
+func TestGetTransfersByAccountID(t *testing.T) {
+	ctx := context.Background()
+	account := createRandomAccount(t)
+	account2 := createRandomAccount(t)
+	account3 := createRandomAccount(t)
+
+	args := entity.Transfer{
+		AccountOriginID:      account.ID,
+		AccountDestinationID: account2.ID,
+		TransferUUID:         uuid.NewV4().String(),
+		Amount:               50,
+	}
+	err := testMysql.Account().AddTransfer(ctx, args)
+	require.NoError(t, err)
+
+	args = entity.Transfer{
+		AccountOriginID:      account3.ID,
+		AccountDestinationID: account2.ID,
+		TransferUUID:         uuid.NewV4().String(),
+		Amount:               50,
+	}
+	err = testMysql.Account().AddTransfer(ctx, args)
+	require.NoError(t, err)
+
+	origin := true
+	transfersAccount1AsOrigin, err := testMysql.Account().GetTransfersByAccountID(ctx, account.ID, origin)
+	require.NoError(t, err)
+
+	require.Len(t, transfersAccount1AsOrigin, 1)
+
+	origin = false
+	transfersAccount2AsDestination, err := testMysql.Account().GetTransfersByAccountID(ctx, account2.ID, origin)
+	require.NoError(t, err)
+
+	require.Len(t, transfersAccount2AsDestination, 2)
 }
