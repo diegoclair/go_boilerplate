@@ -193,10 +193,12 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 
 func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
-	//TODO: usar params = []interface{}{} igual redsales para receber e passar os parametros em todas as queries
+	var params = []interface{}{}
+
 	query := querySelectBase + `
 		WHERE ta.account_uuid = ?
 	`
+	params = append(params, accountUUID)
 
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -204,7 +206,7 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(accountUUID)
+	row := stmt.QueryRow(params...)
 	account, err = r.parseAccount(row)
 	if err != nil {
 		return account, mysqlutils.HandleMySQLError(err)
@@ -214,6 +216,8 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 }
 
 func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int64, origin bool) (transfers []entity.Transfer, err error) {
+	var params = []interface{}{}
+
 	query := ` 
 		SELECT 
 			tt.transfer_id,
@@ -239,6 +243,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 	} else {
 		query += `WHERE	tt.account_destination_id 	= 	? `
 	}
+	params = append(params, accountID)
 
 	query += `
 		ORDER BY tt.created_at desc
@@ -249,7 +254,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(accountID)
+	rows, err := stmt.Query(params...)
 	if err != nil {
 		return transfers, mysqlutils.HandleMySQLError(err)
 	}
@@ -276,8 +281,9 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 	return transfers, nil
 }
 
-func (r *accountRepo) UpdateAccountBalance(ctx context.Context, account entity.Account) (err error) {
+func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64, balance float64) (err error) {
 
+	var params = []interface{}{}
 	query := `
 		UPDATE 	tab_account
 		
@@ -285,6 +291,7 @@ func (r *accountRepo) UpdateAccountBalance(ctx context.Context, account entity.A
 
 		WHERE  	account_id 	= ?
 	`
+	params = append(params, balance, accountID)
 
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -292,7 +299,7 @@ func (r *accountRepo) UpdateAccountBalance(ctx context.Context, account entity.A
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(account.Balance, account.ID)
+	_, err = stmt.Exec(params...)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
 	}

@@ -32,5 +32,5 @@ type AccountRepo interface {
 	GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error)
 	GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error)
 	GetTransfersByAccountID(ctx context.Context, accountID int64, origin bool) (transfers []entity.Transfer, err error)
-	UpdateAccountBalance(ctx context.Context, account entity.Account) (err error)
+	UpdateAccountBalance(ctx context.Context, accountID int64, balance float64) (err error)
 }

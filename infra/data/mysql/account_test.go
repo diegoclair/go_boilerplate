@@ -96,3 +96,17 @@ func TestAddTransfer(t *testing.T) {
 	err := testMysql.Account().AddTransfer(context.Background(), args)
 	require.NoError(t, err)
 }
+
+func TestUpdateBalance(t *testing.T) {
+	ctx := context.Background()
+	account := createRandomAccount(t)
+
+	var balance float64 = 12
+	err := testMysql.Account().UpdateAccountBalance(ctx, account.ID, balance)
+	require.NoError(t, err)
+
+	updatedAccount, err := testMysql.Account().GetAccountByUUID(ctx, account.UUID)
+	require.NoError(t, err)
+
+	require.Equal(t, balance, updatedAccount.Balance)
+}
