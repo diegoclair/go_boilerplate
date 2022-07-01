@@ -65,6 +65,14 @@ func TestGetAccounts(t *testing.T) {
 	require.LessOrEqual(t, 2, len(accounts))
 	require.NotZero(t, totalRecords)
 
+	require.Equal(t, float64(0), accounts[0].Balance)
+	require.NotEmpty(t, accounts[0].UUID)
+	require.NotEmpty(t, accounts[0].Name)
+	require.NotEmpty(t, accounts[0].CPF)
+	require.NotEmpty(t, accounts[0].Secret)
+	require.NotZero(t, accounts[0].ID)
+	require.NotZero(t, accounts[0].CreatedAT)
+
 	accounts, totalRecords, err = testMysql.Account().GetAccounts(context.Background(), 10, 1)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
