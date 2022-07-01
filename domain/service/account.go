@@ -48,7 +48,7 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 	return nil
 }
 
-//TODO: search about floating point
+//TODO: fix floating point
 func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amount float64) (err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
@@ -60,9 +60,9 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 		log.Error("error to get account", err)
 		return err
 	}
-	account.Balance += amount
+	balance := account.Balance + amount
 
-	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account)
+	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account.ID, balance)
 	if err != nil {
 		log.Error("error to update account balance", err)
 		return err

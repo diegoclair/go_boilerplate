@@ -286,17 +286,17 @@ func (mr *MockAccountRepoMockRecorder) GetTransfersByAccountID(arg0, arg1, arg2 
 }
 
 // UpdateAccountBalance mocks base method.
-func (m *MockAccountRepo) UpdateAccountBalance(arg0 context.Context, arg1 entity.Account) error {
+func (m *MockAccountRepo) UpdateAccountBalance(arg0 context.Context, arg1 int64, arg2 float64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAccountBalance", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateAccountBalance", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateAccountBalance indicates an expected call of UpdateAccountBalance.
-func (mr *MockAccountRepoMockRecorder) UpdateAccountBalance(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockAccountRepoMockRecorder) UpdateAccountBalance(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccountBalance", reflect.TypeOf((*MockAccountRepo)(nil).UpdateAccountBalance), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccountBalance", reflect.TypeOf((*MockAccountRepo)(nil).UpdateAccountBalance), arg0, arg1, arg2)
 }
 
 // MockAuthRepo is a mock of AuthRepo interface.

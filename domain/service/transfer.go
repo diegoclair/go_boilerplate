@@ -59,15 +59,15 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 		return err
 	}
 
-	account.Balance -= transfer.Amount
-	err = tx.Account().UpdateAccountBalance(ctx, account)
+	originBalance := account.Balance - transfer.Amount
+	err = tx.Account().UpdateAccountBalance(ctx, account.ID, originBalance)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	destAccount.Balance += transfer.Amount
-	err = tx.Account().UpdateAccountBalance(ctx, destAccount)
+	destBalance := destAccount.Balance + transfer.Amount
+	err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destBalance)
 	if err != nil {
 		log.Error(err)
 		return err
