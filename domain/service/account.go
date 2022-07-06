@@ -36,7 +36,11 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 		return resterrors.NewConflictError("The cpf is already in use")
 	}
 
-	account.Secret = crypto.GetMd5(account.Secret)
+	account.Secret, err = crypto.HashPassword(account.Secret)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
 	account.UUID = uuid.NewV4().String()
 
 	err = s.svc.dm.Account().CreateAccount(ctx, account)

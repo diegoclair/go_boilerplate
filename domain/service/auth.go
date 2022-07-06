@@ -2,10 +2,9 @@ package service
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 
 	"github.com/diegoclair/go-boilerplate/domain/entity"
+	"github.com/diegoclair/go-boilerplate/util/crypto"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 )
 
@@ -39,11 +38,8 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 	log.Info("account_uuid: ", account.UUID)
 	log.Info("name: ", account.Name)
 
-	hasher := md5.New()
-	hasher.Write([]byte(secret))
-	pass := hex.EncodeToString(hasher.Sum(nil))
-
-	if pass != account.Secret {
+	err = crypto.CheckPassword(secret, account.Secret)
+	if err != nil {
 		log.Error("wrong password")
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}

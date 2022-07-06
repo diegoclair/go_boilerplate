@@ -42,7 +42,6 @@ const (
 	SessionKey      Key = "Session"
 )
 
-//TODO: add token generation with paseto instead of jwt and add session key as token payload
 func NewAuthToken(cfg config.AuthConfig) (AuthToken, error) {
 	accessTokenDurationTime = cfg.AccessTokenDuration
 	refreshTokenDurationTime = cfg.RefreshTokenDuration
