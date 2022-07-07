@@ -52,6 +52,7 @@ services:
     networks:
       - app-network
 
+#TODO: add volumes of grafana and prometheus to save data as we have for db and redis for example
   prometheus:
     image: prom/prometheus
     container_name: prometheus
