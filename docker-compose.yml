@@ -51,7 +51,31 @@ services:
       - MYSQL_PASSWORD=root
     networks:
       - app-network
-    
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    depends_on: 
+      - cadvisor
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+        - app-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    container_name: grafana
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+   
 networks:
   app-network:
     driver: bridge
