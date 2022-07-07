@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go-boilerplate/domain/entity"
-	"github.com/diegoclair/go-boilerplate/util/crypto"
-	"github.com/diegoclair/go-boilerplate/util/random"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/util/crypto"
+	"github.com/diegoclair/go_boilerplate/util/random"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
 )

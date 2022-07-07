@@ -2,7 +2,7 @@ package factory
 
 import (
 	"github.com/IQ-tech/go-mapper"
-	"github.com/diegoclair/go-boilerplate/domain/service"
+	"github.com/diegoclair/go_boilerplate/domain/service"
 )
 
 type Services struct {

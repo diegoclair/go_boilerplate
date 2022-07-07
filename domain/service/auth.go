@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/diegoclair/go-boilerplate/domain/entity"
-	"github.com/diegoclair/go-boilerplate/util/crypto"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 )
 

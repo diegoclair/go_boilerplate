@@ -8,10 +8,10 @@ import (
 
 	"github.com/GuiaBolso/darwin"
 
-	"github.com/diegoclair/go-boilerplate/domain/contract"
-	"github.com/diegoclair/go-boilerplate/infra/data/migrations"
-	"github.com/diegoclair/go-boilerplate/infra/logger"
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/infra/data/migrations"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_boilerplate/util/config"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 

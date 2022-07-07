@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/util/config"
 )
 
 type AuthToken interface {

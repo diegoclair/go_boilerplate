@@ -1,10 +1,10 @@
 package data
 
 import (
-	"github.com/diegoclair/go-boilerplate/domain/contract"
-	"github.com/diegoclair/go-boilerplate/infra/data/mysql"
-	"github.com/diegoclair/go-boilerplate/infra/logger"
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/infra/data/mysql"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_boilerplate/util/config"
 )
 
 // Connect returns a instace of mysql db

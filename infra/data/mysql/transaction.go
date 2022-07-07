@@ -3,7 +3,7 @@ package mysql
 import (
 	"database/sql"
 
-	"github.com/diegoclair/go-boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 )
 
 type mysqlTransaction struct {

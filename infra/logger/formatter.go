@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/util/config"
 	"github.com/labstack/gommon/color"
 	"github.com/sirupsen/logrus"
 )

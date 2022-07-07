@@ -3,15 +3,16 @@ package rest
 import (
 	"fmt"
 
-	"github.com/diegoclair/go-boilerplate/application/factory"
-	"github.com/diegoclair/go-boilerplate/application/rest/routes/accountroute"
-	"github.com/diegoclair/go-boilerplate/application/rest/routes/authroute"
-	"github.com/diegoclair/go-boilerplate/application/rest/routes/pingroute"
-	"github.com/diegoclair/go-boilerplate/application/rest/routes/transferroute"
-	servermiddleware "github.com/diegoclair/go-boilerplate/application/rest/serverMiddleware"
-	"github.com/diegoclair/go-boilerplate/infra/auth"
-	"github.com/diegoclair/go-boilerplate/infra/logger"
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/application/factory"
+	"github.com/diegoclair/go_boilerplate/application/rest/routes/accountroute"
+	"github.com/diegoclair/go_boilerplate/application/rest/routes/authroute"
+	"github.com/diegoclair/go_boilerplate/application/rest/routes/pingroute"
+	"github.com/diegoclair/go_boilerplate/application/rest/routes/transferroute"
+	servermiddleware "github.com/diegoclair/go_boilerplate/application/rest/serverMiddleware"
+	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_boilerplate/util/config"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -24,10 +25,11 @@ type IRouter interface {
 type Server struct {
 	routers []IRouter
 	router  *echo.Echo
+	cfg     *config.Config
 }
 
 func StartRestServer(cfg *config.Config, services *factory.Services, log logger.Logger, authToken auth.AuthToken) {
-	server := newRestServer(services, authToken)
+	server := newRestServer(services, authToken, cfg)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -40,7 +42,7 @@ func StartRestServer(cfg *config.Config, services *factory.Services, log logger.
 	}
 }
 
-func newRestServer(services *factory.Services, authToken auth.AuthToken) *Server {
+func newRestServer(services *factory.Services, authToken auth.AuthToken, cfg *config.Config) *Server {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
@@ -55,12 +57,14 @@ func newRestServer(services *factory.Services, authToken auth.AuthToken) *Server
 	authRoute := authroute.NewRouter(authController, "auth")
 	transferRoute := transferroute.NewRouter(transferController, "transfers")
 
-	server := &Server{router: srv}
+	server := &Server{router: srv, cfg: cfg}
 	server.addRouters(accountRoute)
 	server.addRouters(authRoute)
 	server.addRouters(pingRoute)
 	server.addRouters(transferRoute)
 	server.registerAppRouters(authToken)
+
+	server.setupPrometheus()
 
 	return server
 }
@@ -79,7 +83,12 @@ func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 		appRouter.RegisterRoutes(appGroup, privateGroup)
 	}
 
-	return
+}
+
+func (r *Server) setupPrometheus() {
+
+	p := prometheus.NewPrometheus(r.cfg.App.Name, nil)
+	p.Use(r.router)
 }
 
 func (r *Server) Start(port string) error {

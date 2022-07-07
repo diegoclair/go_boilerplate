@@ -1,5 +1,5 @@
 [app]
-name = "go-boilerplate"
+name = "go_boilerplate"
 environment = "local"
 port = "5000"
 
@@ -32,4 +32,4 @@ port = "5000"
 [log]
 debug = true
 log-to-file = false
-path = "go-boilerplate.log"
+path = "go_boilerplate.log"

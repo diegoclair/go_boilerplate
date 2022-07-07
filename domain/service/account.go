@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/diegoclair/go-boilerplate/domain/entity"
-	"github.com/diegoclair/go-boilerplate/util/crypto"
-	utilerrors "github.com/diegoclair/go-boilerplate/util/errors"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/util/crypto"
+	utilerrors "github.com/diegoclair/go_boilerplate/util/errors"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
 )

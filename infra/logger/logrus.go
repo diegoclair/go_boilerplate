@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/diegoclair/go-boilerplate/infra/auth"
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/util/config"
 	"github.com/sirupsen/logrus"
 )
 

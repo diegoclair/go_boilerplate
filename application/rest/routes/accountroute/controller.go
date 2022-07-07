@@ -4,10 +4,10 @@ import (
 	"sync"
 
 	"github.com/IQ-tech/go-mapper"
-	"github.com/diegoclair/go-boilerplate/application/rest/routeutils"
-	"github.com/diegoclair/go-boilerplate/application/rest/viewmodel"
-	"github.com/diegoclair/go-boilerplate/domain/entity"
-	"github.com/diegoclair/go-boilerplate/domain/service"
+	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
+	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/domain/service"
 
 	"github.com/labstack/echo/v4"
 )

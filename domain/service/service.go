@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
-	"github.com/diegoclair/go-boilerplate/domain/contract"
-	"github.com/diegoclair/go-boilerplate/domain/entity"
-	"github.com/diegoclair/go-boilerplate/infra/logger"
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_boilerplate/util/config"
 )
 
 type Service struct {

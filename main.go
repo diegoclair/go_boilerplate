@@ -18,14 +18,14 @@ package main
 import (
 	"log"
 
-	"github.com/diegoclair/go-boilerplate/application/factory"
-	"github.com/diegoclair/go-boilerplate/application/rest"
-	"github.com/diegoclair/go-boilerplate/domain/service"
-	"github.com/diegoclair/go-boilerplate/infra/auth"
-	"github.com/diegoclair/go-boilerplate/infra/cache"
-	"github.com/diegoclair/go-boilerplate/infra/data"
-	"github.com/diegoclair/go-boilerplate/infra/logger"
-	"github.com/diegoclair/go-boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/application/factory"
+	"github.com/diegoclair/go_boilerplate/application/rest"
+	"github.com/diegoclair/go_boilerplate/domain/service"
+	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra/cache"
+	"github.com/diegoclair/go_boilerplate/infra/data"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_boilerplate/util/config"
 )
 
 func main() {

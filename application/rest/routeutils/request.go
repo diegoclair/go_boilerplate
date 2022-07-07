@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/diegoclair/go-boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
 )

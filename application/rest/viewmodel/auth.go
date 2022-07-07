@@ -3,7 +3,7 @@ package viewmodel
 import (
 	"time"
 
-	"github.com/diegoclair/go-boilerplate/util/validator"
+	"github.com/diegoclair/go_boilerplate/util/validator"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/diegoclair/go_utils-lib/v2/validstruct"
 )

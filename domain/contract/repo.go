@@ -3,7 +3,7 @@ package contract
 import (
 	"context"
 
-	"github.com/diegoclair/go-boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 )
 
 // DataManager holds the methods that manipulates the main data.

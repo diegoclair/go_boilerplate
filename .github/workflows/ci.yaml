@@ -1,4 +1,4 @@
-name: ci-go-boilerplate-workflow
+name: ci-go_boilerplate-workflow
 on: [push]
 jobs:
   test-application:
