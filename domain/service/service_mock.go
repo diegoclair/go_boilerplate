@@ -19,7 +19,7 @@ type mocks struct {
 
 func newServiceTestMock(t *testing.T) (mocks, *Service) {
 
-	cfg, err := config.GetConfigEnvironment(config.ConfigDefaultFilepath)
+	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultFilepath)
 	if err != nil {
 		log.Fatalf("Error to load config: %v", err)
 	}
