@@ -11,52 +11,44 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-type serviceSetup struct {
-	ctrl            *gomock.Controller
-	log             logger.Logger
-	dataManagerMock contract.DataManager
-	mocks           mocks
-}
-
 type mocks struct {
-	mar *mock.MockAccountRepo
-	mcm *mock.MockCacheManager
+	mauthr *mock.MockAuthRepo
+	mar    *mock.MockAccountRepo
+	mcm    *mock.MockCacheManager
 }
 
-func newServiceMock(t *testing.T) (mocks, *Service) {
+func newServiceTestMock(t *testing.T) (mocks, *Service) {
 
 	cfg, err := config.GetConfigEnvironment(config.ConfigDefaultFilepath)
 	if err != nil {
 		log.Fatalf("Error to load config: %v", err)
 	}
 
-	serviceSetup := serviceSetup{
-		ctrl: gomock.NewController(t),
-		log:  logger.New(*cfg),
+	ctrl := gomock.NewController(t)
+	log := logger.New(*cfg)
+
+	mocks := mocks{
+		mar:    mock.NewMockAccountRepo(ctrl),
+		mcm:    mock.NewMockCacheManager(ctrl),
+		mauthr: mock.NewMockAuthRepo(ctrl),
 	}
 
-	serviceSetup.mocks = mocks{
-		mar: mock.NewMockAccountRepo(serviceSetup.ctrl),
-		mcm: mock.NewMockCacheManager(serviceSetup.ctrl),
-	}
+	dataManagerMock := newDataMock(ctrl, mocks)
 
-	serviceSetup.dataManagerMock = newDataMock(serviceSetup.ctrl, serviceSetup.mocks.mar)
+	svc := New(dataManagerMock, cfg, mocks.mcm, log)
 
-	svc := New(serviceSetup.dataManagerMock, cfg, serviceSetup.mocks.mcm, serviceSetup.log)
-
-	return serviceSetup.mocks, svc
+	return mocks, svc
 }
 
 type dataMock struct {
-	ctrl   *gomock.Controller
-	mar    *mock.MockAccountRepo
-	mauthr *mock.MockAuthRepo
+	ctrl  *gomock.Controller
+	mocks mocks
 }
 
-func newDataMock(ctrl *gomock.Controller, mar *mock.MockAccountRepo) contract.DataManager {
+func newDataMock(ctrl *gomock.Controller, mocks mocks) contract.DataManager {
 	return &dataMock{
-		ctrl: ctrl,
-		mar:  mar,
+		ctrl:  ctrl,
+		mocks: mocks,
 	}
 }
 
@@ -65,9 +57,9 @@ func (d *dataMock) Begin() (contract.Transaction, error) {
 }
 
 func (d *dataMock) Account() contract.AccountRepo {
-	return d.mar
+	return d.mocks.mar
 }
 
 func (d *dataMock) Auth() contract.AuthRepo {
-	return d.mauthr
+	return d.mocks.mauthr
 }
