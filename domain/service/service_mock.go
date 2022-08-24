@@ -1,7 +1,6 @@
 package service
 
 import (
-	"log"
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
@@ -9,6 +8,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/mock"
 	"github.com/diegoclair/go_boilerplate/util/config"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/require"
 )
 
 type mocks struct {
@@ -20,9 +20,7 @@ type mocks struct {
 func newServiceTestMock(t *testing.T) (mocks, *Service) {
 
 	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultFilepath)
-	if err != nil {
-		log.Fatalf("Error to load config: %v", err)
-	}
+	require.NoError(t, err)
 
 	ctrl := gomock.NewController(t)
 	log := logger.New(*cfg)

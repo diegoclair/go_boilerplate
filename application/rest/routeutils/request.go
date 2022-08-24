@@ -45,6 +45,10 @@ func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (t
 	page, _ := strconv.ParseInt(pg, 10, 64)
 	quantity, _ := strconv.ParseInt(ipp, 10, 64)
 
+	return GetTakeSkipFromPageQuantity(page, quantity)
+}
+
+func GetTakeSkipFromPageQuantity(page, quantity int64) (take, skip int64) {
 	if page < 1 {
 		page = 1
 	}
@@ -55,6 +59,5 @@ func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (t
 
 	take = quantity // itens per page
 	skip = (page - 1) * quantity
-
 	return
 }

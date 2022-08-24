@@ -24,12 +24,12 @@ type IRouter interface {
 
 type Server struct {
 	routers []IRouter
-	router  *echo.Echo
+	Srv     *echo.Echo
 	cfg     *config.Config
 }
 
 func StartRestServer(cfg *config.Config, services *factory.Services, log logger.Logger, authToken auth.AuthToken) {
-	server := newRestServer(services, authToken, cfg)
+	server := NewRestServer(services, authToken, cfg)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -42,7 +42,7 @@ func StartRestServer(cfg *config.Config, services *factory.Services, log logger.
 	}
 }
 
-func newRestServer(services *factory.Services, authToken auth.AuthToken, cfg *config.Config) *Server {
+func NewRestServer(services *factory.Services, authToken auth.AuthToken, cfg *config.Config) *Server {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
@@ -57,7 +57,7 @@ func newRestServer(services *factory.Services, authToken auth.AuthToken, cfg *co
 	authRoute := authroute.NewRouter(authController, "auth")
 	transferRoute := transferroute.NewRouter(transferController, "transfers")
 
-	server := &Server{router: srv, cfg: cfg}
+	server := &Server{Srv: srv, cfg: cfg}
 	server.addRouters(accountRoute)
 	server.addRouters(authRoute)
 	server.addRouters(pingRoute)
@@ -75,7 +75,7 @@ func (r *Server) addRouters(router IRouter) {
 
 func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 
-	appGroup := r.router.Group("/")
+	appGroup := r.Srv.Group("/")
 	privateGroup := appGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(authToken))
 
@@ -88,9 +88,9 @@ func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 func (r *Server) setupPrometheus() {
 
 	p := prometheus.NewPrometheus(r.cfg.App.Name, nil)
-	p.Use(r.router)
+	p.Use(r.Srv)
 }
 
 func (r *Server) Start(port string) error {
-	return r.router.Start(fmt.Sprintf(":%s", port))
+	return r.Srv.Start(fmt.Sprintf(":%s", port))
 }

@@ -11,6 +11,12 @@ import (
 
 func Test_accountService_GetAccountByUUID(t *testing.T) {
 
+	ctx := context.Background()
+	svcMocks, svc := newServiceTestMock(t)
+	s := &accountService{
+		svc: svc,
+	}
+
 	type args struct {
 		accountUUID string
 	}
@@ -48,15 +54,8 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			ctx := context.Background()
-			mocks, svc := newServiceTestMock(t)
-
-			s := &accountService{
-				svc: svc,
-			}
-
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, mocks, tt.args)
+				tt.buildMock(ctx, svcMocks, tt.args)
 			}
 
 			gotAccount, err := s.GetAccountByUUID(ctx, tt.args.accountUUID)
