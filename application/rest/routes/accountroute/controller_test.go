@@ -11,44 +11,14 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/mock"
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
 
-type mocks struct {
-	mapper mapper.Mapper
-	mas    *mock.MockAccountService
-}
-
-func newAccountServer(t *testing.T) (m mocks, srv *echo.Echo) {
-
-	ctrl := gomock.NewController(t)
-
-	m = mocks{
-		mapper: mapper.New(),
-		mas:    mock.NewMockAccountService(ctrl),
-	}
-
-	accountControler := NewController(m.mas, m.mapper)
-	accountRoute := NewRouter(accountControler, "accounts")
-
-	srv = echo.New()
-	appGroup := srv.Group("/")
-
-	accountRoute.RegisterRoutes(appGroup, nil)
-
-	return m, srv
-}
-
 func TestController_handleAddAccount(t *testing.T) {
-
-	accountMock, server := newAccountServer(t)
 
 	type args struct {
 		body any
@@ -200,6 +170,7 @@ func TestController_handleAddAccount(t *testing.T) {
 		})
 	}
 }
+
 func buildAccoununtByID(id int) entity.Account {
 	return entity.Account{UUID: "random", Name: "diego" + strconv.Itoa(id)}
 }
@@ -211,7 +182,6 @@ func buildAccountsByQuantity(qtd int) (accounts []entity.Account) {
 }
 
 func TestController_GetAccounts(t *testing.T) {
-	accountMock, server := newAccountServer(t)
 
 	type args struct {
 		page            int
