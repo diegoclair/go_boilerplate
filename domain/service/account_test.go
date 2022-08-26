@@ -12,7 +12,7 @@ import (
 func Test_accountService_GetAccountByUUID(t *testing.T) {
 
 	ctx := context.Background()
-	svcMocks, svc := newServiceTestMock(t)
+	repoMocks, svc := newServiceTestMock(t)
 	s := &accountService{
 		svc: svc,
 	}
@@ -55,7 +55,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, svcMocks, tt.args)
+				tt.buildMock(ctx, repoMocks, tt.args)
 			}
 
 			gotAccount, err := s.GetAccountByUUID(ctx, tt.args.accountUUID)
