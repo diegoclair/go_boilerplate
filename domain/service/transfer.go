@@ -42,8 +42,6 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 		return err
 	}
 
-	transfer.AccountDestinationID = destAccount.ID
-	transfer.AccountOriginID = account.ID
 	transfer.TransferUUID = uuid.NewV4().String()
 
 	tx, err := s.svc.dm.Begin()
@@ -53,7 +51,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 	}
 	defer tx.Rollback()
 
-	err = tx.Account().AddTransfer(ctx, transfer)
+	err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, account.ID, destAccount.ID, transfer.Amount)
 	if err != nil {
 		log.Error(err)
 		return err

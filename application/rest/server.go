@@ -77,7 +77,8 @@ func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 
 	appGroup := r.Srv.Group("/")
 	privateGroup := appGroup.Group("",
-		servermiddleware.AuthMiddlewarePrivateRoute(authToken))
+		servermiddleware.AuthMiddlewarePrivateRoute(authToken),
+	)
 
 	for _, appRouter := range r.routers {
 		appRouter.RegisterRoutes(appGroup, privateGroup)

@@ -197,17 +197,17 @@ func (m *MockAccountRepo) EXPECT() *MockAccountRepoMockRecorder {
 }
 
 // AddTransfer mocks base method.
-func (m *MockAccountRepo) AddTransfer(arg0 context.Context, arg1 entity.Transfer) error {
+func (m *MockAccountRepo) AddTransfer(arg0 context.Context, arg1 string, arg2, arg3 int64, arg4 float64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddTransfer", arg0, arg1)
+	ret := m.ctrl.Call(m, "AddTransfer", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddTransfer indicates an expected call of AddTransfer.
-func (mr *MockAccountRepoMockRecorder) AddTransfer(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockAccountRepoMockRecorder) AddTransfer(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTransfer", reflect.TypeOf((*MockAccountRepo)(nil).AddTransfer), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTransfer", reflect.TypeOf((*MockAccountRepo)(nil).AddTransfer), arg0, arg1, arg2, arg3, arg4)
 }
 
 // CreateAccount mocks base method.

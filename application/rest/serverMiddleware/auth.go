@@ -17,7 +17,7 @@ func AuthMiddlewarePrivateRoute(authToken auth.AuthToken) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 
-			accessToken := ctx.Request().Header.Get(auth.ContextTokenKey.String())
+			accessToken := ctx.Request().Header.Get(auth.TokenKey.String())
 			if len(accessToken) == 0 {
 				return echo.NewHTTPError(http.StatusUnauthorized, resterrors.NewUnauthorizedError("access token is required"))
 			}

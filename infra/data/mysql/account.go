@@ -49,7 +49,7 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 
 	return account, nil
 }
-func (r *accountRepo) AddTransfer(ctx context.Context, transfer entity.Transfer) (err error) {
+func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (err error) {
 	query := `
 		INSERT INTO tab_transfer (
 			transfer_uuid,
@@ -67,10 +67,10 @@ func (r *accountRepo) AddTransfer(ctx context.Context, transfer entity.Transfer)
 	defer stmt.Close()
 
 	_, err = stmt.Exec(
-		transfer.TransferUUID,
-		transfer.AccountOriginID,
-		transfer.AccountDestinationID,
-		transfer.Amount,
+		transferUUID,
+		accountOriginID,
+		accountDestinationID,
+		amount,
 	)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
@@ -222,9 +222,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 		SELECT 
 			tt.transfer_id,
 			tt.transfer_uuid,
-			tt.account_origin_id,
 			origin.account_uuid,
-			tt.account_destination_id,
 			dest.account_uuid,
 			tt.amount,
 			tt.created_at
@@ -264,9 +262,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 		err = rows.Scan(
 			&transfer.ID,
 			&transfer.TransferUUID,
-			&transfer.AccountOriginID,
 			&transfer.AccountOriginUUID,
-			&transfer.AccountDestinationID,
 			&transfer.AccountDestinationUUID,
 			&transfer.Amount,
 			&transfer.CreateAt,

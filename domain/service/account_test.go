@@ -69,3 +69,44 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 		})
 	}
 }
+
+func Test_accountService_AddBalance(t *testing.T) {
+
+	ctx := context.Background()
+	repoMocks, svc := newServiceTestMock(t)
+	s := &accountService{
+		svc: svc,
+	}
+
+	type args struct {
+		accountUUID string
+		amount      float64
+	}
+	tests := []struct {
+		name      string
+		buildMock func(ctx context.Context, mocks mocks, args args)
+		args      args
+		wantErr   bool
+	}{
+		{
+			name: "Should add balance without any errors",
+			args: args{accountUUID: "account123", amount: 7.32},
+			buildMock: func(ctx context.Context, mocks mocks, args args) {
+				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 50}
+				mocks.mar.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(result, nil)
+				mocks.mar.EXPECT().UpdateAccountBalance(ctx, result.ID, result.Balance+args.amount).Times(1).Return(nil)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if tt.buildMock != nil {
+				tt.buildMock(ctx, repoMocks, tt.args)
+			}
+			if err := s.AddBalance(ctx, tt.args.accountUUID, tt.args.amount); (err != nil) != tt.wantErr {
+				t.Errorf("accountService.AddBalance() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

@@ -104,13 +104,8 @@ func TestAddTransfer(t *testing.T) {
 	account := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 
-	args := entity.Transfer{
-		AccountOriginID:      account.ID,
-		AccountDestinationID: account2.ID,
-		TransferUUID:         uuid.NewV4().String(),
-		Amount:               50,
-	}
-	err := testMysql.Account().AddTransfer(context.Background(), args)
+	transferUUID := uuid.NewV4().String()
+	err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
 }
 
@@ -134,22 +129,13 @@ func TestGetTransfersByAccountID(t *testing.T) {
 	account2 := createRandomAccount(t)
 	account3 := createRandomAccount(t)
 
-	args := entity.Transfer{
-		AccountOriginID:      account.ID,
-		AccountDestinationID: account2.ID,
-		TransferUUID:         uuid.NewV4().String(),
-		Amount:               50,
-	}
-	err := testMysql.Account().AddTransfer(ctx, args)
+	transferUUID := uuid.NewV4().String()
+	err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
 
-	args = entity.Transfer{
-		AccountOriginID:      account3.ID,
-		AccountDestinationID: account2.ID,
-		TransferUUID:         uuid.NewV4().String(),
-		Amount:               50,
-	}
-	err = testMysql.Account().AddTransfer(ctx, args)
+	transferUUID = uuid.NewV4().String()
+
+	err = testMysql.Account().AddTransfer(context.Background(), transferUUID, account3.ID, account2.ID, 50)
 	require.NoError(t, err)
 
 	origin := true

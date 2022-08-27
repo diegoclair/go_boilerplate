@@ -25,15 +25,15 @@ func newJwtAuth(jwtPrivateKey string) (AuthToken, error) {
 	}, nil
 }
 
-func (a *jwtAuth) CreateAccessToken(accountUUID, sessionUUID string) (string, *tokenPayload, error) {
+func (a *jwtAuth) CreateAccessToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
 	return a.createToken(accountUUID, sessionUUID, accessTokenDurationTime)
 }
 
-func (a *jwtAuth) CreateRefreshToken(accountUUID, sessionUUID string) (string, *tokenPayload, error) {
+func (a *jwtAuth) CreateRefreshToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
 	return a.createToken(accountUUID, sessionUUID, refreshTokenDurationTime)
 }
 
-func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
+func (a *jwtAuth) VerifyToken(token string) (payload *tokenPayload, err error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -52,7 +52,8 @@ func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
 	}
 
-	payload, ok := jwtToken.Claims.(*tokenPayload)
+	var ok bool
+	payload, ok = jwtToken.Claims.(*tokenPayload)
 	if !ok {
 		log.Error("VerifyToken: could not parse jwt token: ", err)
 		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
@@ -60,12 +61,12 @@ func (a *jwtAuth) VerifyToken(token string) (*tokenPayload, error) {
 	return payload, nil
 }
 
-func (a *jwtAuth) createToken(accountUUID, sessionUUID string, duration time.Duration) (string, *tokenPayload, error) {
+func (a *jwtAuth) createToken(accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *tokenPayload, err error) {
 	key := []byte(a.jwtPrivateKey)
-	payload := newPayload(accountUUID, sessionUUID, duration)
+	payload = newPayload(accountUUID, sessionUUID, duration)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-	tokenString, err := token.SignedString(key)
+	tokenString, err = token.SignedString(key)
 	if err != nil {
 		log.Error("createToken: error to encrypt token: ", err)
 		return tokenString, payload, resterrors.NewUnauthorizedError(err.Error())

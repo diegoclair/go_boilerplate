@@ -34,7 +34,7 @@ func NewController(transferService service.TransferService, mapper mapper.Mapper
 
 func (s *Controller) handleAddTransfer(c echo.Context) error {
 
-	input := viewmodel.Transfer{}
+	input := viewmodel.TransferReq{}
 	err := c.Bind(&input)
 	if err != nil {
 		return routeutils.ResponseBadRequestError(c, err)
@@ -68,7 +68,7 @@ func (s *Controller) handleGetTransfers(c echo.Context) error {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	response := []viewmodel.Transfer{}
+	response := []viewmodel.TransferResp{}
 	err = s.mapper.From(transfers).To(&response)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)

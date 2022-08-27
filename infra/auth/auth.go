@@ -7,9 +7,10 @@ import (
 	"github.com/diegoclair/go_boilerplate/util/config"
 )
 
+// TODO: Create unit tests for this package
 type AuthToken interface {
-	CreateAccessToken(accountUUID, sessionUUID string) (string, *tokenPayload, error)
-	CreateRefreshToken(accountUUID, sessionUUID string) (string, *tokenPayload, error)
+	CreateAccessToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
+	CreateRefreshToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
 	VerifyToken(token string) (*tokenPayload, error)
 }
 
@@ -36,10 +37,9 @@ func (k Key) String() string {
 }
 
 const (
-	AccountUUIDKey  Key = "AccountUUID"
-	ContextTokenKey Key = "user-token"
-	TokenHeaderName Key = "Token"
-	SessionKey      Key = "Session"
+	AccountUUIDKey Key = "AccountUUID"
+	TokenKey       Key = "user-token"
+	SessionKey     Key = "Session"
 )
 
 func NewAuthToken(cfg config.AuthConfig) (AuthToken, error) {

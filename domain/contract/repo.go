@@ -24,9 +24,9 @@ type AuthRepo interface {
 	GetSessionByUUID(ctx context.Context, sessionUUID string) (session entity.Session, err error)
 }
 
-//TODO: check if transfer should go to a transfer repo
+// TODO: check if transfer should go to a transfer repo
 type AccountRepo interface {
-	AddTransfer(ctx context.Context, transfer entity.Transfer) (err error)
+	AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (err error)
 	CreateAccount(ctx context.Context, account entity.Account) (err error)
 	GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error)
 	GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error)
