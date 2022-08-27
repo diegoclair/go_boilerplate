@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"testing"
 
@@ -26,12 +27,12 @@ type mocks struct {
 	mas    *mock.MockAccountService
 }
 
-// var server *echo.Echo
-// var accountMock mocks
+var server *echo.Echo
+var accountMock mocks
 
-func serverTest(t *testing.T) (accountMock mocks, server *echo.Echo) {
+func TestMain(m *testing.M) {
 
-	ctrl := gomock.NewController(t)
+	ctrl := gomock.NewController(&testing.T{})
 
 	accountMock = mocks{
 		mapper: mapper.New(),
@@ -46,8 +47,7 @@ func serverTest(t *testing.T) (accountMock mocks, server *echo.Echo) {
 
 	accountRoute.RegisterRoutes(appGroup, nil)
 
-	return accountMock, server
-	//os.Exit(m.Run())
+	os.Exit(m.Run())
 }
 
 func TestController_handleAddAccount(t *testing.T) {
@@ -61,77 +61,77 @@ func TestController_handleAddAccount(t *testing.T) {
 		buildMocks    func(ctx context.Context, mock mocks, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
-		// {
-		// 	name: "Should complete request with no error",
-		// 	args: args{
-		// 		body: viewmodel.AddAccount{
-		// 			Name: "Add withou Error",
-		// 			Login: viewmodel.Login{
-		// 				CPF:    "01234567890",
-		// 				Secret: "secret@123",
-		// 			},
-		// 		},
-		// 	},
-		// 	buildMocks: func(ctx context.Context, mocks mocks, args args) {
-		// 		body := args.body.(viewmodel.AddAccount)
-		// 		mocks.mas.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(nil)
-		// 	},
-		// 	checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusCreated, resp.Code)
-		// 		require.Empty(t, resp.Body)
-		// 	},
-		// },
-		// {
-		// 	name: "Should not be possible create an account without field name",
-		// 	args: args{
-		// 		body: viewmodel.AddAccount{
-		// 			Name: "",
-		// 			Login: viewmodel.Login{
-		// 				CPF:    "01234567890",
-		// 				Secret: "secret@123",
-		// 			},
-		// 		},
-		// 	},
-		// 	checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-		// 		require.Contains(t, resp.Body.String(), "Invalid input data")
-		// 		require.Contains(t, resp.Body.String(), "The field 'Name' is required")
-		// 	},
-		// },
-		// {
-		// 	name: "Should not be possible create an account without field CPF",
-		// 	args: args{
-		// 		body: viewmodel.AddAccount{
-		// 			Name: "Teste name",
-		// 			Login: viewmodel.Login{
-		// 				CPF:    "",
-		// 				Secret: "secret@123",
-		// 			},
-		// 		},
-		// 	},
-		// 	checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-		// 		require.Contains(t, resp.Body.String(), "Invalid input data")
-		// 		require.Contains(t, resp.Body.String(), "The field 'CPF' is required")
-		// 	},
-		// },
-		// {
-		// 	name: "Should not be possible create an account without field Secret",
-		// 	args: args{
-		// 		body: viewmodel.AddAccount{
-		// 			Name: "Teste name",
-		// 			Login: viewmodel.Login{
-		// 				CPF:    "01234567890",
-		// 				Secret: "",
-		// 			},
-		// 		},
-		// 	},
-		// 	checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-		// 		require.Contains(t, resp.Body.String(), "Invalid input data")
-		// 		require.Contains(t, resp.Body.String(), "The field 'Secret' is required")
-		// 	},
-		// },
+		{
+			name: "Should complete request with no error",
+			args: args{
+				body: viewmodel.AddAccount{
+					Name: "Add withou Error",
+					Login: viewmodel.Login{
+						CPF:    "01234567890",
+						Secret: "secret@123",
+					},
+				},
+			},
+			buildMocks: func(ctx context.Context, mocks mocks, args args) {
+				body := args.body.(viewmodel.AddAccount)
+				mocks.mas.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(nil)
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusCreated, resp.Code)
+				require.Empty(t, resp.Body)
+			},
+		},
+		{
+			name: "Should not be possible create an account without field name",
+			args: args{
+				body: viewmodel.AddAccount{
+					Name: "",
+					Login: viewmodel.Login{
+						CPF:    "01234567890",
+						Secret: "secret@123",
+					},
+				},
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "Invalid input data")
+				require.Contains(t, resp.Body.String(), "The field 'Name' is required")
+			},
+		},
+		{
+			name: "Should not be possible create an account without field CPF",
+			args: args{
+				body: viewmodel.AddAccount{
+					Name: "Teste name",
+					Login: viewmodel.Login{
+						CPF:    "",
+						Secret: "secret@123",
+					},
+				},
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "Invalid input data")
+				require.Contains(t, resp.Body.String(), "The field 'CPF' is required")
+			},
+		},
+		{
+			name: "Should not be possible create an account without field Secret",
+			args: args{
+				body: viewmodel.AddAccount{
+					Name: "Teste name",
+					Login: viewmodel.Login{
+						CPF:    "01234567890",
+						Secret: "",
+					},
+				},
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "Invalid input data")
+				require.Contains(t, resp.Body.String(), "The field 'Secret' is required")
+			},
+		},
 		{
 			name: "Should not be possible create an account with invalid cpf",
 			args: args{
@@ -178,8 +178,6 @@ func TestController_handleAddAccount(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			accountMock, server := serverTest(t)
 
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts%s", rootRoute)
@@ -256,8 +254,6 @@ func TestController_GetAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			accountMock, server := serverTest(t)
 
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts%s", rootRoute)
