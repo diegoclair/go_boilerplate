@@ -249,6 +249,20 @@ func TestController_GetAccounts(t *testing.T) {
 				require.Contains(t, resp.Body.String(), string(expectedResp))
 			},
 		},
+		{
+			name: "Should return error if we have some error with service",
+			args: args{
+				accountsToBuild: 0,
+			},
+			buildMocks: func(ctx context.Context, mock mocks, args args) {
+				accounts := buildAccountsByQuantity(args.accountsToBuild)
+				mock.mockAccountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mocks, args args) {
+				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
+				require.Contains(t, resp.Body.String(), "some service error")
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
