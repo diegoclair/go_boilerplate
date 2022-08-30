@@ -12,9 +12,9 @@ import (
 )
 
 type mocks struct {
-	mauthr *mock.MockAuthRepo
-	mar    *mock.MockAccountRepo
-	mcm    *mock.MockCacheManager
+	mockAuthRepo     *mock.MockAuthRepo
+	mockAccountRepo  *mock.MockAccountRepo
+	mockCacheManager *mock.MockCacheManager
 }
 
 func newServiceTestMock(t *testing.T) (mocks, *Service) {
@@ -26,14 +26,14 @@ func newServiceTestMock(t *testing.T) (mocks, *Service) {
 	log := logger.New(*cfg)
 
 	mocks := mocks{
-		mar:    mock.NewMockAccountRepo(ctrl),
-		mcm:    mock.NewMockCacheManager(ctrl),
-		mauthr: mock.NewMockAuthRepo(ctrl),
+		mockAccountRepo:  mock.NewMockAccountRepo(ctrl),
+		mockCacheManager: mock.NewMockCacheManager(ctrl),
+		mockAuthRepo:     mock.NewMockAuthRepo(ctrl),
 	}
 
 	dataManagerMock := newDataMock(ctrl, mocks)
 
-	svc := New(dataManagerMock, cfg, mocks.mcm, log)
+	svc := New(dataManagerMock, cfg, mocks.mockCacheManager, log)
 
 	return mocks, svc
 }
@@ -55,9 +55,9 @@ func (d *dataMock) Begin() (contract.Transaction, error) {
 }
 
 func (d *dataMock) Account() contract.AccountRepo {
-	return d.mocks.mar
+	return d.mocks.mockAccountRepo
 }
 
 func (d *dataMock) Auth() contract.AuthRepo {
-	return d.mocks.mauthr
+	return d.mocks.mockAuthRepo
 }

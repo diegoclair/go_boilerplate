@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -34,7 +35,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks mocks, args args) {
 				result := entity.Account{ID: 1, UUID: "123", Name: "name"}
-				mocks.mar.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(result, nil)
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(result, nil)
 			},
 			wantAccount: entity.Account{ID: 1, UUID: "123", Name: "name"},
 			wantErr:     false,
@@ -45,7 +46,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 				accountUUID: "123",
 			},
 			buildMock: func(ctx context.Context, mocks mocks, args args) {
-				mocks.mar.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, errors.New("some error"))
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, errors.New("some error"))
 			},
 			wantAccount: entity.Account{},
 			wantErr:     true,
@@ -93,9 +94,18 @@ func Test_accountService_AddBalance(t *testing.T) {
 			args: args{accountUUID: "account123", amount: 7.32},
 			buildMock: func(ctx context.Context, mocks mocks, args args) {
 				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 50}
-				mocks.mar.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(result, nil)
-				mocks.mar.EXPECT().UpdateAccountBalance(ctx, result.ID, result.Balance+args.amount).Times(1).Return(nil)
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(result, nil)
+				mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, result.ID, result.Balance+args.amount).Times(1).Return(nil)
 			},
+		},
+		{
+			name: "Should return error with there is some error to get account by uuid",
+			args: args{accountUUID: "account123", amount: 7.32},
+			buildMock: func(ctx context.Context, mocks mocks, args args) {
+				result := entity.Account{}
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(result, fmt.Errorf("some error"))
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

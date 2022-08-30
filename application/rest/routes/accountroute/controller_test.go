@@ -13,18 +13,18 @@ import (
 	"testing"
 
 	"github.com/IQ-tech/go-mapper"
+	"github.com/diegoclair/go_boilerplate/application/rest/routes/testutil"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/mock"
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
 
 type mocks struct {
-	mapper mapper.Mapper
-	mas    *mock.MockAccountService
+	mapper             mapper.Mapper
+	mockAccountService *mock.MockAccountService
 }
 
 var server *echo.Echo
@@ -32,14 +32,12 @@ var accountMock mocks
 
 func TestMain(m *testing.M) {
 
-	ctrl := gomock.NewController(&testing.T{})
-
 	accountMock = mocks{
-		mapper: mapper.New(),
-		mas:    mock.NewMockAccountService(ctrl),
+		mapper:             mapper.New(),
+		mockAccountService: testutil.NewServiceManagerTest(&testing.T{}).AccountServiceMock,
 	}
 
-	accountControler := NewController(accountMock.mas, accountMock.mapper)
+	accountControler := NewController(accountMock.mockAccountService, accountMock.mapper)
 	accountRoute := NewRouter(accountControler, "accounts")
 
 	server = echo.New()
@@ -74,7 +72,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mocks mocks, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mocks.mas.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(nil)
+				mocks.mockAccountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -168,7 +166,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mocks mocks, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mocks.mas.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(errors.New("some error"))
+				mocks.mockAccountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -234,7 +232,7 @@ func TestController_GetAccounts(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mocks, args args) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				mock.mas.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
+				mock.mockAccountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mocks, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
