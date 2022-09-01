@@ -52,10 +52,10 @@ func NewRestServer(services *factory.Services, authToken auth.AuthToken, cfg *co
 	authController := authroute.NewController(services.AuthService, services.Mapper, authToken)
 	transferController := transferroute.NewController(services.TransferService, services.Mapper)
 
-	pingRoute := pingroute.NewRouter(pingController, "ping")
-	accountRoute := accountroute.NewRouter(accountController, "accounts")
-	authRoute := authroute.NewRouter(authController, "auth")
-	transferRoute := transferroute.NewRouter(transferController, "transfers")
+	pingRoute := pingroute.NewRouter(pingController, pingroute.RouteName)
+	accountRoute := accountroute.NewRouter(accountController, accountroute.RouteName)
+	authRoute := authroute.NewRouter(authController, authroute.RouteName)
+	transferRoute := transferroute.NewRouter(transferController, transferroute.RouteName)
 
 	server := &Server{Srv: srv, cfg: cfg}
 	server.addRouters(accountRoute)

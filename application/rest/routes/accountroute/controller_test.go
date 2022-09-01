@@ -8,55 +8,51 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strconv"
 	"testing"
 
 	"github.com/IQ-tech/go-mapper"
-	"github.com/diegoclair/go_boilerplate/application/rest/routes/testutil"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/mock"
+	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
 
-type mocks struct {
-	mapper             mapper.Mapper
-	mockAccountService *mock.MockAccountService
+type mock struct {
+	mapper         mapper.Mapper
+	accountService *mocks.MockAccountService
 }
 
-var server *echo.Echo
-var accountMock mocks
+func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo) {
 
-func TestMain(m *testing.M) {
-
-	accountMock = mocks{
-		mapper:             mapper.New(),
-		mockAccountService: testutil.NewServiceManagerTest(&testing.T{}).AccountServiceMock,
+	ctrl := gomock.NewController(t)
+	accountMock = mock{
+		mapper:         mapper.New(),
+		accountService: mocks.NewMockAccountService(ctrl),
 	}
 
-	accountControler := NewController(accountMock.mockAccountService, accountMock.mapper)
-	accountRoute := NewRouter(accountControler, "accounts")
+	transferControler := &Controller{accountMock.accountService, accountMock.mapper}
+	transferRoute := NewRouter(transferControler, RouteName)
 
 	server = echo.New()
 	appGroup := server.Group("/")
-
-	accountRoute.RegisterRoutes(appGroup, nil)
-
-	os.Exit(m.Run())
+	transferRoute.RegisterRoutes(appGroup, nil)
+	return
 }
 
 func TestController_handleAddAccount(t *testing.T) {
 
+	accountMock, server := getServerTest(t)
 	type args struct {
 		body any
 	}
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, mock mocks, args args)
+		buildMocks    func(ctx context.Context, mock mock, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -70,9 +66,9 @@ func TestController_handleAddAccount(t *testing.T) {
 					},
 				},
 			},
-			buildMocks: func(ctx context.Context, mocks mocks, args args) {
+			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mocks.mockAccountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(nil)
+				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -164,9 +160,9 @@ func TestController_handleAddAccount(t *testing.T) {
 					},
 				},
 			},
-			buildMocks: func(ctx context.Context, mocks mocks, args args) {
+			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mocks.mockAccountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(errors.New("some error"))
+				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -213,6 +209,7 @@ func buildAccountsByQuantity(qtd int) (accounts []entity.Account) {
 
 func TestController_GetAccounts(t *testing.T) {
 
+	accountMock, server := getServerTest(t)
 	type args struct {
 		page            int
 		quantity        int
@@ -222,19 +219,19 @@ func TestController_GetAccounts(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, mocks mocks, args args)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mocks, args args)
+		buildMocks    func(ctx context.Context, mocks mock, args args)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mock, args args)
 	}{
 		{
 			name: "Should complete request with no error",
 			args: args{
 				accountsToBuild: 2,
 			},
-			buildMocks: func(ctx context.Context, mock mocks, args args) {
+			buildMocks: func(ctx context.Context, mock mock, args args) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				mock.mockAccountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
+				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mocks, args args) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				take, skip := routeutils.GetTakeSkipFromPageQuantity(int64(args.page), int64(args.quantity))
@@ -254,11 +251,11 @@ func TestController_GetAccounts(t *testing.T) {
 			args: args{
 				accountsToBuild: 0,
 			},
-			buildMocks: func(ctx context.Context, mock mocks, args args) {
+			buildMocks: func(ctx context.Context, mock mock, args args) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				mock.mockAccountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
+				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mocks, args args) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
 				require.Contains(t, resp.Body.String(), "some service error")
 			},

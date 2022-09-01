@@ -4,6 +4,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const RouteName = "accounts"
+
 const (
 	rootRoute          = ""
 	accountByID        = "/:account_uuid"

@@ -7,32 +7,50 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/IQ-tech/go-mapper"
-	"github.com/diegoclair/go_boilerplate/application/rest/routes/testutil"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/application/rest/serverMiddleware"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
-	"github.com/diegoclair/go_boilerplate/mock"
+	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/go_boilerplate/util/config"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
+	"github.com/twinj/uuid"
 )
 
-var tokenMaker auth.AuthToken
-var transferMock *mock.MockTransferService
-var server *echo.Echo
+var (
+	tokenMaker auth.AuthToken
+	onceToken  sync.Once
+)
 
-func TestMain(m *testing.M) {
-	tokenMaker = testutil.GetTokenMaker()
-	transferMock = testutil.NewServiceManagerTest(&testing.T{}).TransferServiceMock
+func getTokenMaker(t *testing.T) auth.AuthToken {
+	onceToken.Do(func() {
+		cfg, err := config.GetConfigEnvironment("../../../../" + config.ConfigDefaultFilepath)
+		require.NoError(t, err)
 
-	transferControler := NewController(transferMock, mapper.New())
+		cfg.App.Auth.AccessTokenDuration = 2 * time.Second
+		cfg.App.Auth.RefreshTokenDuration = 2 * time.Second
+
+		tokenMaker, err = auth.NewAuthToken(cfg.App.Auth)
+		require.NoError(t, err)
+	})
+	return tokenMaker
+}
+
+func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo) {
+
+	ctrl := gomock.NewController(t)
+	transferMock = mocks.NewMockTransferService(ctrl)
+	tokenMaker = getTokenMaker(t)
+
+	transferControler := &Controller{transferMock, mapper.New()}
 	transferRoute := NewRouter(transferControler, "transfers")
 
 	server = echo.New()
@@ -40,32 +58,32 @@ func TestMain(m *testing.M) {
 	privateGroup := appGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(tokenMaker),
 	)
-
 	transferRoute.RegisterRoutes(appGroup, privateGroup)
-
-	os.Exit(m.Run())
+	return
 }
 
-func addAuthorization(t *testing.T, req *http.Request, tokenMaker auth.AuthToken) {
+func addAuthorization(t *testing.T, req *http.Request, tokenMaker auth.AuthToken, accountUUID, sessionUUID string) {
 
-	token, _, err := tokenMaker.CreateAccessToken("account123", "session123")
+	token, _, err := tokenMaker.CreateAccessToken(accountUUID, sessionUUID)
 	require.NoError(t, err)
-
 	require.NotEmpty(t, token)
-
 	req.Header.Set(auth.TokenKey.String(), token)
 }
 
 func TestController_handleAddBalance(t *testing.T) {
 
+	transferMock, server := getServerTest(t)
+
 	type args struct {
-		body any
+		body        any
+		accountUUID string
+		sessionUUID string
 	}
 	tests := []struct {
 		name          string
 		args          args
-		setupAuth     func(t *testing.T, req *http.Request)
-		buildMocks    func(ctx context.Context, mock *mock.MockTransferService, args args)
+		setupAuth     func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken)
+		buildMocks    func(ctx context.Context, transferMock *mocks.MockTransferService, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -75,13 +93,17 @@ func TestController_handleAddBalance(t *testing.T) {
 					AccountDestinationUUID: "randomUUID",
 					Amount:                 5.55,
 				},
+				accountUUID: uuid.NewV4().String(),
+				sessionUUID: uuid.NewV4().String(),
 			},
-			setupAuth: func(t *testing.T, req *http.Request) {
-				addAuthorization(t, req, tokenMaker)
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
-			buildMocks: func(ctx context.Context, mock *mock.MockTransferService, args args) {
+			buildMocks: func(ctx context.Context, transferMock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
-				mock.EXPECT().CreateTransfer(gomock.Any(), entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).Times(1).Return(nil)
+				transferMock.EXPECT().CreateTransfer(gomock.All(),
+					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					Return(nil).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -92,16 +114,20 @@ func TestController_handleAddBalance(t *testing.T) {
 			name: "Should return error id we have some error on create transfer",
 			args: args{
 				body: viewmodel.TransferReq{
-					AccountDestinationUUID: "randomUUID",
+					AccountDestinationUUID: "randomUUID2",
 					Amount:                 8.88,
 				},
+				accountUUID: uuid.NewV4().String(),
+				sessionUUID: uuid.NewV4().String(),
 			},
-			setupAuth: func(t *testing.T, req *http.Request) {
-				addAuthorization(t, req, tokenMaker)
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
-			buildMocks: func(ctx context.Context, mock *mock.MockTransferService, args args) {
+			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
-				mock.EXPECT().CreateTransfer(gomock.Any(), entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).Times(1).Return(fmt.Errorf("error to create transfer"))
+				mock.EXPECT().CreateTransfer(gomock.All(),
+					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -121,17 +147,19 @@ func TestController_handleAddBalance(t *testing.T) {
 
 			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 			require.NoError(t, err)
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 			if tt.setupAuth != nil {
-				tt.setupAuth(t, req)
+				tt.setupAuth(t, req, tt.args, tokenMaker)
 			}
 
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
+				c := echo.New().NewContext(req, recorder)
+				c.Set(auth.AccountUUIDKey.String(), tt.args.accountUUID)
+				c.Set(auth.SessionKey.String(), tt.args.sessionUUID)
+				ctx := routeutils.GetContext(c)
 				tt.buildMocks(ctx, transferMock, tt.args)
 			}
-			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 			server.ServeHTTP(recorder, req)
 			if tt.checkResponse != nil {
@@ -143,20 +171,31 @@ func TestController_handleAddBalance(t *testing.T) {
 
 func TestController_handleGetTransfers(t *testing.T) {
 
+	transferMock, server := getServerTest(t)
+
+	type args struct {
+		accountUUID string
+		sessionUUID string
+	}
 	tests := []struct {
 		name          string
-		buildMocks    func(ctx context.Context, mock *mock.MockTransferService)
-		setupAuth     func(t *testing.T, req *http.Request)
+		args          args
+		buildMocks    func(ctx context.Context, mock *mocks.MockTransferService)
+		setupAuth     func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken)
 		checkResponse func(t *testing.T, resp *httptest.ResponseRecorder)
 		sleep         bool
 	}{
 		{
 			name: "Should pass with success",
-			buildMocks: func(ctx context.Context, mock *mock.MockTransferService) {
-				mock.EXPECT().GetTransfers(gomock.Any()).Times(1).Return([]entity.Transfer{}, nil)
+			args: args{
+				accountUUID: uuid.NewV4().String(),
+				sessionUUID: uuid.NewV4().String(),
 			},
-			setupAuth: func(t *testing.T, req *http.Request) {
-				addAuthorization(t, req, tokenMaker)
+			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
+				mock.EXPECT().GetTransfers(ctx).Return([]entity.Transfer{}, nil).Times(1)
+			},
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, resp.Code)
@@ -166,11 +205,8 @@ func TestController_handleGetTransfers(t *testing.T) {
 
 		{
 			name: "Should return expired token",
-			buildMocks: func(ctx context.Context, mock *mock.MockTransferService) {
-				mock.EXPECT().GetTransfers(gomock.Any()).Times(1).Return([]entity.Transfer{}, nil)
-			},
-			setupAuth: func(t *testing.T, req *http.Request) {
-				addAuthorization(t, req, tokenMaker)
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, resp.Code)
@@ -189,12 +225,15 @@ func TestController_handleGetTransfers(t *testing.T) {
 			require.NoError(t, err)
 
 			if tt.setupAuth != nil {
-				tt.setupAuth(t, req)
+				tt.setupAuth(t, req, tt.args, tokenMaker)
 			}
 
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
+				c := echo.New().NewContext(req, recorder)
+				c.Set(auth.AccountUUIDKey.String(), tt.args.accountUUID)
+				c.Set(auth.SessionKey.String(), tt.args.sessionUUID)
+				ctx := routeutils.GetContext(c)
+
 				tt.buildMocks(ctx, transferMock)
 			}
 

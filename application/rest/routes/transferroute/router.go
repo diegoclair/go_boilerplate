@@ -4,6 +4,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const RouteName = "transfers"
+
 const (
 	rootRoute = ""
 )

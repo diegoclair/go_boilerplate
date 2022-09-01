@@ -5,19 +5,19 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
-	"github.com/diegoclair/go_boilerplate/mock"
+	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/util/config"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
 
-type mocks struct {
-	mockAuthRepo     *mock.MockAuthRepo
-	mockAccountRepo  *mock.MockAccountRepo
-	mockCacheManager *mock.MockCacheManager
+type repoMock struct {
+	mockAuthRepo     *mocks.MockAuthRepo
+	mockAccountRepo  *mocks.MockAccountRepo
+	mockCacheManager *mocks.MockCacheManager
 }
 
-func newServiceTestMock(t *testing.T) (mocks, *Service) {
+func newServiceTestMock(t *testing.T) (repoMock, *Service) {
 
 	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultFilepath)
 	require.NoError(t, err)
@@ -25,10 +25,10 @@ func newServiceTestMock(t *testing.T) (mocks, *Service) {
 	ctrl := gomock.NewController(t)
 	log := logger.New(*cfg)
 
-	mocks := mocks{
-		mockAccountRepo:  mock.NewMockAccountRepo(ctrl),
-		mockCacheManager: mock.NewMockCacheManager(ctrl),
-		mockAuthRepo:     mock.NewMockAuthRepo(ctrl),
+	mocks := repoMock{
+		mockAccountRepo:  mocks.NewMockAccountRepo(ctrl),
+		mockCacheManager: mocks.NewMockCacheManager(ctrl),
+		mockAuthRepo:     mocks.NewMockAuthRepo(ctrl),
 	}
 
 	dataManagerMock := newDataMock(ctrl, mocks)
@@ -40,10 +40,10 @@ func newServiceTestMock(t *testing.T) (mocks, *Service) {
 
 type dataMock struct {
 	ctrl  *gomock.Controller
-	mocks mocks
+	mocks repoMock
 }
 
-func newDataMock(ctrl *gomock.Controller, mocks mocks) contract.DataManager {
+func newDataMock(ctrl *gomock.Controller, mocks repoMock) contract.DataManager {
 	return &dataMock{
 		ctrl:  ctrl,
 		mocks: mocks,
@@ -51,7 +51,7 @@ func newDataMock(ctrl *gomock.Controller, mocks mocks) contract.DataManager {
 }
 
 func (d *dataMock) Begin() (contract.Transaction, error) {
-	return mock.NewMockTransaction(d.ctrl), nil
+	return mocks.NewMockTransaction(d.ctrl), nil
 }
 
 func (d *dataMock) Account() contract.AccountRepo {
