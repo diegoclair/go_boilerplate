@@ -26,9 +26,9 @@ type mock struct {
 	accountService *mocks.MockAccountService
 }
 
-func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo) {
+func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gomock.Controller) {
 
-	ctrl := gomock.NewController(t)
+	ctrl = gomock.NewController(t)
 	accountMock = mock{
 		mapper:         mapper.New(),
 		accountService: mocks.NewMockAccountService(ctrl),
@@ -45,7 +45,6 @@ func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo) {
 
 func TestController_handleAddAccount(t *testing.T) {
 
-	accountMock, server := getServerTest(t)
 	type args struct {
 		body any
 	}
@@ -173,6 +172,9 @@ func TestController_handleAddAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
+			accountMock, server, ctrl := getServerTest(t)
+			defer ctrl.Finish()
+
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts%s", rootRoute)
 
@@ -209,7 +211,6 @@ func buildAccountsByQuantity(qtd int) (accounts []entity.Account) {
 
 func TestController_GetAccounts(t *testing.T) {
 
-	accountMock, server := getServerTest(t)
 	type args struct {
 		page            int
 		quantity        int
@@ -263,6 +264,9 @@ func TestController_GetAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			accountMock, server, ctrl := getServerTest(t)
+			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts%s", rootRoute)

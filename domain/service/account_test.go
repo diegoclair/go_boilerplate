@@ -51,7 +51,8 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			repoMocks, svc := newServiceTestMock(t)
+			repoMocks, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
 
 			s := &accountService{
 				svc: svc,
@@ -121,7 +122,9 @@ func Test_accountService_AddBalance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			repoMocks, svc := newServiceTestMock(t)
+			repoMocks, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
 			s := &accountService{
 				svc: svc,
 			}

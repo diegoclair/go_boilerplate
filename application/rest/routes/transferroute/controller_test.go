@@ -44,9 +44,9 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 	return tokenMaker
 }
 
-func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo) {
+func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo, ctrl *gomock.Controller) {
 
-	ctrl := gomock.NewController(t)
+	ctrl = gomock.NewController(t)
 	transferMock = mocks.NewMockTransferService(ctrl)
 	tokenMaker = getTokenMaker(t)
 
@@ -71,8 +71,6 @@ func addAuthorization(t *testing.T, req *http.Request, tokenMaker auth.AuthToken
 }
 
 func TestController_handleAddBalance(t *testing.T) {
-
-	transferMock, server := getServerTest(t)
 
 	type args struct {
 		body        any
@@ -101,7 +99,7 @@ func TestController_handleAddBalance(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, transferMock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
-				transferMock.EXPECT().CreateTransfer(gomock.All(),
+				transferMock.EXPECT().CreateTransfer(ctx,
 					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(nil).MinTimes(1)
 			},
@@ -125,7 +123,7 @@ func TestController_handleAddBalance(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
-				mock.EXPECT().CreateTransfer(gomock.All(),
+				mock.EXPECT().CreateTransfer(ctx,
 					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
@@ -138,6 +136,9 @@ func TestController_handleAddBalance(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			transferMock, server, ctrl := getServerTest(t)
+			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/transfers%s", rootRoute)
@@ -171,8 +172,6 @@ func TestController_handleAddBalance(t *testing.T) {
 
 func TestController_handleGetTransfers(t *testing.T) {
 
-	transferMock, server := getServerTest(t)
-
 	type args struct {
 		accountUUID string
 		sessionUUID string
@@ -202,7 +201,6 @@ func TestController_handleGetTransfers(t *testing.T) {
 				require.NotEmpty(t, resp.Body)
 			},
 		},
-
 		{
 			name: "Should return expired token",
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
@@ -217,6 +215,9 @@ func TestController_handleGetTransfers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			transferMock, server, ctrl := getServerTest(t)
+			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/transfers%s", rootRoute)

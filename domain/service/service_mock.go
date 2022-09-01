@@ -17,25 +17,25 @@ type repoMock struct {
 	mockCacheManager *mocks.MockCacheManager
 }
 
-func newServiceTestMock(t *testing.T) (repoMock, *Service) {
+func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *Service, ctrl *gomock.Controller) {
 
 	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultFilepath)
 	require.NoError(t, err)
 
-	ctrl := gomock.NewController(t)
+	ctrl = gomock.NewController(t)
 	log := logger.New(*cfg)
 
-	mocks := repoMock{
+	repoMocks = repoMock{
 		mockAccountRepo:  mocks.NewMockAccountRepo(ctrl),
 		mockCacheManager: mocks.NewMockCacheManager(ctrl),
 		mockAuthRepo:     mocks.NewMockAuthRepo(ctrl),
 	}
 
-	dataManagerMock := newDataMock(ctrl, mocks)
+	dataManagerMock := newDataMock(ctrl, repoMocks)
 
-	svc := New(dataManagerMock, cfg, mocks.mockCacheManager, log)
+	svc = New(dataManagerMock, cfg, repoMocks.mockCacheManager, log)
 
-	return mocks, svc
+	return
 }
 
 type dataMock struct {
