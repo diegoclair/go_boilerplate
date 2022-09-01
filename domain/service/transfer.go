@@ -5,6 +5,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
 )
@@ -19,6 +20,7 @@ func newTransferService(svc *Service) TransferService {
 	}
 }
 
+// TODO: create unit test for transaction mock and testing floating point
 func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Transfer) (err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
@@ -57,14 +59,14 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 		return err
 	}
 
-	originBalance := account.Balance - transfer.Amount
+	originBalance := number.RoundFloat(account.Balance-transfer.Amount, 2)
 	err = tx.Account().UpdateAccountBalance(ctx, account.ID, originBalance)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	destBalance := destAccount.Balance + transfer.Amount
+	destBalance := number.RoundFloat(destAccount.Balance+transfer.Amount, 2)
 	err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destBalance)
 	if err != nil {
 		log.Error(err)

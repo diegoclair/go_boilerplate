@@ -13,13 +13,6 @@ import (
 
 func Test_accountService_GetAccountByUUID(t *testing.T) {
 
-	ctx := context.Background()
-	repoMocks, svc := newServiceTestMock(t)
-
-	s := &accountService{
-		svc: svc,
-	}
-
 	type args struct {
 		accountUUID string
 	}
@@ -57,6 +50,13 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
+			ctx := context.Background()
+			repoMocks, svc := newServiceTestMock(t)
+
+			s := &accountService{
+				svc: svc,
+			}
+
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, repoMocks, tt.args)
 			}
@@ -74,12 +74,6 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 }
 
 func Test_accountService_AddBalance(t *testing.T) {
-
-	ctx := context.Background()
-	repoMocks, svc := newServiceTestMock(t)
-	s := &accountService{
-		svc: svc,
-	}
 
 	type args struct {
 		accountUUID string
@@ -103,6 +97,17 @@ func Test_accountService_AddBalance(t *testing.T) {
 			},
 		},
 		{
+			name: "Should add balance validating floating point",
+			args: args{accountUUID: "account123", amount: 0.1},
+			buildMock: func(ctx context.Context, mocks repoMock, args args) {
+				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 0.2}
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, result.ID, 0.3).Return(nil).Times(1),
+				)
+			},
+		},
+		{
 			name: "Should return error with there is some error to get account by uuid",
 			args: args{accountUUID: "account123", amount: 7.32},
 			buildMock: func(ctx context.Context, mocks repoMock, args args) {
@@ -114,6 +119,12 @@ func Test_accountService_AddBalance(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			ctx := context.Background()
+			repoMocks, svc := newServiceTestMock(t)
+			s := &accountService{
+				svc: svc,
+			}
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, repoMocks, tt.args)

@@ -7,6 +7,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	utilerrors "github.com/diegoclair/go_boilerplate/util/errors"
+	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
 )
@@ -52,7 +53,6 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 	return nil
 }
 
-//TODO: fix floating point
 func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amount float64) (err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
@@ -64,7 +64,7 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 		log.Error("error to get account", err)
 		return err
 	}
-	balance := account.Balance + amount
+	balance := number.RoundFloat(account.Balance+amount, 2)
 
 	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account.ID, balance)
 	if err != nil {
