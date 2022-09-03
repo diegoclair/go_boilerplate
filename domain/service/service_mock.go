@@ -19,7 +19,7 @@ type repoMock struct {
 
 func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *Service, ctrl *gomock.Controller) {
 
-	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultFilepath)
+	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultName)
 	require.NoError(t, err)
 
 	ctrl = gomock.NewController(t)

@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
@@ -17,7 +16,7 @@ type jwtAuth struct {
 
 func newJwtAuth(jwtPrivateKey string) (AuthToken, error) {
 	if len(jwtPrivateKey) != chacha20poly1305.KeySize {
-		return nil, fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
+		return nil, errInvalidPrivateKey
 	}
 
 	return &jwtAuth{

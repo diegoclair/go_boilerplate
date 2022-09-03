@@ -32,7 +32,7 @@ var (
 
 func getTokenMaker(t *testing.T) auth.AuthToken {
 	onceToken.Do(func() {
-		cfg, err := config.GetConfigEnvironment("../../../../" + config.ConfigDefaultFilepath)
+		cfg, err := config.GetConfigEnvironment("../../../../" + config.ConfigDefaultName)
 		require.NoError(t, err)
 
 		cfg.App.Auth.AccessTokenDuration = 2 * time.Second

@@ -2,12 +2,13 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/util/config"
 )
 
-// TODO: Create unit tests for this package
+// TODO: Create unit tests for VerifyToken
 type AuthToken interface {
 	CreateAccessToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
 	CreateRefreshToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
@@ -26,8 +27,9 @@ var (
 )
 
 var (
-	errExpiredToken = errors.New("token has expired")
-	errInvalidToken = errors.New("token is invalid")
+	errExpiredToken      = errors.New("token has expired")
+	errInvalidToken      = errors.New("token is invalid")
+	errInvalidPrivateKey = fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 )
 
 type Key string
@@ -46,9 +48,8 @@ func NewAuthToken(cfg config.AuthConfig) (AuthToken, error) {
 	accessTokenDurationTime = cfg.AccessTokenDuration
 	refreshTokenDurationTime = cfg.RefreshTokenDuration
 
-	if cfg.AccessTokenType == tokenTypePaseto {
-		return newPasetoAuth(cfg.PasetoSymmetricKey)
+	if cfg.AccessTokenType == tokenTypeJWT {
+		return newJwtAuth(cfg.JWTPrivateKey)
 	}
-	return newJwtAuth(cfg.JWTPrivateKey)
-
+	return newPasetoAuth(cfg.PasetoSymmetricKey)
 }

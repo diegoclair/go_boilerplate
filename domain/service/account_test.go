@@ -133,7 +133,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 				tt.buildMock(ctx, repoMocks, tt.args)
 			}
 			if err := s.AddBalance(ctx, tt.args.accountUUID, tt.args.amount); (err != nil) != tt.wantErr {
-				t.Errorf("accountService.AddBalance() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("AddBalance() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

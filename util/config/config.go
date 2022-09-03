@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	ConfigDefaultFilepath = "config.toml"
+	ConfigDefaultName = "config.toml"
 )
 
 var (
@@ -22,7 +22,7 @@ var (
 // EnvKeyReplacer replace for environment variable parse
 var EnvKeyReplacer = strings.NewReplacer(".", "_", "-", "_")
 
-// GetConfigEnvironment to read initial config
+// GetConfigEnvironment to read initial config from a config file with it full path
 func GetConfigEnvironment(filepath string) (*Config, error) {
 	once.Do(func() {
 

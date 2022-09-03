@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"fmt"
-
 	"time"
 
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
@@ -18,7 +16,7 @@ type pasetoAuth struct {
 
 func newPasetoAuth(symmetricKey string) (AuthToken, error) {
 	if len(symmetricKey) != chacha20poly1305.KeySize {
-		return nil, fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
+		return nil, errInvalidPrivateKey
 	}
 
 	return &pasetoAuth{
