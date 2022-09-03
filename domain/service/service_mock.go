@@ -31,7 +31,7 @@ func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *Service, ctrl *g
 		mockAuthRepo:     mocks.NewMockAuthRepo(ctrl),
 	}
 
-	dataManagerMock := newDataMock(ctrl, repoMocks)
+	dataManagerMock := newDataMock(repoMocks)
 
 	svc = New(dataManagerMock, cfg, repoMocks.mockCacheManager, log)
 
@@ -39,19 +39,32 @@ func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *Service, ctrl *g
 }
 
 type dataMock struct {
-	ctrl  *gomock.Controller
 	mocks repoMock
 }
 
-func newDataMock(ctrl *gomock.Controller, mocks repoMock) contract.DataManager {
+func newDataMockTransaction(mocks repoMock) contract.Transaction {
 	return &dataMock{
-		ctrl:  ctrl,
+
+		mocks: mocks,
+	}
+}
+
+func (d *dataMock) Rollback() error {
+	return nil
+}
+
+func (d *dataMock) Commit() error {
+	return nil
+}
+
+func newDataMock(mocks repoMock) contract.DataManager {
+	return &dataMock{
 		mocks: mocks,
 	}
 }
 
 func (d *dataMock) Begin() (contract.Transaction, error) {
-	return mocks.NewMockTransaction(d.ctrl), nil
+	return newDataMockTransaction(d.mocks), nil
 }
 
 func (d *dataMock) Account() contract.AccountRepo {

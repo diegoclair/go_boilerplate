@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
@@ -20,21 +21,25 @@ func newTransferService(svc *Service) TransferService {
 	}
 }
 
-// TODO: create unit test for transaction mock and testing floating point
 func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Transfer) (err error) {
 
 	ctx, log := s.svc.log.NewSessionLogger(ctx)
 	log.Info("Process Started")
 	defer log.Info("Process Finished")
 
-	loggedAccountUUID := ctx.Value(auth.AccountUUIDKey)
-	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID.(string))
+	loggedAccountUUID, ok := ctx.Value(auth.AccountUUIDKey).(string)
+	if !ok {
+		errMsg := "accountUUID should not be empty"
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+	fromAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	if account.Balance < transfer.Amount {
+	if fromAccount.Balance < transfer.Amount {
 		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
 	}
 
@@ -53,14 +58,14 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 	}
 	defer tx.Rollback()
 
-	err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, account.ID, destAccount.ID, transfer.Amount)
+	err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	originBalance := number.RoundFloat(account.Balance-transfer.Amount, 2)
-	err = tx.Account().UpdateAccountBalance(ctx, account.ID, originBalance)
+	originBalance := number.RoundFloat(fromAccount.Balance-transfer.Amount, 2)
+	err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, originBalance)
 	if err != nil {
 		log.Error(err)
 		return err
