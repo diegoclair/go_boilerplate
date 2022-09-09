@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"errors"
+	"strings"
 	"time"
 
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
@@ -44,11 +44,11 @@ func (a *jwtAuth) VerifyToken(token string) (payload *tokenPayload, err error) {
 	jwtToken, err := jwt.ParseWithClaims(token, &tokenPayload{}, keyFunc)
 	if err != nil {
 		verr, ok := err.(*jwt.ValidationError)
-		if ok && errors.Is(verr.Inner, errExpiredToken) {
+		if ok && strings.Contains(verr.Inner.Error(), errExpiredToken.Error()) {
 			log.Error("expired token: ", err)
 			return nil, resterrors.NewUnauthorizedError(errExpiredToken.Error())
 		}
-		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error(), err)
 	}
 
 	var ok bool

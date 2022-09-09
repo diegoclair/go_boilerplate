@@ -9,11 +9,11 @@ func TestPasetoTokenMaker(t *testing.T) {
 
 	tests := []struct {
 		name string
-		args args
+		args utilArgs
 	}{
 		{
 			name: "Should create token without error",
-			args: args{
+			args: utilArgs{
 				accountUUID:          "account-123",
 				sessionUUID:          "session-123",
 				accessTokenDuration:  time.Second,
@@ -22,7 +22,7 @@ func TestPasetoTokenMaker(t *testing.T) {
 		},
 		{
 			name: "Should return error with an invalid privateKey",
-			args: args{
+			args: utilArgs{
 				withoutPrivateKey: true,
 				wantErr:           true,
 				wantErrValue:      errInvalidPrivateKey,
@@ -32,7 +32,8 @@ func TestPasetoTokenMaker(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			validateTokenMaker(t, tt.args, tokenTypePaseto)
+			tt.args.tokenType = tokenTypePaseto
+			validateTokenMaker(t, tt.args)
 		})
 	}
 }
