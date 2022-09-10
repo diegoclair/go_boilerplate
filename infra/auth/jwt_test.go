@@ -50,11 +50,18 @@ func Test_jwtAuth_VerifyToken(t *testing.T) {
 		{
 			name: "Should pass without error",
 		},
+		{
+			name: "Should return error for a expired token",
+			args: utilArgs{
+				expiredToken: true,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cfg := getConfig(t, tt.args)
 			tt.args.tokenType = tokenTypeJWT
+			cfg := getConfig(t, tt.args)
 			maker, err := NewAuthToken(cfg.App.Auth)
 			require.NoError(t, err)
 
@@ -63,6 +70,9 @@ func Test_jwtAuth_VerifyToken(t *testing.T) {
 			gotPayload, err := maker.VerifyToken(token)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("jwtAuth.VerifyToken() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr {
 				return
 			}
 			require.Equal(t, tt.args.sessionUUID, gotPayload.SessionUUID)
