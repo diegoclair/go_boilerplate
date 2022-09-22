@@ -54,9 +54,9 @@ func GetConfigEnvironment(filepath string) (*Config, error) {
 		viper.WatchConfig()
 		viper.OnConfigChange(func(in fsnotify.Event) {
 			if in.Op == fsnotify.Write {
-				configError = viper.Unmarshal(config)
-				if configError != nil {
-					log.Error("Error to unmarshal configs: ", configError)
+				err := viper.Unmarshal(config)
+				if err != nil {
+					log.Error("Error to unmarshal new config changes: ", err)
 					return
 				}
 			}
