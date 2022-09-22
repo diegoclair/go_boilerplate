@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/viper"
 )
@@ -49,6 +50,17 @@ func GetConfigEnvironment(filepath string) (*Config, error) {
 			log.Error("Error to unmarshal configs: ", configError)
 			return
 		}
+
+		viper.WatchConfig()
+		viper.OnConfigChange(func(in fsnotify.Event) {
+			if in.Op == fsnotify.Write {
+				configError = viper.Unmarshal(config)
+				if configError != nil {
+					log.Error("Error to unmarshal configs: ", configError)
+					return
+				}
+			}
+		})
 	})
 
 	return config, configError

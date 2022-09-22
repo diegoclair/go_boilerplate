@@ -48,6 +48,7 @@ func NewAuthToken(cfg config.AuthConfig) (AuthToken, error) {
 	accessTokenDurationTime = cfg.AccessTokenDuration
 	refreshTokenDurationTime = cfg.RefreshTokenDuration
 
+	//TODO: adicionar possibilidade de config igual a avenue
 	if cfg.AccessTokenType == tokenTypeJWT {
 		return newJwtAuth(cfg.JWTPrivateKey)
 	}
