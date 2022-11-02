@@ -17,7 +17,7 @@ type repoMock struct {
 	mockCacheManager *mocks.MockCacheManager
 }
 
-func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *Service, ctrl *gomock.Controller) {
+func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *service, ctrl *gomock.Controller) {
 
 	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultName)
 	require.NoError(t, err)
@@ -33,7 +33,7 @@ func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *Service, ctrl *g
 
 	dataManagerMock := newDataMock(repoMocks)
 
-	svc = New(dataManagerMock, cfg, repoMocks.mockCacheManager, log)
+	svc = newService(dataManagerMock, cfg, repoMocks.mockCacheManager, log)
 
 	return
 }

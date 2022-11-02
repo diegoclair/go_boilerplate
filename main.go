@@ -18,7 +18,7 @@ package main
 import (
 	"log"
 
-	"github.com/diegoclair/go_boilerplate/application/factory"
+	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest"
 	"github.com/diegoclair/go_boilerplate/domain/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
@@ -53,13 +53,12 @@ func main() {
 		log.Fatal("Error connecting to cache server:", err)
 	}
 
-	svc := service.New(data, cfg, cache, log)
-	svm := service.NewServiceManager()
-
-	services, err := factory.GetServices(svc, svm)
+	services, err := service.New(data, cfg, cache, log)
 	if err != nil {
 		log.Fatal("error to get domain services: ", err)
 	}
 
-	rest.StartRestServer(cfg, services, log, authToken) //TODO: receive flags for what server it will starts
+	mp := mapper.New()
+
+	rest.StartRestServer(cfg, services, log, authToken, mp) //TODO: receive flags for what server it will starts
 }

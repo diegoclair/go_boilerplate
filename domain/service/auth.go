@@ -13,10 +13,10 @@ const (
 )
 
 type authService struct {
-	svc *Service
+	svc *service
 }
 
-func newAuthService(svc *Service) AuthService {
+func newAuthService(svc *service) AuthService {
 	return &authService{
 		svc: svc,
 	}

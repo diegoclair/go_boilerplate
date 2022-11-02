@@ -13,10 +13,10 @@ import (
 )
 
 type accountService struct {
-	svc *Service
+	svc *service
 }
 
-func newAccountService(svc *Service) AccountService {
+func newAccountService(svc *service) AccountService {
 	return &accountService{
 		svc: svc,
 	}

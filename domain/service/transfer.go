@@ -12,10 +12,10 @@ import (
 )
 
 type transferService struct {
-	svc *Service
+	svc *service
 }
 
-func newTransferService(svc *Service) TransferService {
+func newTransferService(svc *service) TransferService {
 	return &transferService{
 		svc: svc,
 	}

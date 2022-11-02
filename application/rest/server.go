@@ -3,12 +3,13 @@ package rest
 import (
 	"fmt"
 
-	"github.com/diegoclair/go_boilerplate/application/factory"
+	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/accountroute"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/pingroute"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/transferroute"
 	servermiddleware "github.com/diegoclair/go_boilerplate/application/rest/serverMiddleware"
+	"github.com/diegoclair/go_boilerplate/domain/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
@@ -28,8 +29,8 @@ type Server struct {
 	cfg     *config.Config
 }
 
-func StartRestServer(cfg *config.Config, services *factory.Services, log logger.Logger, authToken auth.AuthToken) {
-	server := NewRestServer(services, authToken, cfg)
+func StartRestServer(cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, mapper mapper.Mapper) {
+	server := newRestServer(services, authToken, cfg, mapper)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -42,15 +43,15 @@ func StartRestServer(cfg *config.Config, services *factory.Services, log logger.
 	}
 }
 
-func NewRestServer(services *factory.Services, authToken auth.AuthToken, cfg *config.Config) *Server {
+func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, mapper mapper.Mapper) *Server {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	pingController := pingroute.NewController()
-	accountController := accountroute.NewController(services.AccountService, services.Mapper)
-	authController := authroute.NewController(services.AuthService, services.Mapper, authToken)
-	transferController := transferroute.NewController(services.TransferService, services.Mapper)
+	accountController := accountroute.NewController(services.AccountService, mapper)
+	authController := authroute.NewController(services.AuthService, mapper, authToken)
+	transferController := transferroute.NewController(services.TransferService, mapper)
 
 	pingRoute := pingroute.NewRouter(pingController, pingroute.RouteName)
 	accountRoute := accountroute.NewRouter(accountController, accountroute.RouteName)
