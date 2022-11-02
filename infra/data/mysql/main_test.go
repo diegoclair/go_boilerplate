@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/data/mysql"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
-	"github.com/diegoclair/go_boilerplate/util/config"
 )
 
 var testMysql contract.DataManager

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
-	"github.com/diegoclair/go_boilerplate/util/config"
 
 	redis "gopkg.in/redis.v5"
 )

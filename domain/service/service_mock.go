@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/mocks"
-	"github.com/diegoclair/go_boilerplate/util/config"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )

@@ -3,7 +3,7 @@ package logger
 import (
 	"context"
 
-	"github.com/diegoclair/go_boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/infra/config"
 )
 
 // Level represents a logging level

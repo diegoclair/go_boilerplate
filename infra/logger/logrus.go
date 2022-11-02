@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/diegoclair/go_boilerplate/infra/auth"
-	"github.com/diegoclair/go_boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/sirupsen/logrus"
 )
 

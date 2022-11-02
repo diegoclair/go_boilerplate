@@ -9,9 +9,9 @@ import (
 	"github.com/GuiaBolso/darwin"
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/data/migrations"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
-	"github.com/diegoclair/go_boilerplate/util/config"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 
@@ -26,7 +26,7 @@ type mysqlConn struct {
 	db *sql.DB
 }
 
-//Instance returns an instance of a MySQLRepo
+// Instance returns an instance of a MySQLRepo
 func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
 	onceDB.Do(func() {
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/infra/config"
 )
 
 // TODO: Create unit tests for VerifyToken

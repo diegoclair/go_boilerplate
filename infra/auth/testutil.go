@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/util/config"
+	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/stretchr/testify/require"
 )
 
