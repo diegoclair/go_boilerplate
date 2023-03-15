@@ -23,7 +23,7 @@ services:
   cache:
     container_name: cache-redis
     image: redis:7.0-alpine
-    restart: always
+    restart: unless-stopped
     ports:
       - '6379:6379'
     command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
@@ -38,7 +38,7 @@ services:
     command: --innodb-use-native-aio=0
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE - this is to not show the error 'mbind: Operation not permitted' in database docker log
-    restart: always
+    restart: unless-stopped
     tty: true
     ports:
       - 3306:3306
