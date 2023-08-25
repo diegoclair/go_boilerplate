@@ -3,9 +3,9 @@ Go Boilerplate API
   
 ## Description ✈️
 Here I tried to create an golang boilerplate with experiences that I got with doing some projects using Go.
-I tried to use some concepts from DDD and Clean Arch. 
+I tried to use some concepts from DDD, Clean Arch and some design patterns. 
   
-Now I'm studying about how to implements test in a better way possible.  
+The code are with all layers tested.
 Feel free to help me improve the project/structure. 
   
 ## ▶️ Start application 💻 
