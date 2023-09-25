@@ -24,6 +24,9 @@ var (
 // mysqlConn is the database connection manager
 type mysqlConn struct {
 	db *sql.DB
+
+	accountRepo contract.AccountRepo
+	authRepo    contract.AuthRepo
 }
 
 // Instance returns an instance of a MySQLRepo
@@ -80,6 +83,8 @@ func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, erro
 		conn = &mysqlConn{
 			db: db,
 		}
+		conn.accountRepo = newAccountRepo(db)
+		conn.authRepo = newAuthRepo(db)
 	})
 
 	return conn, connErr
@@ -100,9 +105,9 @@ func (c *mysqlConn) Close() (err error) {
 }
 
 func (c *mysqlConn) Account() contract.AccountRepo {
-	return newAccountRepo(c.db)
+	return c.accountRepo
 }
 
 func (c *mysqlConn) Auth() contract.AuthRepo {
-	return newAuthRepo(c.db)
+	return c.authRepo
 }
