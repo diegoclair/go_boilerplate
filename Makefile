@@ -5,6 +5,6 @@ test:
 .PHONY: mock
 mock:
 	rm -rf mocks
-	mockgen -package mocks -destination mocks/repo.go github.com/diegoclair/go_boilerplate/domain/contract Transaction,AccountRepo,AuthRepo
+	mockgen -package mocks -destination mocks/repo.go github.com/diegoclair/go_boilerplate/domain/contract DataManager,Transaction,AccountRepo,AuthRepo
 	mockgen -package mocks -destination mocks/cache.go github.com/diegoclair/go_boilerplate/domain/contract CacheManager
 	mockgen -package mocks -destination mocks/service.go github.com/diegoclair/go_boilerplate/domain/service AccountService,AuthService,TransferService

@@ -3,7 +3,6 @@ package service
 import (
 	"testing"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/mocks"
@@ -12,6 +11,9 @@ import (
 )
 
 type repoMock struct {
+	mockDataManager *mocks.MockDataManager
+	mockTransaction *mocks.MockTransaction
+
 	mockAuthRepo     *mocks.MockAuthRepo
 	mockAccountRepo  *mocks.MockAccountRepo
 	mockCacheManager *mocks.MockCacheManager
@@ -26,51 +28,20 @@ func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *service, ctrl *g
 	log := logger.New(*cfg)
 
 	repoMocks = repoMock{
+		mockDataManager: mocks.NewMockDataManager(ctrl),
+		mockTransaction: mocks.NewMockTransaction(ctrl),
+
 		mockAccountRepo:  mocks.NewMockAccountRepo(ctrl),
 		mockCacheManager: mocks.NewMockCacheManager(ctrl),
 		mockAuthRepo:     mocks.NewMockAuthRepo(ctrl),
 	}
 
-	dataManagerMock := newDataMock(repoMocks)
+	repoMocks.mockDataManager.EXPECT().Account().Return(repoMocks.mockAccountRepo).AnyTimes()
+	repoMocks.mockDataManager.EXPECT().Auth().Return(repoMocks.mockAuthRepo).AnyTimes()
+	repoMocks.mockTransaction.EXPECT().Account().Return(repoMocks.mockAccountRepo).AnyTimes()
+	repoMocks.mockTransaction.EXPECT().Auth().Return(repoMocks.mockAuthRepo).AnyTimes()
 
-	svc = newService(dataManagerMock, cfg, repoMocks.mockCacheManager, log)
+	svc = newService(repoMocks.mockDataManager, cfg, repoMocks.mockCacheManager, log)
 
 	return
-}
-
-type dataMock struct {
-	mocks repoMock
-}
-
-func newDataMockTransaction(mocks repoMock) contract.Transaction {
-	return &dataMock{
-
-		mocks: mocks,
-	}
-}
-
-func (d *dataMock) Rollback() error {
-	return nil
-}
-
-func (d *dataMock) Commit() error {
-	return nil
-}
-
-func newDataMock(mocks repoMock) contract.DataManager {
-	return &dataMock{
-		mocks: mocks,
-	}
-}
-
-func (d *dataMock) Begin() (contract.Transaction, error) {
-	return newDataMockTransaction(d.mocks), nil
-}
-
-func (d *dataMock) Account() contract.AccountRepo {
-	return d.mocks.mockAccountRepo
-}
-
-func (d *dataMock) Auth() contract.AuthRepo {
-	return d.mocks.mockAuthRepo
 }

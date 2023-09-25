@@ -44,12 +44,15 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 							ID:      2,
 							Balance: 25.50,
 						}, nil).Times(1),
+					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), 5.50).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), 30.50).
 						Return(nil).Times(1),
+					mocks.mockTransaction.EXPECT().Commit().Return(nil).Times(1),
+					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
 				)
 			},
 		},
@@ -109,6 +112,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 							ID:      2,
 							Balance: 0.2,
 						}, nil).Times(1),
+					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
 						Return(nil).Times(1),
 					//if we remove the number.RoundFloat of destination balance, here we would have 0.19999999999999998 instead of 0.2
@@ -117,6 +121,8 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 					//if we remove the number.RoundFloat of destination balance, here we would have 0.30000000000000004 instead of 0.3
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), 0.3).
 						Return(nil).Times(1),
+					mocks.mockTransaction.EXPECT().Commit().Return(nil).Times(1),
+					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
 				)
 			},
 			wantErr: false,
