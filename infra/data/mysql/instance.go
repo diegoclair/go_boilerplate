@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -80,24 +81,36 @@ func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, erro
 
 		log.Info("Migrations executed")
 
-		conn = &mysqlConn{
-			db: db,
-		}
-		conn.accountRepo = newAccountRepo(db)
-		conn.authRepo = newAuthRepo(db)
+		conn = repoInstances(db)
+		conn.db = db
 	})
 
 	return conn, connErr
 }
 
-// Begin starts a mysql transaction
-func (c *mysqlConn) Begin() (contract.Transaction, error) {
+func repoInstances(dbConn dbConnection) *mysqlConn {
+	return &mysqlConn{
+		accountRepo: newAccountRepo(dbConn),
+		authRepo:    newAuthRepo(dbConn),
+	}
+}
+
+func (c *mysqlConn) WithTransaction(ctx context.Context, fn func(dm contract.DataManager) error) error {
 	tx, err := c.db.Begin()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return newTransaction(tx), nil
+	txConn := repoInstances(tx)
+	err = fn(txConn)
+	if err != nil {
+		rbErr := tx.Rollback()
+		if rbErr != nil {
+			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (c *mysqlConn) Close() (err error) {

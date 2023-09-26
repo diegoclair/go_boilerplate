@@ -8,15 +8,9 @@ import (
 
 // DataManager holds the methods that manipulates the main data.
 type DataManager interface {
-	Begin() (Transaction, error)
+	WithTransaction(ctx context.Context, fn func(r DataManager) error) error
 	Account() AccountRepo
 	Auth() AuthRepo
-}
-
-type Transaction interface {
-	DataManager
-	Rollback() error
-	Commit() error
 }
 
 type AuthRepo interface {

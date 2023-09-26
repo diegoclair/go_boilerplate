@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/util/number"
@@ -59,15 +60,17 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 							ID:      2,
 							Balance: 25.50,
 						}, nil).Times(1),
-					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
+					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).DoAndReturn(
+						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+							return fn(mocks.mockDataManager)
+						},
+					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), 5.50).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), 30.50).
 						Return(nil).Times(1),
-					mocks.mockTransaction.EXPECT().Commit().Return(nil).Times(1),
-					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
 				)
 			},
 		},
@@ -127,7 +130,11 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 							ID:      2,
 							Balance: 0.2,
 						}, nil).Times(1),
-					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
+					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).DoAndReturn(
+						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+							return fn(mocks.mockDataManager)
+						},
+					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
 						Return(nil).Times(1),
 					//if we remove the number.RoundFloat of destination balance, here we would have 0.19999999999999998 instead of 0.2
@@ -136,8 +143,6 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 					//if we remove the number.RoundFloat of destination balance, here we would have 0.30000000000000004 instead of 0.3
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), 0.3).
 						Return(nil).Times(1),
-					mocks.mockTransaction.EXPECT().Commit().Return(nil).Times(1),
-					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
 				)
 			},
 			wantErr: false,
@@ -185,7 +190,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						Return(entity.Account{}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
 						Return(entity.Account{}, nil).Times(1),
-					mocks.mockDataManager.EXPECT().Begin().Return(nil, assert.AnError).Times(1),
+					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).Return(assert.AnError).Times(1),
 				)
 			},
 			wantErr: true,
@@ -204,10 +209,13 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						Return(entity.Account{ID: 1}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
 						Return(entity.Account{ID: 2}, nil).Times(1),
-					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
+					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).DoAndReturn(
+						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+							return fn(mocks.mockDataManager)
+						},
+					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
 						Return(assert.AnError).Times(1),
-					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
 				)
 			},
 			wantErr: true,
@@ -228,12 +236,15 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						Return(respAccountFrom, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
 						Return(entity.Account{ID: 2}, nil).Times(1),
-					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
+					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).DoAndReturn(
+						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+							return fn(mocks.mockDataManager)
+						},
+					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), number.RoundFloat(respAccountFrom.Balance-args.transfer.Amount, 2)).
 						Return(assert.AnError).Times(1),
-					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
 				)
 			},
 			wantErr: true,
@@ -255,44 +266,17 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						Return(respAccountFrom, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
 						Return(respAccountDest, nil).Times(1),
-					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
+					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).DoAndReturn(
+						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+							return fn(mocks.mockDataManager)
+						},
+					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), number.RoundFloat(respAccountFrom.Balance-args.transfer.Amount, 2)).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), number.RoundFloat(respAccountDest.Balance+args.transfer.Amount, 2)).
 						Return(assert.AnError).Times(1),
-					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
-				)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error if there is some error to commit transaction",
-			args: args{
-				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
-					AccountDestinationUUID: "account-dest-123",
-					Amount:                 2,
-				},
-			},
-			buildMock: func(ctx context.Context, mocks repoMock, args args) {
-				respAccountFrom := entity.Account{ID: 1, Balance: 4}
-				respAccountDest := entity.Account{ID: 2, Balance: 5}
-				gomock.InOrder(
-					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(respAccountFrom, nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(respAccountDest, nil).Times(1),
-					mocks.mockDataManager.EXPECT().Begin().Return(mocks.mockTransaction, nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
-						Return(nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), number.RoundFloat(respAccountFrom.Balance-args.transfer.Amount, 2)).
-						Return(nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), number.RoundFloat(respAccountDest.Balance+args.transfer.Amount, 2)).
-						Return(nil).Times(1),
-					mocks.mockTransaction.EXPECT().Commit().Return(assert.AnError).Times(1),
-					mocks.mockTransaction.EXPECT().Rollback().Return(nil).Times(1),
 				)
 			},
 			wantErr: true,

@@ -23,12 +23,6 @@ func newTransaction(tx *sql.Tx) *mysqlTransaction {
 	return instance
 }
 
-func (t *mysqlTransaction) Begin() (contract.Transaction, error) {
-	return &mysqlTransaction{
-		tx: t.tx,
-	}, nil
-}
-
 // Commit persists changes to database
 func (t *mysqlTransaction) Commit() error {
 	err := t.tx.Commit()

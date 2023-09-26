@@ -9,10 +9,10 @@ import (
 )
 
 type accountRepo struct {
-	db connection
+	db dbConnection
 }
 
-func newAccountRepo(db connection) contract.AccountRepo {
+func newAccountRepo(db dbConnection) contract.AccountRepo {
 	return &accountRepo{
 		db: db,
 	}

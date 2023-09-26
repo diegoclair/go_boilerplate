@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/util/number"
@@ -51,40 +52,29 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 
 	transfer.TransferUUID = uuid.NewV4().String()
 
-	tx, err := s.svc.dm.Begin()
-	if err != nil {
-		log.Error("error to get db transaction", err)
-		return err
-	}
-	defer tx.Rollback()
+	return s.svc.dm.WithTransaction(ctx, func(tx contract.DataManager) error {
 
-	err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+		err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 
-	originBalance := number.RoundFloat(fromAccount.Balance-transfer.Amount, 2)
-	err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, originBalance)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+		originBalance := number.RoundFloat(fromAccount.Balance-transfer.Amount, 2)
+		err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, originBalance)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 
-	destBalance := number.RoundFloat(destAccount.Balance+transfer.Amount, 2)
-	err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destBalance)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	return nil
+		destBalance := number.RoundFloat(destAccount.Balance+transfer.Amount, 2)
+		err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destBalance)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		return nil
+	})
 }
 
 func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.Transfer, err error) {

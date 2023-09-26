@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-type connection interface {
+type dbConnection interface {
 	Prepare(query string) (*sql.Stmt, error)
 }
 

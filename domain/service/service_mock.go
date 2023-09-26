@@ -12,7 +12,6 @@ import (
 
 type repoMock struct {
 	mockDataManager *mocks.MockDataManager
-	mockTransaction *mocks.MockTransaction
 
 	mockAuthRepo     *mocks.MockAuthRepo
 	mockAccountRepo  *mocks.MockAccountRepo
@@ -29,7 +28,6 @@ func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *service, ctrl *g
 
 	repoMocks = repoMock{
 		mockDataManager: mocks.NewMockDataManager(ctrl),
-		mockTransaction: mocks.NewMockTransaction(ctrl),
 
 		mockAccountRepo:  mocks.NewMockAccountRepo(ctrl),
 		mockCacheManager: mocks.NewMockCacheManager(ctrl),
@@ -38,8 +36,6 @@ func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *service, ctrl *g
 
 	repoMocks.mockDataManager.EXPECT().Account().Return(repoMocks.mockAccountRepo).AnyTimes()
 	repoMocks.mockDataManager.EXPECT().Auth().Return(repoMocks.mockAuthRepo).AnyTimes()
-	repoMocks.mockTransaction.EXPECT().Account().Return(repoMocks.mockAccountRepo).AnyTimes()
-	repoMocks.mockTransaction.EXPECT().Auth().Return(repoMocks.mockAuthRepo).AnyTimes()
 
 	svc = newService(repoMocks.mockDataManager, cfg, repoMocks.mockCacheManager, log)
 

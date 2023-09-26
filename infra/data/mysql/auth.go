@@ -9,10 +9,10 @@ import (
 )
 
 type authRepo struct {
-	db connection
+	db dbConnection
 }
 
-func newAuthRepo(db connection) contract.AuthRepo {
+func newAuthRepo(db dbConnection) contract.AuthRepo {
 	return &authRepo{
 		db: db,
 	}
