@@ -3,13 +3,113 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func Test_newAccountService(t *testing.T) {
+
+	_, svc, ctrl := newServiceTestMock(t)
+	defer ctrl.Finish()
+
+	want := &accountService{svc: svc}
+
+	if got := newAccountService(svc); !reflect.DeepEqual(got, want) {
+		t.Errorf("newAccountService() = %v, want %v", got, want)
+	}
+}
+
+func Test_accountService_CreateAccount(t *testing.T) {
+	type args struct {
+		account entity.Account
+	}
+	tests := []struct {
+		name      string
+		buildMock func(ctx context.Context, mocks repoMock, args args)
+		args      args
+		wantErr   bool
+	}{
+		{
+			name: "Should create account without any errors",
+			args: args{account: entity.Account{
+				Name:   "name",
+				CPF:    "123",
+				Secret: "123",
+			}},
+			buildMock: func(ctx context.Context, mocks repoMock, args args) {
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, errors.New("No records find")).Times(1),
+					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, account entity.Account) error {
+						require.Equal(t, args.account.Name, account.Name)
+						require.Equal(t, args.account.CPF, account.CPF)
+						require.NotEmpty(t, account.Secret)
+						return nil
+					}).Times(1),
+				)
+			},
+		},
+		{
+			name: "Should return error with there is some error to get account by document",
+			args: args{account: entity.Account{
+				Name: "name",
+				CPF:  "123",
+			}},
+			buildMock: func(ctx context.Context, mocks repoMock, args args) {
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, errors.New("some error")).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "Should return error with there is some error to create account",
+			args: args{account: entity.Account{
+				Name: "name",
+				CPF:  "123",
+			}},
+			buildMock: func(ctx context.Context, mocks repoMock, args args) {
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, errors.New("No records find")).Times(1),
+					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).Return(errors.New("some error")).Times(1),
+				)
+			},
+			wantErr: true,
+		},
+		{
+			name: "Should return error cpf already in use",
+			args: args{account: entity.Account{
+				Name: "name",
+				CPF:  "123",
+			}},
+			buildMock: func(ctx context.Context, mocks repoMock, args args) {
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, nil).Times(1)
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			ctx := context.Background()
+			repoMocks, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
+			s := &accountService{
+				svc: svc,
+			}
+
+			if tt.buildMock != nil {
+				tt.buildMock(ctx, repoMocks, tt.args)
+			}
+			if err := s.CreateAccount(ctx, tt.args.account); (err != nil) != tt.wantErr {
+				t.Errorf("CreateAccount() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
 
 func Test_accountService_GetAccountByUUID(t *testing.T) {
 
@@ -113,7 +213,19 @@ func Test_accountService_AddBalance(t *testing.T) {
 			args: args{accountUUID: "account123", amount: 7.32},
 			buildMock: func(ctx context.Context, mocks repoMock, args args) {
 				result := entity.Account{}
-				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, fmt.Errorf("some error")).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, assert.AnError).Times(1)
+			},
+			wantErr: true,
+		},
+		{
+			name: "Should return error with there is some error to update account balance",
+			args: args{accountUUID: "account123", amount: 7.32},
+			buildMock: func(ctx context.Context, mocks repoMock, args args) {
+				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 50}
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, result.ID, result.Balance+args.amount).Return(assert.AnError).Times(1),
+				)
 			},
 			wantErr: true,
 		},

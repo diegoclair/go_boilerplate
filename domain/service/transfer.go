@@ -93,27 +93,32 @@ func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.
 	log.Info("Process Started")
 	defer log.Info("Process Finished")
 
-	loggedAccountUUID := ctx.Value(auth.AccountUUIDKey)
+	loggedAccountUUID, ok := ctx.Value(auth.AccountUUIDKey).(string)
+	if !ok {
+		errMsg := "accountUUID should not be empty"
+		log.Error(errMsg)
+		return transfers, errors.New(errMsg)
+	}
 
-	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID.(string))
+	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
 	if err != nil {
 		log.Error(err)
 		return transfers, err
 	}
 
-	trasnfersMade, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, true)
+	transfersMade, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, true)
 	if err != nil {
 		log.Error(err)
 		return transfers, err
 	}
-	transfers = append(transfers, trasnfersMade...)
+	transfers = append(transfers, transfersMade...)
 
-	trasnfersReceived, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
+	transfersReceived, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
 	if err != nil {
 		log.Error(err)
 		return transfers, err
 	}
-	transfers = append(transfers, trasnfersReceived...)
+	transfers = append(transfers, transfersReceived...)
 
 	return transfers, nil
 }
