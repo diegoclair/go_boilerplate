@@ -28,6 +28,10 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 )
 
+func logsome(cfg *config.Config) {
+
+}
+
 func main() {
 
 	cfg, err := config.GetConfigEnvironment(config.ConfigDefaultName)
@@ -37,14 +41,17 @@ func main() {
 
 	log := logger.New(*cfg)
 
+	log.Info("info ", "message4", "message2", "message3", "message1")
+	log.Fatal("fatal ", "message1", "message2")
+
 	authToken, err := auth.NewAuthToken(cfg.App.Auth)
 	if err != nil {
-		log.Fatalf("Error to load config: %v", err)
+		log.Fatal("Error to load config: ", err)
 	}
 
 	data, err := data.Connect(cfg, log)
 	if err != nil {
-		log.Fatalf("Error to connect dataManager repositories: %v", err)
+		log.Fatal("Error to connect dataManager repositories: ", err)
 	}
 
 	log.Info("Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
