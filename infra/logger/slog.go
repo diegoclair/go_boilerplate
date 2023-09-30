@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"log/slog"
+
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"golang.org/x/exp/slog"
 )
 
 const sessionCodeKey = "session_code"
@@ -29,9 +30,7 @@ type SlogLogger struct {
 func newSlogLogger(cfg config.Config) *SlogLogger {
 
 	logger := &SlogLogger{cfg: cfg}
-
 	opts := slog.HandlerOptions{}
-
 	if cfg.Log.Debug {
 		opts.Level = slog.LevelDebug
 	}

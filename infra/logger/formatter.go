@@ -13,7 +13,7 @@ import (
 	"github.com/gookit/color"
 	"github.com/labstack/gommon/log"
 
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 type customJSONFormatter struct {
