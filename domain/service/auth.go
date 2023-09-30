@@ -6,6 +6,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
+	"golang.org/x/exp/slog"
 )
 
 const (
@@ -33,9 +34,12 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
-	s.svc.log.Infof(ctx, "account_id: %d", account.ID)
-	s.svc.log.Infof(ctx, "account_uuid: %s", account.UUID)
-	s.svc.log.Infof(ctx, "name: %s", account.Name)
+	s.svc.log.Infof(ctx, "account information used to login",
+		slog.Group("accountInfo",
+			slog.Int64("account_id", account.ID),
+			slog.String("account_uuid", account.UUID),
+			slog.String("name", account.Name),
+		))
 
 	err = crypto.CheckPassword(secret, account.Secret)
 	if err != nil {

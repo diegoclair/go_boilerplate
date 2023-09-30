@@ -10,6 +10,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
+	"golang.org/x/exp/slog"
 )
 
 type accountService struct {
@@ -59,14 +60,18 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		s.svc.log.Errorw(ctx, "error to get account by uuid", logger.AccountUUIDKey, accountUUID, logger.ErrorKey, err)
+		s.svc.log.Errorw(ctx, "error to get account by uuid",
+			slog.String(logger.AccountUUIDKey, accountUUID),
+			slog.String(logger.ErrorKey, err.Error()))
 		return err
 	}
 	balance := number.RoundFloat(account.Balance+amount, 2)
 
 	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account.ID, balance)
 	if err != nil {
-		s.svc.log.Errorw(ctx, "error to update account balance", logger.AccountUUIDKey, accountUUID, logger.ErrorKey, err)
+		s.svc.log.Errorw(ctx, "error to update account balance",
+			slog.String(logger.AccountUUIDKey, accountUUID),
+			slog.String(logger.ErrorKey, err.Error()))
 		return err
 	}
 
