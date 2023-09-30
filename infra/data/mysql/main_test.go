@@ -1,6 +1,7 @@
 package mysql_test
 
 import (
+	"context"
 	"log"
 	"os"
 	"testing"
@@ -21,9 +22,10 @@ func TestMain(m *testing.M) {
 	}
 	log := logger.New(*cfg)
 
-	mysql, err := mysql.Instance(cfg, log)
+	ctx := context.Background()
+	mysql, err := mysql.Instance(ctx, cfg, log)
 	if err != nil {
-		log.Fatal("cannot connect to mysql: ", err)
+		log.Fatalf(ctx, "cannot connect to mysql: %v", err)
 	}
 
 	testMysql = mysql

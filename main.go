@@ -16,6 +16,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/IQ-tech/go-mapper"
@@ -28,10 +29,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 )
 
-func logsome(cfg *config.Config) {
-
-}
-
 func main() {
 
 	cfg, err := config.GetConfigEnvironment(config.ConfigDefaultName)
@@ -39,33 +36,31 @@ func main() {
 		log.Fatalf("Error to load config: %v", err)
 	}
 
+	ctx := context.Background()
 	log := logger.New(*cfg)
-
-	log.Info("info ", "message4", "message2", "message3", "message1")
-	log.Fatal("fatal ", "message1", "message2")
 
 	authToken, err := auth.NewAuthToken(cfg.App.Auth)
 	if err != nil {
-		log.Fatal("Error to load config: ", err)
+		log.Fatalf(ctx, "Error to load config: %v", err)
 	}
 
-	data, err := data.Connect(cfg, log)
+	data, err := data.Connect(ctx, cfg, log)
 	if err != nil {
-		log.Fatal("Error to connect dataManager repositories: ", err)
+		log.Fatalf(ctx, "Error to connect dataManager repositories: %v", err)
 	}
 
-	log.Info("Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
+	log.Infof(ctx, "Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
 	cache, err := cache.Instance(cfg.Cache.Redis, log)
 	if err != nil {
-		log.Fatal("Error connecting to cache server:", err)
+		log.Fatalf(ctx, "Error connecting to cache server: %v", err)
 	}
 
 	services, err := service.New(data, cfg, cache, log)
 	if err != nil {
-		log.Fatal("error to get domain services: ", err)
+		log.Fatalf(ctx, "error to get domain services: %v", err)
 	}
 
 	mp := mapper.New()
 
-	rest.StartRestServer(cfg, services, log, authToken, mp) //TODO: receive flags for what server it will starts
+	rest.StartRestServer(ctx, cfg, services, log, authToken, mp) //TODO: receive flags for what server it will starts
 }

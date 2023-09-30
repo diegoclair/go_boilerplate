@@ -11,6 +11,10 @@ COPY . /app
 
 # Add docker-compose-wait tool 
 ENV WAIT_VERSION 2.9.0
+
+# possibilite colors in the terminal for logs look better
+ENV TERM xterm-256color
+
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
 RUN chmod +x /wait
 

@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	utilerrors "github.com/diegoclair/go_boilerplate/util/errors"
 	"github.com/diegoclair/go_boilerplate/util/number"
@@ -24,29 +24,28 @@ func newAccountService(svc *service) AccountService {
 
 func (s *accountService) CreateAccount(ctx context.Context, account entity.Account) (err error) {
 
-	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started")
-	defer log.Info("Process Finished")
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
 
 	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
 	if err != nil && !utilerrors.SQLNotFound(err.Error()) {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return err
 	} else if err == nil {
-		log.Error("The document number is already in use")
+		s.svc.log.Error(ctx, "The document number is already in use")
 		return resterrors.NewConflictError("The cpf is already in use")
 	}
 
 	account.Secret, err = crypto.HashPassword(account.Secret)
 	if err != nil {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return err
 	}
 	account.UUID = uuid.NewV4().String()
 
 	err = s.svc.dm.Account().CreateAccount(ctx, account)
 	if err != nil {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return err
 	}
 
@@ -55,20 +54,19 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 
 func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amount float64) (err error) {
 
-	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started")
-	defer log.Info("Process Finished")
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
 
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		log.Error("error to get account", err)
+		s.svc.log.Errorw(ctx, "error to get account by uuid", logger.AccountUUIDKey, accountUUID, logger.ErrorKey, err)
 		return err
 	}
 	balance := number.RoundFloat(account.Balance+amount, 2)
 
 	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account.ID, balance)
 	if err != nil {
-		log.Error("error to update account balance", err)
+		s.svc.log.Errorw(ctx, "error to update account balance", logger.AccountUUIDKey, accountUUID, logger.ErrorKey, err)
 		return err
 	}
 
@@ -77,30 +75,28 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 
 func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 
-	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started")
-	defer log.Info("Process Finished")
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
 
 	accounts, totalRecords, err = s.svc.dm.Account().GetAccounts(ctx, take, skip)
 	if err != nil {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return accounts, totalRecords, err
 	}
 
-	log.Info(fmt.Sprintf("Found %d accounts", totalRecords))
+	s.svc.log.Infof(ctx, "Found %d accounts", totalRecords)
 
 	return accounts, totalRecords, nil
 }
 
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
-	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started with accountUUID: ", accountUUID)
-	defer log.Info("Process Finished for accountUUID: ", accountUUID)
+	s.svc.log.Infof(ctx, "Process Started with accountUUID: %s", accountUUID)
+	defer s.svc.log.Infof(ctx, "Process Finished for accountUUID: %s", accountUUID)
 
 	account, err = s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return account, err
 	}
 

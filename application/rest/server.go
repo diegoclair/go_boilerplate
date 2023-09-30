@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/IQ-tech/go-mapper"
@@ -29,14 +30,14 @@ type Server struct {
 	cfg     *config.Config
 }
 
-func StartRestServer(cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, mapper mapper.Mapper) {
+func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, mapper mapper.Mapper) {
 	server := newRestServer(services, authToken, cfg, mapper)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
 	}
 
-	log.Info(fmt.Sprintf("About to start the application on port: %s...", port))
+	log.Infof(ctx, "About to start the application on port: %s...", port)
 
 	if err := server.Start(port); err != nil {
 		panic(err)

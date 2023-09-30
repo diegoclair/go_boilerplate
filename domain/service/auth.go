@@ -24,23 +24,22 @@ func newAuthService(svc *service) AuthService {
 
 func (s *authService) Login(ctx context.Context, cpf, secret string) (account entity.Account, err error) {
 
-	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started")
-	defer log.Info("Process Finished")
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
 
 	account, err = s.svc.dm.Account().GetAccountByDocument(ctx, cpf)
 	if err != nil {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
-	log.Info("account_id: ", account.ID)
-	log.Info("account_uuid: ", account.UUID)
-	log.Info("name: ", account.Name)
+	s.svc.log.Infof(ctx, "account_id: %d", account.ID)
+	s.svc.log.Infof(ctx, "account_uuid: %s", account.UUID)
+	s.svc.log.Infof(ctx, "name: %s", account.Name)
 
 	err = crypto.CheckPassword(secret, account.Secret)
 	if err != nil {
-		log.Error("wrong password")
+		s.svc.log.Error(ctx, "wrong password")
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
@@ -49,13 +48,12 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 
 func (s *authService) CreateSession(ctx context.Context, session entity.Session) (err error) {
 
-	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started")
-	defer log.Info("Process Finished")
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
 
 	err = s.svc.dm.Auth().CreateSession(ctx, session)
 	if err != nil {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return err
 	}
 
@@ -64,13 +62,12 @@ func (s *authService) CreateSession(ctx context.Context, session entity.Session)
 
 func (s *authService) GetSessionByUUID(ctx context.Context, sessionUUID string) (session entity.Session, err error) {
 
-	ctx, log := s.svc.log.NewSessionLogger(ctx)
-	log.Info("Process Started")
-	defer log.Info("Process Finished")
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
 
 	session, err = s.svc.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
 	if err != nil {
-		log.Error(err)
+		s.svc.log.Error(ctx, err.Error())
 		return session, err
 	}
 

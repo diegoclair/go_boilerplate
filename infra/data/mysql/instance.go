@@ -31,7 +31,7 @@ type mysqlConn struct {
 }
 
 // Instance returns an instance of a MySQLRepo
-func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
+func Instance(ctx context.Context, cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
 	onceDB.Do(func() {
 
 		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
@@ -39,26 +39,26 @@ func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, erro
 		)
 
 		var db *sql.DB
-		log.Info("Connecting to database...")
+		log.Info(ctx, "Connecting to database...")
 		db, connErr = sql.Open("mysql", dataSourceName)
 		if connErr != nil {
 			return
 		}
 
-		log.Info("Database Ping...")
+		log.Info(ctx, "Database Ping...")
 		connErr = db.Ping()
 		if connErr != nil {
 			return
 		}
 
-		log.Info("Creating database if not exists...")
+		log.Info(ctx, "Creating database if not exists...")
 		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", cfg.DB.MySQL.DBName)); connErr != nil {
-			log.Error("Create Database error: ", connErr)
+			log.Errorf(ctx, "Create Database error: %v", connErr)
 			return
 		}
 
 		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", cfg.DB.MySQL.DBName)); connErr != nil {
-			log.Error("Default Database error: ", connErr)
+			log.Errorf(ctx, "Default Database error: %v", connErr)
 			return
 		}
 
@@ -66,20 +66,20 @@ func Instance(cfg *config.Config, log logger.Logger) (contract.DataManager, erro
 		if connErr != nil {
 			return
 		}
-		log.Info("Database successfully configured")
+		log.Info(ctx, "Database successfully configured")
 
-		log.Info("Running the migrations")
+		log.Info(ctx, "Running the migrations")
 		driver := darwin.NewGenericDriver(db, darwin.MySQLDialect{})
 
 		d := darwin.New(driver, migrations.Migrations, nil)
 
 		connErr = d.Migrate()
 		if connErr != nil {
-			log.Error("Migrate Error: ", connErr)
+			log.Errorf(ctx, "Migrate Error: %v", connErr)
 			return
 		}
 
-		log.Info("Migrations executed")
+		log.Info(ctx, "Migrations executed")
 
 		conn = repoInstances(db)
 		conn.db = db

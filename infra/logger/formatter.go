@@ -42,7 +42,7 @@ func newCustomJSONFormatter(w io.Writer, opts slog.HandlerOptions, cfg config.Co
 
 func (f *customJSONFormatter) Handle(ctx context.Context, r slog.Record) error {
 
-	funcName, fileName, fileLine := f.getRuntimeData(int(r.Level))
+	funcName, fileName, fileLine := f.getRuntimeData()
 
 	level := f.getLevel(r.Level)
 
@@ -90,10 +90,10 @@ func (f *customJSONFormatter) applyLevelColor(fullMsg, level string) string {
 		levelColor := ""
 
 		switch level {
-		case slog.LevelDebug.String():
-			levelColor = color.Magenta.Render(levelUpper)
 		case slog.LevelInfo.String():
 			levelColor = color.Blue.Render(levelUpper)
+		case slog.LevelDebug.String():
+			levelColor = color.Magenta.Render(levelUpper)
 		case slog.LevelWarn.String():
 			levelColor = color.Yellow.Render(levelUpper)
 		case slog.LevelError.String():
@@ -117,14 +117,8 @@ func (f *customJSONFormatter) getLevel(level slog.Level) string {
 	return level.String()
 }
 
-func (f *customJSONFormatter) getRuntimeData(level int) (funcname, filename string, line int) {
-	caller := 4
-
-	if _, ok := CustomLevels[level]; ok {
-		//if is a custom level, get the caller from the 6th stack
-		caller = 5
-	}
-	pc, filePath, line, ok := runtime.Caller(caller)
+func (f *customJSONFormatter) getRuntimeData() (funcname, filename string, line int) {
+	pc, filePath, line, ok := runtime.Caller(5)
 	if !ok {
 		panic("Could not get context info for logger!")
 	}

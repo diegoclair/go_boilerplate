@@ -1,6 +1,8 @@
 package data
 
 import (
+	"context"
+
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/data/mysql"
@@ -8,6 +10,6 @@ import (
 )
 
 // Connect returns a instace of mysql db
-func Connect(cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
-	return mysql.Instance(cfg, log)
+func Connect(ctx context.Context, cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
+	return mysql.Instance(ctx, cfg, log)
 }
