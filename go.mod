@@ -1,6 +1,6 @@
 module github.com/diegoclair/go_boilerplate
 
-go 1.18
+go 1.21
 
 require (
 	github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244
@@ -16,7 +16,6 @@ require (
 	github.com/labstack/gommon v0.3.1
 	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
 	github.com/o1egl/paseto v1.0.0
-	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.8.4
 	github.com/twinj/uuid v1.0.0
