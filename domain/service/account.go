@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 
+	"log/slog"
+
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
@@ -10,7 +12,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
-	"golang.org/x/exp/slog"
 )
 
 type accountService struct {

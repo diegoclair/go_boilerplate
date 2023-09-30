@@ -20,7 +20,6 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/twinj/uuid v1.0.0
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	gopkg.in/redis.v5 v5.2.9
 )
 
@@ -38,6 +37,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
