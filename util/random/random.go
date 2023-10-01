@@ -8,14 +8,14 @@ import (
 	"github.com/mvrilo/go-cpf"
 )
 
-//TODO: Create tests to the all util package
+// TODO: Create tests to the all util package
 const (
 	alphabet       = "abcdefghijklmnopqrstuvwxyz"
 	alphabetLength = len(alphabet)
 )
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
 func RandomCPF() string {
