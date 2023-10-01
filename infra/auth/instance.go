@@ -8,7 +8,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/config"
 )
 
-// TODO: Create unit tests for VerifyToken
 type AuthToken interface {
 	CreateAccessToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
 	CreateRefreshToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
@@ -48,7 +47,6 @@ func NewAuthToken(cfg config.AuthConfig) (AuthToken, error) {
 	accessTokenDurationTime = cfg.AccessTokenDuration
 	refreshTokenDurationTime = cfg.RefreshTokenDuration
 
-	//TODO: adicionar possibilidade de config igual a avenue
 	if cfg.AccessTokenType == tokenTypeJWT {
 		return newJwtAuth(cfg.JWTPrivateKey)
 	}
