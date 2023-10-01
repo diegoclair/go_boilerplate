@@ -42,5 +42,4 @@ func TestFloatingPoint(t *testing.T) {
 	require.Less(t, 0.2205, final)                 //different value because of floating point
 	require.Equal(t, 0.22050000000000003, final)   //floating point problem
 	require.Equal(t, 0.2205, RoundFloat(final, 4)) //fixed floating point value
-
 }

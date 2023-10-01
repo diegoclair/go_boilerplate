@@ -2,6 +2,7 @@ package mysql_test
 
 import (
 	"context"
+
 	"testing"
 	"time"
 
@@ -14,11 +15,11 @@ import (
 
 func createRandomAccount(t *testing.T) entity.Account {
 	args := entity.Account{
-		UUID:   uuid.NewV4().String(),
-		Name:   random.RandomName(),
-		CPF:    random.RandomCPF(),
-		Secret: crypto.GetMd5(random.RandomSecret()),
+		UUID: uuid.NewV4().String(),
+		Name: random.RandomName(),
+		CPF:  random.RandomCPF(),
 	}
+	args.Secret, _ = crypto.HashPassword(random.RandomSecret())
 	err := testMysql.Account().CreateAccount(context.Background(), args)
 	require.NoError(t, err)
 
