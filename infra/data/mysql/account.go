@@ -180,7 +180,8 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 	if err != nil {
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
-	account := entity.Account{}
+
+	var account entity.Account
 	for rows.Next() {
 		account, err = r.parseAccount(rows)
 		if err != nil {
