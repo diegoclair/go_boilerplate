@@ -1,8 +1,21 @@
 name: CI test and vulnerability check
 on: [push]
 jobs:
-  setup-mysql:
-    name: Setup MySQL
+  setup-go:
+    name: Setup Go
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code into the Go module directory
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+      
+  test-application:
+    name: Run test application
+    needs: setup-go
     runs-on: ubuntu-latest
     steps:
       - name: Setup MySQL to run the tests
@@ -17,12 +30,7 @@ jobs:
           mysql root password: root
           mysql user: 'root'
           mysql password: root
-    
-  test-application:
-    name: Run test application
-    needs: [setup-go, setup-mysql]
-    runs-on: ubuntu-latest
-    steps:
+
       - name: Run tests
         run: make test
   
