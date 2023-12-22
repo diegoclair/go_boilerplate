@@ -1,8 +1,8 @@
 name: CI Workflow
 on: [push]
 jobs:
-  ci:
-    name: Run CI process
+  test_application:
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code into the Go module directory
@@ -28,6 +28,19 @@ jobs:
 
       - name: Run tests
         run: make test
+  
+  govulncheck:
+    runs-on: ubuntu-latest
+    needs: setup-go
+    name: Run govulncheck
+    steps:
+      - name: Checkout code into the Go module directory
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
 
       - name: Running Vulnerability Check
         run: |
