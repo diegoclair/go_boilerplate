@@ -1,16 +1,13 @@
 name: CI Workflow
 on: [push]
 jobs:
-  parallel_steps_matrix:
-    name: Parallel steps matrix
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        setup: [mysql, go]
 
   test_application:
     name: Run tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        setup: [mysql, go] # Run tests with MySQL and Go parallel
     steps:
       - name: Checkout code into the Go module directory
         uses: actions/checkout@v3
