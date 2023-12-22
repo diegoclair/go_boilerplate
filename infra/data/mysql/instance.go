@@ -46,8 +46,9 @@ func Instance(ctx context.Context, cfg *config.Config, log logger.Logger) (contr
 		}
 
 		log.Info(ctx, "Database Ping...")
-		connErr = db.Ping()
+		connErr = db.PingContext(ctx)
 		if connErr != nil {
+			log.Errorf(ctx, "Database Ping error: %v", connErr)
 			return
 		}
 
