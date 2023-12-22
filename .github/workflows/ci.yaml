@@ -1,9 +1,8 @@
 name: CI test and vulnerability check
 on: [push]
 jobs:
-  test-application:
-    name: Run test application
-    needs: setup-go
+  setup-mysql:
+    name: Setup MySQL
     runs-on: ubuntu-latest
     steps:
       - name: Setup MySQL to run the tests
@@ -18,7 +17,12 @@ jobs:
           mysql root password: root
           mysql user: 'root'
           mysql password: root
-          
+    
+  test-application:
+    name: Run test application
+    needs: [setup-go, setup-mysql]
+    runs-on: ubuntu-latest
+    steps:
       - name: Run tests
         run: make test
   
