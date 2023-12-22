@@ -1,19 +1,14 @@
 name: CI Workflow
 on: [push]
 jobs:
-
   test_application:
     name: Run tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        setup: [mysql, go] # Run tests with MySQL and Go parallel
     steps:
       - name: Checkout code into the Go module directory
         uses: actions/checkout@v3
 
       - name: Setup MySQL to run the tests
-        if: matrix.setup == 'mysql'
         uses: mirromutth/mysql-action@v1.1
         with:
           #host port: 3800 # Optional, default value is 3306. The port of host
@@ -27,7 +22,6 @@ jobs:
           mysql password: root
 
       - name: Setup Go
-        if: matrix.setup == 'go'
         uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
