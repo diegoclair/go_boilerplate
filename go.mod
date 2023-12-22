@@ -1,6 +1,6 @@
 module github.com/diegoclair/go_boilerplate
 
-go 1.21
+go 1.21.5
 
 require (
 	github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244
