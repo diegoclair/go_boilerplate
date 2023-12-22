@@ -8,7 +8,6 @@ import (
 	"github.com/mvrilo/go-cpf"
 )
 
-// TODO: Create tests to the all util package
 const (
 	alphabet       = "abcdefghijklmnopqrstuvwxyz"
 	alphabetLength = len(alphabet)
