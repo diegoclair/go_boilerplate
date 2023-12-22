@@ -5,6 +5,13 @@ jobs:
     name: Setup Go
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code into the Go module directory
+        uses: actions/checkout@v3
+        with: #checkout only go.mod file
+           sparse-checkout: |
+            go.mod
+           sparse-checkout-cone-mode: false
+           
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -41,7 +48,7 @@ jobs:
     steps:
       - name: Checkout code into the Go module directory
         uses: actions/checkout@v3
-        
+
       - name: Running Vulnerability Check
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
