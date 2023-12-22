@@ -1,4 +1,4 @@
-name: ci-go_boilerplate-workflow
+name: CI test and vulnerability check
 on: [push]
 jobs:
   test-application:
