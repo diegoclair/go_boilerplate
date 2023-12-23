@@ -12,12 +12,9 @@ type Mocks struct {
 }
 
 func NewServiceManagerTest(ctrl *gomock.Controller) Mocks {
-
-	mocks := Mocks{
+	return Mocks{
 		AccountServiceMock:  mocks.NewMockAccountService(ctrl),
 		AuthServiceMock:     mocks.NewMockAuthService(ctrl),
 		TransferServiceMock: mocks.NewMockTransferService(ctrl),
 	}
-
-	return mocks
 }
