@@ -4,7 +4,8 @@ test:
 
 .PHONY: mock
 mock:
+	go install github.com/golang/mock/mockgen@latest
 	rm -rf mocks
-	mockgen -package mocks -destination mocks/repo.go github.com/diegoclair/go_boilerplate/domain/contract DataManager,AccountRepo,AuthRepo
-	mockgen -package mocks -destination mocks/cache.go github.com/diegoclair/go_boilerplate/domain/contract CacheManager
-	mockgen -package mocks -destination mocks/service.go github.com/diegoclair/go_boilerplate/domain/contract AccountService,AuthService,TransferService
+	mockgen -package mocks -source=domain/contract/repo.go -destination=mocks/repo.go
+	mockgen -package mocks -source=domain/contract/cache.go -destination=mocks/cache.go
+	mockgen -package mocks -source=domain/contract/service.go -destination=mocks/service.go
