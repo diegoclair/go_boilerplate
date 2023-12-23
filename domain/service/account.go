@@ -5,6 +5,7 @@ import (
 
 	"log/slog"
 
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
@@ -18,7 +19,7 @@ type accountService struct {
 	svc *service
 }
 
-func newAccountService(svc *service) AccountService {
+func newAccountService(svc *service) contract.AccountService {
 	return &accountService{
 		svc: svc,
 	}
