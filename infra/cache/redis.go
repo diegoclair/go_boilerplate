@@ -188,11 +188,7 @@ func (r *RedisCache) Increase(key string) (err error) {
 
 // Delete removes a list of keys from the cache
 func (r *RedisCache) Delete(keys ...string) (err error) {
-	redisKeys := make([]string, len(keys))
-	for i, key := range keys {
-		redisKeys[i] = key
-	}
-	err = r.redis.Del(redisKeys...).Err()
+	err = r.redis.Del(keys...).Err()
 	if err != nil {
 		return err
 	}
