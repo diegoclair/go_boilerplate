@@ -101,3 +101,116 @@ func Test_authService_Login(t *testing.T) {
 		})
 	}
 }
+
+func Test_authService_CreateSession(t *testing.T) {
+	type args struct {
+		session entity.Session
+	}
+	tests := []struct {
+		name      string
+		buildMock func(ctx context.Context, mocks allMocks, args args)
+		args      args
+		wantErr   bool
+	}{
+		{
+			name: "Should create session without any errors",
+			args: args{
+				session: entity.Session{
+					AccountID:   1,
+					SessionUUID: "uuid",
+				},
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAuthRepo.EXPECT().CreateSession(ctx, args.session).Return(nil).Times(1)
+			},
+		},
+		{
+			name: "Should return error when there is some error to create session",
+			args: args{
+				session: entity.Session{
+					AccountID:   1,
+					SessionUUID: "uuid",
+				},
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAuthRepo.EXPECT().CreateSession(ctx, args.session).Return(errors.New("some error")).Times(1)
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			ctx := context.Background()
+			allMockss, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
+			if tt.buildMock != nil {
+				tt.buildMock(ctx, allMockss, tt.args)
+			}
+			s := newAuthService(svc)
+			if err := s.CreateSession(ctx, tt.args.session); (err != nil) != tt.wantErr {
+				t.Errorf("authService.CreateSession() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_authService_GetSessionByUUID(t *testing.T) {
+	type args struct {
+		sessionUUID string
+	}
+	tests := []struct {
+		name        string
+		buildMock   func(ctx context.Context, mocks allMocks, args args)
+		args        args
+		wantSession entity.Session
+		wantErr     bool
+	}{
+		{
+			name: "Should return a session without error",
+			args: args{
+				sessionUUID: "123",
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				result := entity.Session{SessionID: 1, SessionUUID: "123"}
+				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).Return(result, nil).Times(1)
+			},
+			wantSession: entity.Session{SessionID: 1, SessionUUID: "123"},
+			wantErr:     false,
+		},
+		{
+			name: "Should error if database return some error",
+			args: args{
+				sessionUUID: "123",
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).Return(entity.Session{}, errors.New("some error")).Times(1)
+			},
+			wantSession: entity.Session{},
+			wantErr:     true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			ctx := context.Background()
+			allMockss, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
+			if tt.buildMock != nil {
+				tt.buildMock(ctx, allMockss, tt.args)
+			}
+			s := newAuthService(svc)
+			gotSession, err := s.GetSessionByUUID(ctx, tt.args.sessionUUID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("authService.GetSessionByUUID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotSession, tt.wantSession) {
+				t.Errorf("authService.GetSessionByUUID() = %v, want %v", gotSession, tt.wantSession)
+			}
+		})
+	}
+}
