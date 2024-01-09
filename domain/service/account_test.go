@@ -81,6 +81,20 @@ func Test_accountService_CreateAccount(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "Should return error with there is some error to hash password",
+			args: args{account: entity.Account{
+				Name: "name",
+				CPF:  "123",
+			}},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, errors.New("No records find")).Times(1),
+					mocks.mockCrypto.EXPECT().HashPassword(args.account.Password).Return("", errors.New("some error")).Times(1),
+				)
+			},
+			wantErr: true,
+		},
+		{
 			name: "Should return error cpf already in use",
 			args: args{account: entity.Account{
 				Name: "name",
