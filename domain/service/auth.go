@@ -35,7 +35,7 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
-	s.svc.log.Infof(ctx, "account information used to login",
+	s.svc.log.Infow(ctx, "account information used to login",
 		slog.Group("accountInfo",
 			slog.Int64("account_id", account.ID),
 			slog.String("account_uuid", account.UUID),
