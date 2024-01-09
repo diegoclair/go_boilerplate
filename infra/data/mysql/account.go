@@ -39,7 +39,7 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 		&account.Name,
 		&account.CPF,
 		&account.Balance,
-		&account.Secret,
+		&account.Password,
 		&account.CreatedAT,
 	)
 
@@ -100,7 +100,7 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account)
 		account.UUID,
 		account.Name,
 		account.CPF,
-		account.Secret,
+		account.Password,
 	)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)

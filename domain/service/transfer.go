@@ -16,7 +16,7 @@ type transferService struct {
 	svc *service
 }
 
-func newTransferService(svc *service) TransferService {
+func newTransferService(svc *service) contract.TransferService {
 	return &transferService{
 		svc: svc,
 	}

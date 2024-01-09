@@ -6,8 +6,8 @@ import (
 	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/domain/service"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,11 +18,11 @@ var (
 )
 
 type Controller struct {
-	accountService service.AccountService
+	accountService contract.AccountService
 	mapper         mapper.Mapper
 }
 
-func NewController(accountService service.AccountService, mapper mapper.Mapper) *Controller {
+func NewController(accountService contract.AccountService, mapper mapper.Mapper) *Controller {
 	once.Do(func() {
 		instance = &Controller{
 			accountService: accountService,
@@ -48,9 +48,9 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 	}
 
 	account := entity.Account{
-		Name:   input.Name,
-		CPF:    input.CPF,
-		Secret: input.Secret,
+		Name:     input.Name,
+		CPF:      input.CPF,
+		Password: input.Password,
 	}
 
 	err = s.accountService.CreateAccount(ctx, account)

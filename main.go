@@ -27,6 +27,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/data"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_boilerplate/util/crypto"
 )
 
 func main() {
@@ -55,7 +56,9 @@ func main() {
 		log.Fatalf(ctx, "Error connecting to cache server: %v", err)
 	}
 
-	services, err := service.New(data, cfg, cache, log)
+	c := crypto.NewCrypto()
+
+	services, err := service.New(data, cfg, cache, c, log)
 	if err != nil {
 		log.Fatalf(ctx, "error to get domain services: %v", err)
 	}

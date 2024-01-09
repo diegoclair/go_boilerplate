@@ -19,7 +19,9 @@ func createRandomAccount(t *testing.T) entity.Account {
 		Name: random.RandomName(),
 		CPF:  random.RandomCPF(),
 	}
-	args.Secret, _ = crypto.HashPassword(random.RandomSecret())
+
+	c := crypto.NewCrypto()
+	args.Password, _ = c.HashPassword(random.RandomSecret())
 	err := testMysql.Account().CreateAccount(context.Background(), args)
 	require.NoError(t, err)
 
@@ -36,7 +38,7 @@ func validateTwoAccounts(t *testing.T, accountExpected entity.Account, accountTo
 	require.Equal(t, accountExpected.UUID, accountToCompare.UUID)
 	require.Equal(t, accountExpected.Name, accountToCompare.Name)
 	require.Equal(t, accountExpected.CPF, accountToCompare.CPF)
-	require.Equal(t, accountExpected.Secret, accountToCompare.Secret)
+	require.Equal(t, accountExpected.Password, accountToCompare.Password)
 	require.NotZero(t, accountToCompare.ID)
 	require.WithinDuration(t, time.Now(), accountToCompare.CreatedAT, time.Second)
 }
@@ -70,7 +72,7 @@ func TestGetAccounts(t *testing.T) {
 	require.NotEmpty(t, accounts[0].UUID)
 	require.NotEmpty(t, accounts[0].Name)
 	require.NotEmpty(t, accounts[0].CPF)
-	require.NotEmpty(t, accounts[0].Secret)
+	require.NotEmpty(t, accounts[0].Password)
 	require.NotZero(t, accounts[0].ID)
 	require.NotZero(t, accounts[0].CreatedAT)
 
@@ -85,7 +87,7 @@ func TestGetAccounts(t *testing.T) {
 	require.NotEmpty(t, accounts[0].UUID)
 	require.NotEmpty(t, accounts[0].Name)
 	require.NotEmpty(t, accounts[0].CPF)
-	require.NotEmpty(t, accounts[0].Secret)
+	require.NotEmpty(t, accounts[0].Password)
 	require.NotZero(t, accounts[0].ID)
 	require.NotZero(t, accounts[0].CreatedAT)
 }

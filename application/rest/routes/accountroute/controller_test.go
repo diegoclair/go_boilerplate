@@ -60,14 +60,14 @@ func TestController_handleAddAccount(t *testing.T) {
 				body: viewmodel.AddAccount{
 					Name: "Add withou Error",
 					Login: viewmodel.Login{
-						CPF:    "01234567890",
-						Secret: "secret@123",
+						CPF:      "01234567890",
+						Password: "secret@123",
 					},
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(nil)
+				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -80,8 +80,8 @@ func TestController_handleAddAccount(t *testing.T) {
 				body: viewmodel.AddAccount{
 					Name: "",
 					Login: viewmodel.Login{
-						CPF:    "01234567890",
-						Secret: "secret@123",
+						CPF:      "01234567890",
+						Password: "secret@123",
 					},
 				},
 			},
@@ -97,8 +97,8 @@ func TestController_handleAddAccount(t *testing.T) {
 				body: viewmodel.AddAccount{
 					Name: "Teste name",
 					Login: viewmodel.Login{
-						CPF:    "",
-						Secret: "secret@123",
+						CPF:      "",
+						Password: "secret@123",
 					},
 				},
 			},
@@ -114,15 +114,15 @@ func TestController_handleAddAccount(t *testing.T) {
 				body: viewmodel.AddAccount{
 					Name: "Teste name",
 					Login: viewmodel.Login{
-						CPF:    "01234567890",
-						Secret: "",
+						CPF:      "01234567890",
+						Password: "",
 					},
 				},
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 				require.Contains(t, resp.Body.String(), "Invalid input data")
-				require.Contains(t, resp.Body.String(), "The field 'Secret' is required")
+				require.Contains(t, resp.Body.String(), "The field 'Password' is required")
 			},
 		},
 		{
@@ -131,8 +131,8 @@ func TestController_handleAddAccount(t *testing.T) {
 				body: viewmodel.AddAccount{
 					Name: "Teste name",
 					Login: viewmodel.Login{
-						CPF:    "12345612345",
-						Secret: "Secret@123",
+						CPF:      "12345612345",
+						Password: "Secret@123",
 					},
 				},
 			},
@@ -154,14 +154,14 @@ func TestController_handleAddAccount(t *testing.T) {
 				body: viewmodel.AddAccount{
 					Name: "Error with service",
 					Login: viewmodel.Login{
-						CPF:    "01234567890",
-						Secret: "Secret@123",
+						CPF:      "01234567890",
+						Password: "Secret@123",
 					},
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Secret: body.Secret}).Times(1).Return(errors.New("some error"))
+				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)

@@ -10,34 +10,41 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type repoMock struct {
+type allMocks struct {
 	mockDataManager *mocks.MockDataManager
 
-	mockAuthRepo     *mocks.MockAuthRepo
-	mockAccountRepo  *mocks.MockAccountRepo
+	mockAuthRepo    *mocks.MockAuthRepo
+	mockAccountRepo *mocks.MockAccountRepo
+
 	mockCacheManager *mocks.MockCacheManager
+	mockCrypto       *mocks.MockCrypto
 }
 
-func newServiceTestMock(t *testing.T) (repoMocks repoMock, svc *service, ctrl *gomock.Controller) {
+func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Controller) {
 
 	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultName)
 	require.NoError(t, err)
 
 	ctrl = gomock.NewController(t)
 	log := logger.New(*cfg)
+	dm := mocks.NewMockDataManager(ctrl)
+	accountRepo := mocks.NewMockAccountRepo(ctrl)
+	cm := mocks.NewMockCacheManager(ctrl)
+	crypto := mocks.NewMockCrypto(ctrl)
+	authRepo := mocks.NewMockAuthRepo(ctrl)
 
-	repoMocks = repoMock{
-		mockDataManager: mocks.NewMockDataManager(ctrl),
-
-		mockAccountRepo:  mocks.NewMockAccountRepo(ctrl),
-		mockCacheManager: mocks.NewMockCacheManager(ctrl),
-		mockAuthRepo:     mocks.NewMockAuthRepo(ctrl),
+	m = allMocks{
+		mockDataManager:  dm,
+		mockAccountRepo:  accountRepo,
+		mockCacheManager: cm,
+		mockAuthRepo:     authRepo,
+		mockCrypto:       crypto,
 	}
 
-	repoMocks.mockDataManager.EXPECT().Account().Return(repoMocks.mockAccountRepo).AnyTimes()
-	repoMocks.mockDataManager.EXPECT().Auth().Return(repoMocks.mockAuthRepo).AnyTimes()
+	m.mockDataManager.EXPECT().Account().Return(accountRepo).AnyTimes()
+	m.mockDataManager.EXPECT().Auth().Return(authRepo).AnyTimes()
 
-	svc = newService(repoMocks.mockDataManager, cfg, repoMocks.mockCacheManager, log)
+	svc = newService(dm, cfg, cm, crypto, log)
 
 	return
 }

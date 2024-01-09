@@ -5,9 +5,9 @@ import (
 
 	"log/slog"
 
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
-	"github.com/diegoclair/go_boilerplate/util/crypto"
 	utilerrors "github.com/diegoclair/go_boilerplate/util/errors"
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
@@ -18,7 +18,7 @@ type accountService struct {
 	svc *service
 }
 
-func newAccountService(svc *service) AccountService {
+func newAccountService(svc *service) contract.AccountService {
 	return &accountService{
 		svc: svc,
 	}
@@ -38,7 +38,7 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 		return resterrors.NewConflictError("The cpf is already in use")
 	}
 
-	account.Secret, err = crypto.HashPassword(account.Secret)
+	account.Password, err = s.svc.crypto.HashPassword(account.Password)
 	if err != nil {
 		s.svc.log.Error(ctx, err.Error())
 		return err

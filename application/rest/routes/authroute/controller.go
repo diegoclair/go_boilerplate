@@ -8,8 +8,8 @@ import (
 	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/domain/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/twinj/uuid"
 
@@ -22,12 +22,12 @@ var (
 )
 
 type Controller struct {
-	authService service.AuthService
+	authService contract.AuthService
 	mapper      mapper.Mapper
 	authToken   auth.AuthToken
 }
 
-func NewController(authService service.AuthService, mapper mapper.Mapper, authToken auth.AuthToken) *Controller {
+func NewController(authService contract.AuthService, mapper mapper.Mapper, authToken auth.AuthToken) *Controller {
 	once.Do(func() {
 		instance = &Controller{
 			authService: authService,
@@ -52,7 +52,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		return routeutils.ResponseBadRequestError(c, err)
 	}
 
-	account, err := s.authService.Login(ctx, input.CPF, input.Secret)
+	account, err := s.authService.Login(ctx, input.CPF, input.Password)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}

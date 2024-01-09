@@ -9,8 +9,8 @@ import (
 )
 
 type Login struct {
-	CPF    string `json:"cpf,omitempty" validate:"required,min=11,max=11"`
-	Secret string `json:"secret,omitempty" validate:"required,min=8"`
+	CPF      string `json:"cpf,omitempty" validate:"required,min=11,max=11"`
+	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
 func (l *Login) Validate() error {

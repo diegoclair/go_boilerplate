@@ -7,6 +7,7 @@ import (
 )
 
 func TestHashPassword(t *testing.T) {
+	c := NewCrypto()
 	type args struct {
 		password string
 	}
@@ -23,7 +24,7 @@ func TestHashPassword(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := HashPassword(tt.args.password)
+			got, err := c.HashPassword(tt.args.password)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HashPassword() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -34,6 +35,8 @@ func TestHashPassword(t *testing.T) {
 }
 
 func TestCheckPassword(t *testing.T) {
+	c := NewCrypto()
+
 	type args struct {
 		password       string
 		hashedPassword string
@@ -66,7 +69,7 @@ func TestCheckPassword(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := CheckPassword(tt.args.password, tt.args.hashedPassword)
+			err := c.CheckPassword(tt.args.password, tt.args.hashedPassword)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CheckPassword() error = %v, wantErr %v", err, tt.wantErr)
 				return

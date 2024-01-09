@@ -5,8 +5,8 @@ import (
 
 	"log/slog"
 
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 )
 
@@ -18,7 +18,7 @@ type authService struct {
 	svc *service
 }
 
-func newAuthService(svc *service) AuthService {
+func newAuthService(svc *service) contract.AuthService {
 	return &authService{
 		svc: svc,
 	}
@@ -42,7 +42,7 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 			slog.String("name", account.Name),
 		))
 
-	err = crypto.CheckPassword(secret, account.Secret)
+	err = s.svc.crypto.CheckPassword(secret, account.Password)
 	if err != nil {
 		s.svc.log.Error(ctx, "wrong password")
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
