@@ -106,6 +106,10 @@ func (l *SlogLogger) Print(args ...any) {
 }
 
 func (l *SlogLogger) getSession(ctx context.Context) (string, bool) {
+	if ctx == nil {
+		return "", false
+	}
+
 	sessionCode := ctx.Value(auth.SessionKey)
 	if sessionCode == nil {
 		return "", false
