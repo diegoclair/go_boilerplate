@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot get config: ", err)
 	}
 
-	log := logger.New(*cfg)
+	log := logger.NewNoop()
 	cfg.DB.MySQL.DBName = cfg.DB.MySQL.DBName + "_test"
 
 	ctx := context.Background()

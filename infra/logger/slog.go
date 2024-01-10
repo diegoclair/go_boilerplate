@@ -96,7 +96,7 @@ func (l *SlogLogger) Fatalf(ctx context.Context, msg string, args ...any) {
 	os.Exit(1)
 }
 
-func (l *SlogLogger) Fatalfw(ctx context.Context, msg string, keyAndValues ...any) {
+func (l *SlogLogger) Fatalw(ctx context.Context, msg string, keyAndValues ...any) {
 	l.Logger.Log(ctx, LevelFatalCode, msg, append(l.withSession(ctx), keyAndValues...)...)
 	os.Exit(1)
 }

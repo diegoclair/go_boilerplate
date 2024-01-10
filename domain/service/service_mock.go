@@ -26,7 +26,7 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 	require.NoError(t, err)
 
 	ctrl = gomock.NewController(t)
-	log := logger.New(*cfg)
+	log := logger.NewNoop()
 	dm := mocks.NewMockDataManager(ctrl)
 	accountRepo := mocks.NewMockAccountRepo(ctrl)
 	cm := mocks.NewMockCacheManager(ctrl)

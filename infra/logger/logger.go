@@ -26,7 +26,7 @@ type Logger interface {
 	Errorw(ctx context.Context, msg string, keyAndValues ...any)
 	Fatal(ctx context.Context, msg string)
 	Fatalf(ctx context.Context, msg string, args ...any)
-	Fatalfw(ctx context.Context, msg string, keyAndValues ...any)
+	Fatalw(ctx context.Context, msg string, keyAndValues ...any)
 	Print(args ...any)
 }
 
