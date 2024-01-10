@@ -109,7 +109,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			},
 		},
 		{
-			name: "Should not be possible create an account without field Secret",
+			name: "Should not be possible create an account without field Password",
 			args: args{
 				body: viewmodel.AddAccount{
 					Name: "Teste name",
