@@ -353,7 +353,7 @@ func TestController_GetAccountByID(t *testing.T) {
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s/%s", RouteName, tt.args.accountUUID)
+			url := fmt.Sprintf("/%s/%s/", RouteName, tt.args.accountUUID)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)

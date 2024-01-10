@@ -8,7 +8,7 @@ const RouteName = "accounts"
 
 const (
 	rootRoute          = ""
-	accountByID        = "/:account_uuid"
+	accountByID        = "/:account_uuid/"
 	accountBalanceByID = "/:account_uuid/balance"
 )
 
