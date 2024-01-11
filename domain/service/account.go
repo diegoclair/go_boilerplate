@@ -25,7 +25,6 @@ func newAccountService(svc *service) contract.AccountService {
 }
 
 func (s *accountService) CreateAccount(ctx context.Context, account entity.Account) (err error) {
-
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -55,7 +54,6 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 }
 
 func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amount float64) (err error) {
-
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -80,7 +78,6 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 }
 
 func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
-
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -96,7 +93,6 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 }
 
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
-
 	s.svc.log.Infof(ctx, "Process Started with accountUUID: %s", accountUUID)
 	defer s.svc.log.Infof(ctx, "Process Finished for accountUUID: %s", accountUUID)
 

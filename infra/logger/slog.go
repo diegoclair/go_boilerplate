@@ -28,7 +28,6 @@ type SlogLogger struct {
 }
 
 func newSlogLogger(cfg config.Config) *SlogLogger {
-
 	logger := &SlogLogger{cfg: cfg}
 	opts := slog.HandlerOptions{}
 	if cfg.Log.Debug {

@@ -30,6 +30,8 @@ type Logger interface {
 	Print(args ...any)
 }
 
+// New creates a new logger based on the provided configuration.
+// It returns an instance of the Logger interface.
 func New(cfg config.Config) Logger {
 	return newSlogLogger(cfg)
 }
