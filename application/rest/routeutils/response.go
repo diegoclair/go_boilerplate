@@ -5,13 +5,33 @@ import (
 	"net/http"
 
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 )
 
+type ResponseUtils interface {
+	BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult
+	ResponseNoContent(c echo.Context) error
+	ResponseCreated(c echo.Context) error
+	ResponseAPIOK(c echo.Context, data interface{}) error
+	ResponseNotFoundError(c echo.Context, err error) error
+	ResponseBadRequestError(c echo.Context, err error) error
+	ResponseUnauthorizedError(c echo.Context, err error) error
+	ResponseAPIError(c echo.Context, status int, message string, err string, causes interface{}) error
+	HandleAPIError(c echo.Context, errorToHandle error) (err error)
+}
+
+type respUtils struct {
+	log logger.Logger
+}
+
+func newResponseUtils(log logger.Logger) ResponseUtils {
+	return &respUtils{log: log}
+}
+
 // BuildPaginatedResult returns a paginatedResult instance
-func BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult {
+func (r *respUtils) BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult {
 	return viewmodel.PaginatedResult{
 		List: list,
 		Pagination: viewmodel.ReturnPagination{
@@ -25,52 +45,52 @@ func BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords
 
 const ErrorMessageServiceUnavailable = "Service temporarily unavailable"
 
-func ResponseNoContent(c echo.Context) error {
+func (r *respUtils) ResponseNoContent(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func ResponseCreated(c echo.Context) error {
+func (r *respUtils) ResponseCreated(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
 
-func ResponseAPIOK(c echo.Context, data interface{}) error {
+func (r *respUtils) ResponseAPIOK(c echo.Context, data interface{}) error {
 	return c.JSON(http.StatusOK, data)
 }
 
-func ResponseNotFoundError(c echo.Context, err error) error {
-	return ResponseAPIError(c, http.StatusNotFound, "Not Found", err.Error(), nil)
+func (r *respUtils) ResponseNotFoundError(c echo.Context, err error) error {
+	return r.ResponseAPIError(c, http.StatusNotFound, "Not Found", err.Error(), nil)
 }
 
-func ResponseBadRequestError(c echo.Context, err error) error {
-	return ResponseAPIError(c, http.StatusBadRequest, "Bad request", err.Error(), nil)
+func (r *respUtils) ResponseBadRequestError(c echo.Context, err error) error {
+	return r.ResponseAPIError(c, http.StatusBadRequest, "Bad request", err.Error(), nil)
 }
 
-func ResponseUnauthorizedError(c echo.Context, err error) error {
-	return ResponseAPIError(c, http.StatusUnauthorized, "Unauthorized", err.Error(), nil)
+func (r *respUtils) ResponseUnauthorizedError(c echo.Context, err error) error {
+	return r.ResponseAPIError(c, http.StatusUnauthorized, "Unauthorized", err.Error(), nil)
 }
 
-func ResponseAPIError(c echo.Context, status int, message string, err string, causes interface{}) error {
+func (r *respUtils) ResponseAPIError(c echo.Context, status int, message string, err string, causes interface{}) error {
 	returnValue := resterrors.NewRestError(message, status, err, causes)
 	return c.JSON(status, returnValue)
 }
 
-func HandleAPIError(c echo.Context, errorToHandle error) (err error) {
+func (r *respUtils) HandleAPIError(c echo.Context, errorToHandle error) (err error) {
 	statusCode := http.StatusServiceUnavailable
 	errorMessage := ErrorMessageServiceUnavailable
 
 	if errorToHandle != nil {
-		log.Error("HandleAPIError: ", errorToHandle)
+		r.log.Errorf(c.Request().Context(), "HandleAPIError: %s", errorToHandle)
 
 		errorString := errorToHandle.Error()
 
 		restErr, ok := errorToHandle.(resterrors.RestErr)
 		if !ok {
-			return ResponseAPIError(c, statusCode, errorMessage, errorString, nil)
+			return r.ResponseAPIError(c, statusCode, errorMessage, errorString, nil)
 		}
 
 		return c.JSON(restErr.StatusCode(), restErr)
 
 	}
 
-	return ResponseAPIError(c, statusCode, errorMessage, "", nil)
+	return r.ResponseAPIError(c, statusCode, errorMessage, "", nil)
 }

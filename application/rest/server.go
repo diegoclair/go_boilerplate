@@ -9,6 +9,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/pingroute"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/transferroute"
+	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/application/rest/serverMiddleware"
 	"github.com/diegoclair/go_boilerplate/domain/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
@@ -31,7 +32,7 @@ type Server struct {
 }
 
 func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, mapper mapper.Mapper) {
-	server := newRestServer(services, authToken, cfg, mapper)
+	server := newRestServer(services, authToken, cfg, mapper, log)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -44,15 +45,16 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 	}
 }
 
-func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, mapper mapper.Mapper) *Server {
+func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, mapper mapper.Mapper, log logger.Logger) *Server {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+	routeUtils := routeutils.New(log)
 
 	pingController := pingroute.NewController()
-	accountController := accountroute.NewController(services.AccountService, mapper)
-	authController := authroute.NewController(services.AuthService, mapper, authToken)
-	transferController := transferroute.NewController(services.TransferService, mapper)
+	accountController := accountroute.NewController(services.AccountService, mapper, routeUtils)
+	authController := authroute.NewController(services.AuthService, mapper, authToken, routeUtils)
+	transferController := transferroute.NewController(services.TransferService, mapper, routeUtils)
 
 	pingRoute := pingroute.NewRouter(pingController, pingroute.RouteName)
 	accountRoute := accountroute.NewRouter(accountController, accountroute.RouteName)

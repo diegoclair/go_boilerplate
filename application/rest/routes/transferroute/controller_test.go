@@ -18,6 +18,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
@@ -44,13 +45,13 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 	return tokenMaker
 }
 
-func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo, ctrl *gomock.Controller) {
+func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo, ctrl *gomock.Controller, transferControler *Controller) {
 
 	ctrl = gomock.NewController(t)
 	transferMock = mocks.NewMockTransferService(ctrl)
 	tokenMaker = getTokenMaker(t)
 
-	transferControler := &Controller{transferMock, mapper.New()}
+	transferControler = &Controller{transferMock, mapper.New(), routeutils.New(logger.NewNoop())}
 	transferRoute := NewRouter(transferControler, "transfers")
 
 	server = echo.New()
@@ -63,7 +64,6 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 }
 
 func addAuthorization(t *testing.T, req *http.Request, tokenMaker auth.AuthToken, accountUUID, sessionUUID string) {
-
 	token, _, err := tokenMaker.CreateAccessToken(accountUUID, sessionUUID)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
@@ -137,7 +137,7 @@ func TestController_handleAddBalance(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			transferMock, server, ctrl := getServerTest(t)
+			transferMock, server, ctrl, s := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -158,7 +158,7 @@ func TestController_handleAddBalance(t *testing.T) {
 				c := echo.New().NewContext(req, recorder)
 				c.Set(auth.AccountUUIDKey.String(), tt.args.accountUUID)
 				c.Set(auth.SessionKey.String(), tt.args.sessionUUID)
-				ctx := routeutils.GetContext(c)
+				ctx := s.utils.Req().GetContext(c)
 				tt.buildMocks(ctx, transferMock, tt.args)
 			}
 
@@ -216,7 +216,7 @@ func TestController_handleGetTransfers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			transferMock, server, ctrl := getServerTest(t)
+			transferMock, server, ctrl, s := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -233,7 +233,7 @@ func TestController_handleGetTransfers(t *testing.T) {
 				c := echo.New().NewContext(req, recorder)
 				c.Set(auth.AccountUUIDKey.String(), tt.args.accountUUID)
 				c.Set(auth.SessionKey.String(), tt.args.sessionUUID)
-				ctx := routeutils.GetContext(c)
+				ctx := s.utils.Req().GetContext(c)
 
 				tt.buildMocks(ctx, transferMock)
 			}

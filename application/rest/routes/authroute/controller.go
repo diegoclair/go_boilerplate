@@ -25,14 +25,16 @@ type Controller struct {
 	authService contract.AuthService
 	mapper      mapper.Mapper
 	authToken   auth.AuthToken
+	utils       routeutils.Utils
 }
 
-func NewController(authService contract.AuthService, mapper mapper.Mapper, authToken auth.AuthToken) *Controller {
+func NewController(authService contract.AuthService, mapper mapper.Mapper, authToken auth.AuthToken, utils routeutils.Utils) *Controller {
 	once.Do(func() {
 		instance = &Controller{
 			authService: authService,
 			mapper:      mapper,
 			authToken:   authToken,
+			utils:       utils,
 		}
 	})
 	return instance
@@ -40,32 +42,32 @@ func NewController(authService contract.AuthService, mapper mapper.Mapper, authT
 
 func (s *Controller) handleLogin(c echo.Context) error {
 
-	ctx := routeutils.GetContext(c)
+	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.Login{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 	err = input.Validate()
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
 	account, err := s.authService.Login(ctx, input.CPF, input.Password)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	sessionUUID := uuid.NewV4().String()
 	token, tokenPayload, err := s.authToken.CreateAccessToken(account.UUID, sessionUUID)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(account.UUID, sessionUUID)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	sessionReq := entity.Session{
@@ -79,7 +81,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 
 	err = s.authService.CreateSession(ctx, sessionReq)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	response := viewmodel.LoginResponse{
@@ -89,51 +91,51 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt,
 	}
 
-	return routeutils.ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOK(c, response)
 }
 
 func (s *Controller) handleRefreshToken(c echo.Context) error {
 
-	ctx := routeutils.GetContext(c)
+	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.RefreshTokenRequest{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 	err = input.Validate()
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
 	refreshPayload, err := s.authToken.VerifyToken(input.RefreshToken)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	session, err := s.authService.GetSessionByUUID(ctx, refreshPayload.SessionUUID)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	if session.IsBlocked {
-		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("blocked session"))
+		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("blocked session"))
 	}
 	if session.RefreshToken != input.RefreshToken {
-		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("mismatched session token"))
+		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("mismatched session token"))
 	}
 	if time.Now().After(session.RefreshTokenExpiredAt) {
-		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
+		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
 	}
 
 	accessToken, accessPayload, err := s.authToken.CreateAccessToken(refreshPayload.AccountUUID, refreshPayload.SessionUUID)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	response := viewmodel.RefreshTokenResponse{
 		AccessToken:          accessToken,
 		AccessTokenExpiresAt: accessPayload.ExpiredAt,
 	}
-	return routeutils.ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOK(c, response)
 }

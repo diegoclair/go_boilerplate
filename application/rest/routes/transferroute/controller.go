@@ -20,13 +20,15 @@ var (
 type Controller struct {
 	transferService contract.TransferService
 	mapper          mapper.Mapper
+	utils           routeutils.Utils
 }
 
-func NewController(transferService contract.TransferService, mapper mapper.Mapper) *Controller {
+func NewController(transferService contract.TransferService, mapper mapper.Mapper, utils routeutils.Utils) *Controller {
 	once.Do(func() {
 		instance = &Controller{
 			transferService: transferService,
 			mapper:          mapper,
+			utils:           utils,
 		}
 	})
 	return instance
@@ -37,41 +39,41 @@ func (s *Controller) handleAddTransfer(c echo.Context) error {
 	input := viewmodel.TransferReq{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
 	err = input.Validate()
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	transfer := entity.Transfer{}
 	err = s.mapper.From(input).To(&transfer)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
-	appContext := routeutils.GetContext(c)
+	appContext := s.utils.Req().GetContext(c)
 	err = s.transferService.CreateTransfer(appContext, transfer)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
-	return routeutils.ResponseCreated(c)
+	return s.utils.Resp().ResponseCreated(c)
 }
 
 func (s *Controller) handleGetTransfers(c echo.Context) error {
 
-	ctx := routeutils.GetContext(c)
+	ctx := s.utils.Req().GetContext(c)
 	transfers, err := s.transferService.GetTransfers(ctx)
 	if err != nil {
 
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
 	response := []viewmodel.TransferResp{}
 	err = s.mapper.From(transfers).To(&response)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return s.utils.Resp().HandleAPIError(c, err)
 	}
-	return routeutils.ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOK(c, response)
 }
