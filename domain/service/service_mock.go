@@ -41,8 +41,8 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 		mockCrypto:       crypto,
 	}
 
-	m.mockDataManager.EXPECT().Account().Return(accountRepo).AnyTimes()
-	m.mockDataManager.EXPECT().Auth().Return(authRepo).AnyTimes()
+	dm.EXPECT().Account().Return(accountRepo).AnyTimes()
+	dm.EXPECT().Auth().Return(authRepo).AnyTimes()
 
 	svc = newService(dm, cfg, cm, crypto, log)
 
