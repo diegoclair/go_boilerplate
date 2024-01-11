@@ -29,6 +29,9 @@ func RandomSecret() string {
 	return RandomString(8)
 }
 
+// RandomString generates a random string of length n.
+// It uses the characters from the alphabet defined in the package.
+// The generated string is returned as a result.
 func RandomString(n int) string {
 	var sb strings.Builder
 
