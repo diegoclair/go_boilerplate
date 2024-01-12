@@ -168,11 +168,12 @@ func (mr *MockAccountRepoMockRecorder) AddTransfer(ctx, transferUUID, accountOri
 }
 
 // CreateAccount mocks base method.
-func (m *MockAccountRepo) CreateAccount(ctx context.Context, account entity.Account) error {
+func (m *MockAccountRepo) CreateAccount(ctx context.Context, account entity.Account) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", ctx, account)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateAccount indicates an expected call of CreateAccount.
