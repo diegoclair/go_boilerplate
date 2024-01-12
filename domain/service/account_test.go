@@ -45,11 +45,11 @@ func Test_accountService_CreateAccount(t *testing.T) {
 					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, errors.New("No records find")).Times(1),
 					mocks.mockCrypto.EXPECT().HashPassword(args.account.Password).Return("123", nil).Times(1),
 
-					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, account entity.Account) error {
+					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, account entity.Account) (int64, error) {
 						require.Equal(t, args.account.Name, account.Name)
 						require.Equal(t, args.account.CPF, account.CPF)
 						require.NotEmpty(t, account.Password)
-						return nil
+						return int64(0), nil
 					}).Times(1),
 				)
 			},
@@ -75,7 +75,7 @@ func Test_accountService_CreateAccount(t *testing.T) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, errors.New("No records find")).Times(1),
 					mocks.mockCrypto.EXPECT().HashPassword(args.account.Password).Return("123", nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).Return(errors.New("some error")).Times(1),
+					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).Return(int64(0), errors.New("some error")).Times(1),
 				)
 			},
 			wantErr: true,
