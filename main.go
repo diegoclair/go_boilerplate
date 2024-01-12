@@ -42,7 +42,7 @@ func main() {
 
 	authToken, err := auth.NewAuthToken(cfg.App.Auth)
 	if err != nil {
-		log.Fatalf(ctx, "Error to load config: %v", err)
+		log.Fatalf(ctx, "Error getting NewAuthToken: %v", err)
 	}
 
 	data, err := data.Connect(ctx, cfg, log)
