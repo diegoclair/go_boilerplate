@@ -44,7 +44,7 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 	}
 	account.UUID = uuid.NewV4().String()
 
-	err = s.svc.dm.Account().CreateAccount(ctx, account)
+	_, err = s.svc.dm.Account().CreateAccount(ctx, account)
 	if err != nil {
 		s.svc.log.Error(ctx, err.Error())
 		return err

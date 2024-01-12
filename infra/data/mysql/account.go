@@ -79,7 +79,7 @@ func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, acco
 	return nil
 }
 
-func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account) (err error) {
+func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account) (createdID int64, err error) {
 	query := `
 		INSERT INTO tab_account (
 			account_uuid,
@@ -92,21 +92,26 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account)
 
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return createdID, mysqlutils.HandleMySQLError(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(
+	result, err := stmt.Exec(
 		account.UUID,
 		account.Name,
 		account.CPF,
 		account.Password,
 	)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return createdID, mysqlutils.HandleMySQLError(err)
 	}
 
-	return nil
+	createdID, err = result.LastInsertId()
+	if err != nil {
+		return createdID, mysqlutils.HandleMySQLError(err)
+	}
+
+	return createdID, nil
 }
 
 func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error) {

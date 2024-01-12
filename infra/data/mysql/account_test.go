@@ -20,10 +20,17 @@ func createRandomAccount(t *testing.T) entity.Account {
 		CPF:  random.RandomCPF(),
 	}
 
-	c := crypto.NewCrypto()
-	args.Password, _ = c.HashPassword(random.RandomSecret())
-	err := testMysql.Account().CreateAccount(context.Background(), args)
+	var (
+		c   = crypto.NewCrypto()
+		err error
+	)
+
+	args.Password, err = c.HashPassword(random.RandomSecret())
 	require.NoError(t, err)
+
+	createID, err := testMysql.Account().CreateAccount(context.Background(), args)
+	require.NoError(t, err)
+	require.NotZero(t, createID)
 
 	account, err := testMysql.Account().GetAccountByUUID(context.Background(), args.UUID)
 	require.NoError(t, err)
