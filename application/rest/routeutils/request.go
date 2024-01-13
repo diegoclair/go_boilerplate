@@ -11,7 +11,7 @@ import (
 )
 
 type RequestUtils interface {
-	// GetContext returns a filled ctx with the account uuid and session code
+	// GetContext returns a filled ctx with the account uuid and session code if route has access token
 	GetContext(c echo.Context) (ctx context.Context)
 	GetAndValidateParam(c echo.Context, paramName string, errorMessage string) (paramValue string, err error)
 	GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (take int64, skip int64)
