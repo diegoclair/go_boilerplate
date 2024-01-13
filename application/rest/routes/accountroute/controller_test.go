@@ -73,10 +73,21 @@ func TestController_handleAddAccount(t *testing.T) {
 			},
 		},
 		{
-			name: "Should not be possible create an account without field name",
+			name: "Should validate Login required fields",
+			args: args{
+				body: viewmodel.AddAccount{},
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "Invalid input data")
+				require.Contains(t, resp.Body.String(), "The field 'CPF' is required")
+				require.Contains(t, resp.Body.String(), "The field 'Password' is required")
+			},
+		},
+		{
+			name: "Should validate required fields",
 			args: args{
 				body: viewmodel.AddAccount{
-					Name: "",
 					Login: viewmodel.Login{
 						CPF:      "01234567890",
 						Password: "secret@123",
@@ -87,40 +98,6 @@ func TestController_handleAddAccount(t *testing.T) {
 				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 				require.Contains(t, resp.Body.String(), "Invalid input data")
 				require.Contains(t, resp.Body.String(), "The field 'Name' is required")
-			},
-		},
-		{
-			name: "Should not be possible create an account without field CPF",
-			args: args{
-				body: viewmodel.AddAccount{
-					Name: "Teste name",
-					Login: viewmodel.Login{
-						CPF:      "",
-						Password: "secret@123",
-					},
-				},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "Invalid input data")
-				require.Contains(t, resp.Body.String(), "The field 'CPF' is required")
-			},
-		},
-		{
-			name: "Should not be possible create an account without field Password",
-			args: args{
-				body: viewmodel.AddAccount{
-					Name: "Teste name",
-					Login: viewmodel.Login{
-						CPF:      "01234567890",
-						Password: "",
-					},
-				},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "Invalid input data")
-				require.Contains(t, resp.Body.String(), "The field 'Password' is required")
 			},
 		},
 		{
