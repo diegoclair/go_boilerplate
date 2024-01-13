@@ -7,6 +7,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 )
 
@@ -24,8 +25,9 @@ func newAuthService(svc *service) contract.AuthService {
 	}
 }
 
-func (s *authService) Login(ctx context.Context, cpf, secret string) (account entity.Account, err error) {
+// TODO: criar logout process
 
+func (s *authService) Login(ctx context.Context, cpf, secret string) (account entity.Account, err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -35,10 +37,11 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
+	ctx = context.WithValue(ctx, auth.AccountUUIDKey, account.UUID) // set account uuid in context to be used in logs
+
 	s.svc.log.Infow(ctx, "account information used to login",
 		slog.Group("accountInfo",
 			slog.Int64("account_id", account.ID),
-			slog.String("account_uuid", account.UUID),
 			slog.String("name", account.Name),
 		))
 
@@ -52,7 +55,6 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 }
 
 func (s *authService) CreateSession(ctx context.Context, session entity.Session) (err error) {
-
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -66,7 +68,6 @@ func (s *authService) CreateSession(ctx context.Context, session entity.Session)
 }
 
 func (s *authService) GetSessionByUUID(ctx context.Context, sessionUUID string) (session entity.Session, err error) {
-
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
