@@ -19,7 +19,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest"
 	"github.com/diegoclair/go_boilerplate/domain/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
@@ -63,7 +62,5 @@ func main() {
 		log.Fatalf(ctx, "error to get domain services: %v", err)
 	}
 
-	mp := mapper.New()
-
-	rest.StartRestServer(ctx, cfg, services, log, authToken, mp) //TODO: receive flags for what server it will starts
+	rest.StartRestServer(ctx, cfg, services, log, authToken) //TODO: receive flags for what server it will starts
 }

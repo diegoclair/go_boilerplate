@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
@@ -23,18 +22,16 @@ import (
 )
 
 type mock struct {
-	mapper         mapper.Mapper
 	accountService *mocks.MockAccountService
 }
 
 func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gomock.Controller, transferControler *Controller) {
 	ctrl = gomock.NewController(t)
 	accountMock = mock{
-		mapper:         mapper.New(),
 		accountService: mocks.NewMockAccountService(ctrl),
 	}
 
-	transferControler = &Controller{accountMock.accountService, accountMock.mapper, routeutils.New(logger.NewNoop())}
+	transferControler = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop())}
 	transferRoute := NewRouter(transferControler, RouteName)
 
 	server = echo.New()
@@ -45,10 +42,10 @@ func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gom
 }
 
 func TestController_handleAddAccount(t *testing.T) {
-
 	type args struct {
 		body any
 	}
+
 	tests := []struct {
 		name          string
 		args          args
@@ -170,6 +167,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
@@ -240,8 +238,11 @@ func TestController_GetAccounts(t *testing.T) {
 				take, skip := s.utils.Req().GetTakeSkipFromPageQuantity(int64(args.page), int64(args.quantity))
 
 				response := []viewmodel.Account{}
-				err := mock.mapper.From(accounts).To(&response)
-				require.NoError(t, err)
+				for _, account := range accounts {
+					item := viewmodel.Account{}
+					item.FillFromEntity(account)
+					response = append(response, item)
+				}
 
 				paginatedResp := s.utils.Resp().BuildPaginatedResult(response, skip, take, int64(args.accountsToBuild))
 				expectedResp, err := json.Marshal(paginatedResp)
@@ -316,8 +317,7 @@ func TestController_GetAccountByID(t *testing.T) {
 				account := buildAccoununtByID(1)
 
 				response := viewmodel.Account{}
-				err := mock.mapper.From(account).To(&response)
-				require.NoError(t, err)
+				response.FillFromEntity(account)
 
 				expectedResp, err := json.Marshal(response)
 				require.NoError(t, err)

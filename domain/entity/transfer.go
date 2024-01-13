@@ -8,5 +8,5 @@ type Transfer struct {
 	AccountOriginUUID      string
 	AccountDestinationUUID string
 	Amount                 float64
-	CreateAt               time.Time
+	CreatedAt              time.Time
 }

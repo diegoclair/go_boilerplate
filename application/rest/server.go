@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/accountroute"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/application/rest/routes/pingroute"
@@ -31,8 +30,8 @@ type Server struct {
 	cfg     *config.Config
 }
 
-func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, mapper mapper.Mapper) {
-	server := newRestServer(services, authToken, cfg, mapper, log)
+func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken) {
+	server := newRestServer(services, authToken, cfg, log)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -45,16 +44,16 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 	}
 }
 
-func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, mapper mapper.Mapper, log logger.Logger) *Server {
+func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, log logger.Logger) *Server {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	routeUtils := routeutils.New(log)
 
 	pingController := pingroute.NewController()
-	accountController := accountroute.NewController(services.AccountService, mapper, routeUtils)
-	authController := authroute.NewController(services.AuthService, mapper, authToken, routeUtils)
-	transferController := transferroute.NewController(services.TransferService, mapper, routeUtils)
+	accountController := accountroute.NewController(services.AccountService, routeUtils)
+	authController := authroute.NewController(services.AuthService, authToken, routeUtils)
+	transferController := transferroute.NewController(services.TransferService, routeUtils)
 
 	pingRoute := pingroute.NewRouter(pingController, pingroute.RouteName)
 	accountRoute := accountroute.NewRouter(accountController, accountroute.RouteName)

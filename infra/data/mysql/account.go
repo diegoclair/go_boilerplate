@@ -271,7 +271,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 			&transfer.AccountOriginUUID,
 			&transfer.AccountDestinationUUID,
 			&transfer.Amount,
-			&transfer.CreateAt,
+			&transfer.CreatedAt,
 		)
 		if err != nil {
 			return transfers, err

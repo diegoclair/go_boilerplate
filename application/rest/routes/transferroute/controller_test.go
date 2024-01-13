@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/application/rest/serverMiddleware"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
@@ -46,12 +45,12 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 }
 
 func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo, ctrl *gomock.Controller, transferControler *Controller) {
-
 	ctrl = gomock.NewController(t)
+
 	transferMock = mocks.NewMockTransferService(ctrl)
 	tokenMaker = getTokenMaker(t)
 
-	transferControler = &Controller{transferMock, mapper.New(), routeutils.New(logger.NewNoop())}
+	transferControler = &Controller{transferMock, routeutils.New(logger.NewNoop())}
 	transferRoute := NewRouter(transferControler, "transfers")
 
 	server = echo.New()
@@ -59,6 +58,7 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	privateGroup := appGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(tokenMaker),
 	)
+
 	transferRoute.RegisterRoutes(appGroup, privateGroup)
 	return
 }
@@ -71,12 +71,12 @@ func addAuthorization(t *testing.T, req *http.Request, tokenMaker auth.AuthToken
 }
 
 func TestController_handleAddBalance(t *testing.T) {
-
 	type args struct {
 		body        any
 		accountUUID string
 		sessionUUID string
 	}
+
 	tests := []struct {
 		name          string
 		args          args

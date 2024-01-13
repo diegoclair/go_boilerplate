@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
@@ -23,16 +22,14 @@ var (
 
 type Controller struct {
 	authService contract.AuthService
-	mapper      mapper.Mapper
 	authToken   auth.AuthToken
 	utils       routeutils.Utils
 }
 
-func NewController(authService contract.AuthService, mapper mapper.Mapper, authToken auth.AuthToken, utils routeutils.Utils) *Controller {
+func NewController(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils) *Controller {
 	once.Do(func() {
 		instance = &Controller{
 			authService: authService,
-			mapper:      mapper,
 			authToken:   authToken,
 			utils:       utils,
 		}

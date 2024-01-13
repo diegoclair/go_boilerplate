@@ -4,7 +4,6 @@ go 1.21.5
 
 require (
 	github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244
-	github.com/IQ-tech/go-mapper v1.0.9
 	github.com/diegoclair/go_utils-lib/v2 v2.4.6
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-sql-driver/mysql v1.7.1
@@ -25,7 +24,6 @@ require (
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.1 // indirect
-	github.com/IQ-tech/go-errors v0.2.0 // indirect
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/aead/chacha20poly1305 v0.0.0-20201124145622-1a5aba2a8b29 // indirect
 	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect

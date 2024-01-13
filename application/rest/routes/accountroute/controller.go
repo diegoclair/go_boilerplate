@@ -3,7 +3,6 @@ package accountroute
 import (
 	"sync"
 
-	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
@@ -19,23 +18,21 @@ var (
 
 type Controller struct {
 	accountService contract.AccountService
-	mapper         mapper.Mapper
 	utils          routeutils.Utils
 }
 
-func NewController(accountService contract.AccountService, mapper mapper.Mapper, utils routeutils.Utils) *Controller {
+func NewController(accountService contract.AccountService, utils routeutils.Utils) *Controller {
 	once.Do(func() {
 		instance = &Controller{
 			accountService: accountService,
-			mapper:         mapper,
 			utils:          utils,
 		}
 	})
+
 	return instance
 }
 
 func (s *Controller) handleAddAccount(c echo.Context) error {
-
 	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.AddAccount{}
@@ -59,11 +56,11 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
+
 	return s.utils.Resp().ResponseCreated(c)
 }
 
 func (s *Controller) handleAddBalance(c echo.Context) error {
-
 	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.AddBalance{}
@@ -86,11 +83,11 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
+
 	return s.utils.Resp().ResponseCreated(c)
 }
 
 func (s *Controller) handleGetAccounts(c echo.Context) error {
-
 	ctx := s.utils.Req().GetContext(c)
 
 	take, skip := s.utils.Req().GetPagingParams(c, "page", "quantity")
@@ -101,9 +98,10 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 	}
 
 	response := []viewmodel.Account{}
-	err = s.mapper.From(accounts).To(&response)
-	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+	for _, account := range accounts {
+		item := viewmodel.Account{}
+		item.FillFromEntity(account)
+		response = append(response, item)
 	}
 
 	responsePaginated := s.utils.Resp().BuildPaginatedResult(response, skip, take, totalRecords)
@@ -112,7 +110,6 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 }
 
 func (s *Controller) handleGetAccountByID(c echo.Context) error {
-
 	ctx := s.utils.Req().GetContext(c)
 
 	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")
@@ -126,16 +123,12 @@ func (s *Controller) handleGetAccountByID(c echo.Context) error {
 	}
 
 	response := viewmodel.Account{}
-	err = s.mapper.From(account).To(&response)
-	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
-	}
+	response.FillFromEntity(account)
 
 	return s.utils.Resp().ResponseAPIOK(c, response)
 }
 
 func (s *Controller) handleGetAccountBalanceByID(c echo.Context) error {
-
 	ctx := s.utils.Req().GetContext(c)
 
 	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_id", "Invalid account_id")

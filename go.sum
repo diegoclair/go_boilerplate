@@ -2,11 +2,6 @@ github.com/DATA-DOG/go-sqlmock v1.5.1 h1:FK6RCIUSfmbnI/imIICmboyQBkOckutaa6R5YYl
 github.com/DATA-DOG/go-sqlmock v1.5.1/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244 h1:dqzm54OhCqY8RinR/cx+Ppb0y56Ds5I3wwWhx4XybDg=
 github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244/go.mod h1:3sqgkckuISJ5rs1EpOp6vCvwOUKe/z9vPmyuIlq8Q/A=
-github.com/IQ-tech/go-errors v0.1.0/go.mod h1:qgv1mXc6/4Tq7Zln30l/BrZjvTpzBNB40nPh55xr4V4=
-github.com/IQ-tech/go-errors v0.2.0 h1:PQW1CcVcqiONTD9d/5dX/kzOIH2qdmY66heZHvbeElU=
-github.com/IQ-tech/go-errors v0.2.0/go.mod h1:ZrAGggk/GiuFnVwitQewz+rSD5Us8CWc8l8J8qKdesc=
-github.com/IQ-tech/go-mapper v1.0.9 h1:IW0CECMZM/zdXPuq6iAC8Ig717g32kFzUsHRI8EkNqE=
-github.com/IQ-tech/go-mapper v1.0.9/go.mod h1:kqfQFTJdx+etacUd98R7yMCwsk4tFMrK9xOr/sU0ZFY=
 github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da h1:KjTM2ks9d14ZYCvmHS9iAKVt9AyzRSqNU1qabPih5BY=
 github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da/go.mod h1:eHEWzANqSiWQsof+nXEI9bUVUyV6F53Fp89EuCh2EAA=
 github.com/aead/chacha20poly1305 v0.0.0-20170617001512-233f39982aeb/go.mod h1:UzH9IX1MMqOcwhoNOIjmTQeAxrFgzs50j4golQtXXxU=
@@ -167,7 +162,6 @@ github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSS
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
-github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
