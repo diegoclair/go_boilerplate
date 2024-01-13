@@ -3,11 +3,8 @@ package service
 import (
 	"context"
 
-	"log/slog"
-
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/infra/logger"
 	utilerrors "github.com/diegoclair/go_boilerplate/util/errors"
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
@@ -30,7 +27,7 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 
 	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
 	if err != nil && !utilerrors.SQLNotFound(err.Error()) {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get account by document: %s", err.Error())
 		return err
 	} else if err == nil {
 		s.svc.log.Error(ctx, "The document number is already in use")
@@ -39,14 +36,14 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 
 	account.Password, err = s.svc.crypto.HashPassword(account.Password)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to hash password: %s", err.Error())
 		return err
 	}
 	account.UUID = uuid.NewV4().String()
 
 	_, err = s.svc.dm.Account().CreateAccount(ctx, account)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to create account: %s", err.Error())
 		return err
 	}
 
@@ -59,18 +56,14 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		s.svc.log.Errorw(ctx, "error to get account by uuid",
-			slog.String(logger.AccountUUIDKey, accountUUID),
-			slog.String(logger.ErrorKey, err.Error()))
+		s.svc.log.Errorf(ctx, "error to get account by uuid: %s", err.Error())
 		return err
 	}
 	balance := number.RoundFloat(account.Balance+amount, 2)
 
 	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account.ID, balance)
 	if err != nil {
-		s.svc.log.Errorw(ctx, "error to update account balance",
-			slog.String(logger.AccountUUIDKey, accountUUID),
-			slog.String(logger.ErrorKey, err.Error()))
+		s.svc.log.Errorf(ctx, "error to update account balance: %s", err.Error())
 		return err
 	}
 
@@ -83,7 +76,7 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 
 	accounts, totalRecords, err = s.svc.dm.Account().GetAccounts(ctx, take, skip)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get accounts: %s", err.Error())
 		return accounts, totalRecords, err
 	}
 
@@ -98,7 +91,7 @@ func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID strin
 
 	account, err = s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get account by uuid: %s", err.Error())
 		return account, err
 	}
 

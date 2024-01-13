@@ -33,7 +33,7 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 
 	account, err = s.svc.dm.Account().GetAccountByDocument(ctx, cpf)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error getting account by document: %s", err.Error())
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
@@ -60,7 +60,7 @@ func (s *authService) CreateSession(ctx context.Context, session entity.Session)
 
 	err = s.svc.dm.Auth().CreateSession(ctx, session)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error creating session: %s", err.Error())
 		return err
 	}
 
@@ -73,7 +73,7 @@ func (s *authService) GetSessionByUUID(ctx context.Context, sessionUUID string) 
 
 	session, err = s.svc.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error getting session: %s", err.Error())
 		return session, err
 	}
 

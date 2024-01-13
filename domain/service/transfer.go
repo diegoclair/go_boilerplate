@@ -33,9 +33,10 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 		s.svc.log.Error(ctx, errMsg)
 		return errors.New(errMsg)
 	}
+
 	fromAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get logged account by uuid: %s", err.Error())
 		return err
 	}
 
@@ -45,7 +46,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 
 	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get destionation account by uuid: %s", err.Error())
 		return err
 	}
 
@@ -55,21 +56,21 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 
 		err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
 		if err != nil {
-			s.svc.log.Error(ctx, err.Error())
+			s.svc.log.Errorf(ctx, "error to add transfer: %s", err.Error())
 			return err
 		}
 
 		originBalance := number.RoundFloat(fromAccount.Balance-transfer.Amount, 2)
 		err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, originBalance)
 		if err != nil {
-			s.svc.log.Error(ctx, err.Error())
+			s.svc.log.Errorf(ctx, "error to update origin account balance: %s", err.Error())
 			return err
 		}
 
 		destBalance := number.RoundFloat(destAccount.Balance+transfer.Amount, 2)
 		err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destBalance)
 		if err != nil {
-			s.svc.log.Error(ctx, err.Error())
+			s.svc.log.Errorf(ctx, "error to update destination account balance: %s", err.Error())
 			return err
 		}
 		return nil
@@ -90,23 +91,23 @@ func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.
 
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get logged account by uuid: %s", err.Error())
 		return transfers, err
 	}
 
-	transfersMade, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, true)
+	madeTransfers, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, true)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get made transfers: %s", err.Error())
 		return transfers, err
 	}
-	transfers = append(transfers, transfersMade...)
+	transfers = append(transfers, madeTransfers...)
 
-	transfersReceived, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
+	receivedTransfers, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
 	if err != nil {
-		s.svc.log.Error(ctx, err.Error())
+		s.svc.log.Errorf(ctx, "error to get received transfers: %s", err.Error())
 		return transfers, err
 	}
-	transfers = append(transfers, transfersReceived...)
+	transfers = append(transfers, receivedTransfers...)
 
 	return transfers, nil
 }
