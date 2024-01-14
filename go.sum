@@ -37,8 +37,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/diegoclair/go_utils-lib/v2 v2.4.11 h1:zJqYLmgNM3XcBglcVoWkrC3+ApSrnTCzcJ1C5VhtE2g=
-github.com/diegoclair/go_utils-lib/v2 v2.4.11/go.mod h1:cGwO6oi4zB8xBDTaZpaE8r8qQghq+exITp4sexhALpU=
+github.com/diegoclair/go_utils-lib/v2 v2.4.12 h1:W9uL2DgNHVK1otLMeBFLTJBWr94cNyAlKLz1rUtABy4=
+github.com/diegoclair/go_utils-lib/v2 v2.4.12/go.mod h1:cGwO6oi4zB8xBDTaZpaE8r8qQghq+exITp4sexhALpU=
 github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712 h1:aaQcKT9WumO6JEJcRyTqFVq4XUZiUcKR2/GI31TOcz8=
 github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
