@@ -25,18 +25,18 @@ type mock struct {
 	accountService *mocks.MockAccountService
 }
 
-func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gomock.Controller, transferControler *Controller) {
+func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gomock.Controller, accountControler *Controller) {
 	ctrl = gomock.NewController(t)
 	accountMock = mock{
 		accountService: mocks.NewMockAccountService(ctrl),
 	}
 
-	transferControler = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop())}
-	transferRoute := NewRouter(transferControler, RouteName)
+	accountControler = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop())}
+	accountRoute := NewRouter(accountControler, RouteName)
 
 	server = echo.New()
 	appGroup := server.Group("/")
-	transferRoute.RegisterRoutes(appGroup, nil)
+	accountRoute.RegisterRoutes(appGroup, nil)
 
 	return
 }
