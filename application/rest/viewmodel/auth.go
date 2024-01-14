@@ -3,27 +3,18 @@ package viewmodel
 import (
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/util/validator"
-	"github.com/diegoclair/go_utils-lib/v2/resterrors"
-	"github.com/diegoclair/go_utils-lib/v2/validstruct"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
 type Login struct {
-	CPF      string `json:"cpf,omitempty" validate:"required,min=11,max=11"`
+	CPF      string `json:"cpf,omitempty" validate:"required,min=11,max=11,cpf"`
 	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
-func (l *Login) Validate() error {
-
-	l.CPF = validator.CleanNumber(l.CPF)
-	err := validstruct.ValidateStruct(l)
+func (l *Login) Validate(structValidator validator.Validator) error {
+	err := structValidator.ValidateStruct(l)
 	if err != nil {
 		return err
-	}
-
-	validDocument := validator.IsValidCPF(l.CPF)
-	if !validDocument {
-		return resterrors.NewUnprocessableEntity("Invalid cpf document")
 	}
 
 	return nil
@@ -40,9 +31,8 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
-func (t *RefreshTokenRequest) Validate() error {
-
-	err := validstruct.ValidateStruct(t)
+func (t *RefreshTokenRequest) Validate(structValidator validator.Validator) error {
+	err := structValidator.ValidateStruct(t)
 	if err != nil {
 		return err
 	}

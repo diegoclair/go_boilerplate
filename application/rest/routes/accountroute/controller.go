@@ -7,6 +7,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,15 +18,17 @@ var (
 )
 
 type Controller struct {
-	accountService contract.AccountService
-	utils          routeutils.Utils
+	accountService  contract.AccountService
+	utils           routeutils.Utils
+	structValidator validator.Validator
 }
 
-func NewController(accountService contract.AccountService, utils routeutils.Utils) *Controller {
+func NewController(accountService contract.AccountService, utils routeutils.Utils, structValidator validator.Validator) *Controller {
 	once.Do(func() {
 		instance = &Controller{
-			accountService: accountService,
-			utils:          utils,
+			accountService:  accountService,
+			utils:           utils,
+			structValidator: structValidator,
 		}
 	})
 
@@ -41,7 +44,7 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate()
+	err = input.Validate(s.structValidator)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
@@ -69,7 +72,7 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate()
+	err = input.Validate(s.structValidator)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}

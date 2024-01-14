@@ -20,6 +20,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -51,7 +52,10 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	transferMock = mocks.NewMockTransferService(ctrl)
 	tokenMaker = getTokenMaker(t)
 
-	transferControler = &Controller{transferMock, routeutils.New(logger.NewNoop())}
+	v, err := validator.NewValidator()
+	require.NoError(t, err)
+
+	transferControler = &Controller{transferMock, routeutils.New(logger.NewNoop()), v}
 	transferRoute := NewRouter(transferControler, "transfers")
 
 	server = echo.New()

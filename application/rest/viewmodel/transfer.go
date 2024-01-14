@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_utils-lib/v2/validstruct"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
 type TransferReq struct {
@@ -12,8 +12,8 @@ type TransferReq struct {
 	Amount                 float64 `json:"amount,omitempty" validate:"required"`
 }
 
-func (t *TransferReq) Validate() error {
-	return validstruct.ValidateStruct(t)
+func (t *TransferReq) Validate(structValidator validator.Validator) error {
+	return structValidator.ValidateStruct(t)
 }
 
 func (t *TransferReq) ToEntity() entity.Transfer {

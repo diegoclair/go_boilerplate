@@ -16,6 +16,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -30,8 +31,10 @@ func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gom
 	accountMock = mock{
 		accountService: mocks.NewMockAccountService(ctrl),
 	}
+	v, err := validator.NewValidator()
+	require.NoError(t, err)
 
-	accountControler = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop())}
+	accountControler = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop()), v}
 	accountRoute := NewRouter(accountControler, RouteName)
 
 	server = echo.New()
@@ -56,11 +59,9 @@ func TestController_handleAddAccount(t *testing.T) {
 			name: "Should complete request with no error",
 			args: args{
 				body: viewmodel.AddAccount{
-					Name: "Add withou Error",
-					Login: viewmodel.Login{
-						CPF:      "01234567890",
-						Password: "secret@123",
-					},
+					Name:     "Add withou Error",
+					CPF:      "01234567890",
+					Password: "secret@123",
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
@@ -88,10 +89,8 @@ func TestController_handleAddAccount(t *testing.T) {
 			name: "Should validate required fields",
 			args: args{
 				body: viewmodel.AddAccount{
-					Login: viewmodel.Login{
-						CPF:      "01234567890",
-						Password: "secret@123",
-					},
+					CPF:      "01234567890",
+					Password: "secret@123",
 				},
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -104,16 +103,14 @@ func TestController_handleAddAccount(t *testing.T) {
 			name: "Should not be possible create an account with invalid cpf",
 			args: args{
 				body: viewmodel.AddAccount{
-					Name: "Teste name",
-					Login: viewmodel.Login{
-						CPF:      "12345612345",
-						Password: "Secret@123",
-					},
+					Name:     "Teste name",
+					CPF:      "12345612345",
+					Password: "Secret@123",
 				},
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "Invalid cpf document")
+				require.Contains(t, resp.Body.String(), "The field 'CPF' should be a valid cpf")
 			},
 		},
 		{
@@ -127,11 +124,9 @@ func TestController_handleAddAccount(t *testing.T) {
 			name: "Should return error if we have any error with service",
 			args: args{
 				body: viewmodel.AddAccount{
-					Name: "Error with service",
-					Login: viewmodel.Login{
-						CPF:      "01234567890",
-						Password: "Secret@123",
-					},
+					Name:     "Error with service",
+					CPF:      "01234567890",
+					Password: "Secret@123",
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {

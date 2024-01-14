@@ -4,24 +4,21 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_utils-lib/v2/validstruct"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
 type AddAccount struct {
-	Name string `json:"name,omitempty" validate:"required,min=3"`
-	Login
+	Name     string `json:"name,omitempty" validate:"required,min=3"`
+	CPF      string `json:"cpf,omitempty" validate:"required,min=11,max=11,cpf"`
+	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
-func (a *AddAccount) Validate() error {
-	err := a.Login.Validate()
+func (a *AddAccount) Validate(strucValidator validator.Validator) error {
+	err := strucValidator.ValidateStruct(a)
 	if err != nil {
 		return err
 	}
 
-	err = validstruct.ValidateStruct(a)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -45,11 +42,11 @@ type AddBalance struct {
 	Amount float64 `json:"amount" validate:"required,gt=0"`
 }
 
-func (a *AddBalance) Validate() error {
-
-	err := validstruct.ValidateStruct(a)
+func (a *AddBalance) Validate(strucValidator validator.Validator) error {
+	err := strucValidator.ValidateStruct(a)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

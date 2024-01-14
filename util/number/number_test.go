@@ -43,3 +43,12 @@ func TestFloatingPoint(t *testing.T) {
 	require.Equal(t, 0.22050000000000003, final)   //floating point problem
 	require.Equal(t, 0.2205, RoundFloat(final, 4)) //fixed floating point value
 }
+
+func TestCleanNumber(t *testing.T) {
+	require.Equal(t, "1234567890", CleanNumber("1234567890"))
+	require.Equal(t, "1234567890", CleanNumber("1234567890a"))
+	require.Equal(t, "1234567890", CleanNumber("a1234567890"))
+	require.Equal(t, "1234567890", CleanNumber("a1234567890a"))
+	require.Equal(t, "1234567890", CleanNumber("a1b2c3d4e5f6g7h8i9j0"))
+	require.Equal(t, "1234567890", CleanNumber("a1.b2-c3*d4/e5+f6=g7h8i9j0"))
+}

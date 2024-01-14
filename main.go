@@ -27,6 +27,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/data"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
 func main() {
@@ -62,5 +63,10 @@ func main() {
 		log.Fatalf(ctx, "error to get domain services: %v", err)
 	}
 
-	rest.StartRestServer(ctx, cfg, services, log, authToken) //TODO: receive flags for what server it will starts
+	v, err := validator.NewValidator()
+	if err != nil {
+		log.Fatalf(ctx, "error to get validator: %v", err)
+	}
+
+	rest.StartRestServer(ctx, cfg, services, log, authToken, v) //TODO: receive flags for what server it will starts
 }

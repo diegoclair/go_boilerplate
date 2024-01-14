@@ -10,6 +10,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_utils-lib/v2/validator"
 	"github.com/twinj/uuid"
 
 	"github.com/labstack/echo/v4"
@@ -21,19 +22,22 @@ var (
 )
 
 type Controller struct {
-	authService contract.AuthService
-	authToken   auth.AuthToken
-	utils       routeutils.Utils
+	authService     contract.AuthService
+	authToken       auth.AuthToken
+	utils           routeutils.Utils
+	structValidator validator.Validator
 }
 
-func NewController(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils) *Controller {
+func NewController(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils, structValidator validator.Validator) *Controller {
 	once.Do(func() {
 		instance = &Controller{
-			authService: authService,
-			authToken:   authToken,
-			utils:       utils,
+			authService:     authService,
+			authToken:       authToken,
+			utils:           utils,
+			structValidator: structValidator,
 		}
 	})
+
 	return instance
 }
 
@@ -46,7 +50,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
-	err = input.Validate()
+	err = input.Validate(s.structValidator)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
@@ -100,7 +104,7 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
-	err = input.Validate()
+	err = input.Validate(s.structValidator)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
