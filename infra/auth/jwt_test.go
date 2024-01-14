@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -62,12 +64,14 @@ func Test_jwtAuth_VerifyToken(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.args.tokenType = tokenTypeJWT
 			cfg := getConfig(t, tt.args)
-			maker, err := NewAuthToken(cfg.App.Auth)
+			maker, err := NewAuthToken(cfg.App.Auth, logger.NewNoop())
 			require.NoError(t, err)
 
-			token, tokenPayload := createTestAccessToken(t, maker, tt.args)
+			ctx := context.Background()
 
-			gotPayload, err := maker.VerifyToken(token)
+			token, tokenPayload := createTestAccessToken(ctx, t, maker, tt.args)
+
+			gotPayload, err := maker.VerifyToken(ctx, token)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("jwtAuth.VerifyToken() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -1,10 +1,11 @@
 package auth
 
 import (
+	"context"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
-	"github.com/labstack/gommon/log"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -12,9 +13,10 @@ import (
 type pasetoAuth struct {
 	paseto       *paseto.V2
 	symmetricKey []byte
+	log          logger.Logger
 }
 
-func newPasetoAuth(symmetricKey string) (AuthToken, error) {
+func newPasetoAuth(symmetricKey string, log logger.Logger) (AuthToken, error) {
 	if len(symmetricKey) != chacha20poly1305.KeySize {
 		return nil, errInvalidPrivateKey
 	}
@@ -22,35 +24,44 @@ func newPasetoAuth(symmetricKey string) (AuthToken, error) {
 	return &pasetoAuth{
 		paseto:       paseto.NewV2(),
 		symmetricKey: []byte(symmetricKey),
+		log:          log,
 	}, nil
 }
 
-func (a *pasetoAuth) CreateAccessToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
-	return a.createToken(accountUUID, sessionUUID, accessTokenDurationTime)
+func (a *pasetoAuth) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
+	return a.createToken(ctx, accountUUID, sessionUUID, accessTokenDurationTime)
 }
 
-func (a *pasetoAuth) CreateRefreshToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
-	return a.createToken(accountUUID, sessionUUID, refreshTokenDurationTime)
+func (a *pasetoAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
+	return a.createToken(ctx, accountUUID, sessionUUID, refreshTokenDurationTime)
 }
 
-func (a *pasetoAuth) VerifyToken(token string) (*tokenPayload, error) {
+func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*tokenPayload, error) {
 	payload := &tokenPayload{}
 
 	err := a.paseto.Decrypt(token, a.symmetricKey, payload, nil)
 	if err != nil {
-		log.Error("VerifyToken: error to decrypt token: ", err)
+		a.log.Errorf(ctx, "error to decrypt token: %v", err)
 		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+	}
+
+	err = payload.Valid()
+	if err != nil {
+		a.log.Errorf(ctx, "error to validate token: %v", err)
+		return nil, resterrors.NewUnauthorizedError(err.Error())
 	}
 
 	return payload, payload.Valid()
 }
 
-func (a *pasetoAuth) createToken(accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *tokenPayload, err error) {
+func (a *pasetoAuth) createToken(ctx context.Context, accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *tokenPayload, err error) {
 	payload = newPayload(accountUUID, sessionUUID, duration)
+
 	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)
 	if err != nil {
-		log.Error("createToken: error to encrypt token: ", err)
+		a.log.Errorf(ctx, "error to encrypt token: %v", err)
 		return tokenString, payload, resterrors.NewUnauthorizedError(err.Error())
 	}
+
 	return tokenString, payload, nil
 }

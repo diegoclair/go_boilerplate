@@ -39,7 +39,7 @@ func main() {
 	ctx := context.Background()
 	log := logger.New(*cfg)
 
-	authToken, err := auth.NewAuthToken(cfg.App.Auth)
+	authToken, err := auth.NewAuthToken(cfg.App.Auth, log)
 	if err != nil {
 		log.Fatalf(ctx, "Error getting NewAuthToken: %v", err)
 	}

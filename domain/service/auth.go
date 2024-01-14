@@ -7,7 +7,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 )
 
@@ -37,7 +37,7 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
-	ctx = context.WithValue(ctx, auth.AccountUUIDKey, account.UUID) // set account uuid in context to be used in logs
+	ctx = context.WithValue(ctx, infra.AccountUUIDKey, account.UUID) // set account uuid in context to be used in logs
 
 	s.svc.log.Infow(ctx, "account information used to login",
 		slog.Group("accountInfo",

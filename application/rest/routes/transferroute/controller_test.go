@@ -15,6 +15,7 @@ import (
 	servermiddleware "github.com/diegoclair/go_boilerplate/application/rest/serverMiddleware"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
@@ -38,7 +39,7 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 		cfg.App.Auth.AccessTokenDuration = 2 * time.Second
 		cfg.App.Auth.RefreshTokenDuration = 2 * time.Second
 
-		tokenMaker, err = auth.NewAuthToken(cfg.App.Auth)
+		tokenMaker, err = auth.NewAuthToken(cfg.App.Auth, logger.NewNoop())
 		require.NoError(t, err)
 	})
 	return tokenMaker
@@ -63,14 +64,16 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	return
 }
 
-func addAuthorization(t *testing.T, req *http.Request, tokenMaker auth.AuthToken, accountUUID, sessionUUID string) {
-	token, _, err := tokenMaker.CreateAccessToken(accountUUID, sessionUUID)
+func addAuthorization(ctx context.Context, t *testing.T, req *http.Request, tokenMaker auth.AuthToken, accountUUID, sessionUUID string) {
+	token, _, err := tokenMaker.CreateAccessToken(ctx, accountUUID, sessionUUID)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
-	req.Header.Set(auth.TokenKey.String(), token)
+	req.Header.Set(infra.TokenKey.String(), token)
 }
 
 func TestController_handleAddBalance(t *testing.T) {
+	ctx := context.Background()
+
 	type args struct {
 		body        any
 		accountUUID string
@@ -95,7 +98,7 @@ func TestController_handleAddBalance(t *testing.T) {
 				sessionUUID: uuid.NewV4().String(),
 			},
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
-				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
 			buildMocks: func(ctx context.Context, transferMock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
@@ -119,7 +122,7 @@ func TestController_handleAddBalance(t *testing.T) {
 				sessionUUID: uuid.NewV4().String(),
 			},
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
-				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
@@ -156,8 +159,8 @@ func TestController_handleAddBalance(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				c := echo.New().NewContext(req, recorder)
-				c.Set(auth.AccountUUIDKey.String(), tt.args.accountUUID)
-				c.Set(auth.SessionKey.String(), tt.args.sessionUUID)
+				c.Set(infra.AccountUUIDKey.String(), tt.args.accountUUID)
+				c.Set(infra.SessionKey.String(), tt.args.sessionUUID)
 				ctx := s.utils.Req().GetContext(c)
 				tt.buildMocks(ctx, transferMock, tt.args)
 			}
@@ -171,6 +174,7 @@ func TestController_handleAddBalance(t *testing.T) {
 }
 
 func TestController_handleGetTransfers(t *testing.T) {
+	ctx := context.Background()
 
 	type args struct {
 		accountUUID string
@@ -194,7 +198,7 @@ func TestController_handleGetTransfers(t *testing.T) {
 				mock.EXPECT().GetTransfers(ctx).Return([]entity.Transfer{}, nil).Times(1)
 			},
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
-				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, resp.Code)
@@ -204,7 +208,7 @@ func TestController_handleGetTransfers(t *testing.T) {
 		{
 			name: "Should return expired token",
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
-				addAuthorization(t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, resp.Code)
@@ -231,8 +235,8 @@ func TestController_handleGetTransfers(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				c := echo.New().NewContext(req, recorder)
-				c.Set(auth.AccountUUIDKey.String(), tt.args.accountUUID)
-				c.Set(auth.SessionKey.String(), tt.args.sessionUUID)
+				c.Set(infra.AccountUUIDKey.String(), tt.args.accountUUID)
+				c.Set(infra.SessionKey.String(), tt.args.sessionUUID)
 				ctx := s.utils.Req().GetContext(c)
 
 				tt.buildMocks(ctx, transferMock)

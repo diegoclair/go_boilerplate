@@ -7,7 +7,7 @@ import (
 
 	"log/slog"
 
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 )
 
@@ -118,7 +118,7 @@ func (l *SlogLogger) getContextValue(ctx context.Context, key string) string {
 }
 
 func (l *SlogLogger) getSession(ctx context.Context) (string, bool) {
-	sessionCode := l.getContextValue(ctx, string(auth.SessionKey))
+	sessionCode := l.getContextValue(ctx, string(infra.SessionKey))
 	if sessionCode == "" {
 		return "", false
 	}
@@ -127,7 +127,7 @@ func (l *SlogLogger) getSession(ctx context.Context) (string, bool) {
 }
 
 func (l *SlogLogger) getAccountUUID(ctx context.Context) (string, bool) {
-	accountUUID := l.getContextValue(ctx, string(auth.AccountUUIDKey))
+	accountUUID := l.getContextValue(ctx, string(infra.AccountUUIDKey))
 	if accountUUID == "" {
 		return "", false
 	}

@@ -57,12 +57,12 @@ func (s *Controller) handleLogin(c echo.Context) error {
 	}
 
 	sessionUUID := uuid.NewV4().String()
-	token, tokenPayload, err := s.authToken.CreateAccessToken(account.UUID, sessionUUID)
+	token, tokenPayload, err := s.authToken.CreateAccessToken(ctx, account.UUID, sessionUUID)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
-	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(account.UUID, sessionUUID)
+	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(ctx, account.UUID, sessionUUID)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
@@ -105,7 +105,7 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
-	refreshPayload, err := s.authToken.VerifyToken(input.RefreshToken)
+	refreshPayload, err := s.authToken.VerifyToken(ctx, input.RefreshToken)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
@@ -125,7 +125,7 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
 	}
 
-	accessToken, accessPayload, err := s.authToken.CreateAccessToken(refreshPayload.AccountUUID, refreshPayload.SessionUUID)
+	accessToken, accessPayload, err := s.authToken.CreateAccessToken(ctx, refreshPayload.AccountUUID, refreshPayload.SessionUUID)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
@@ -134,5 +134,6 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 		AccessToken:          accessToken,
 		AccessTokenExpiresAt: accessPayload.ExpiredAt,
 	}
+
 	return s.utils.Resp().ResponseAPIOK(c, response)
 }

@@ -2,9 +2,6 @@ package auth
 
 import (
 	"time"
-
-	"github.com/diegoclair/go_utils-lib/v2/resterrors"
-	"github.com/labstack/gommon/log"
 )
 
 type tokenPayload struct {
@@ -27,8 +24,7 @@ func newPayload(accountUUID, sessionUUID string, duration time.Duration) *tokenP
 // Valid checks if the token payload is valid or not
 func (p *tokenPayload) Valid() error {
 	if time.Now().After(p.ExpiredAt) {
-		log.Error(errExpiredToken)
-		return resterrors.NewUnauthorizedError(errExpiredToken.Error())
+		return errExpiredToken
 	}
 	return nil
 }

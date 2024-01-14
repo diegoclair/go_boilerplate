@@ -1,10 +1,12 @@
 package auth
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -47,16 +49,16 @@ func getConfig(t *testing.T, args utilArgs) config.Config {
 	return cfg
 }
 
-func createTestAccessToken(t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *tokenPayload) {
+func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *tokenPayload) {
 	var err error
-	token, tokenPayload, err = maker.CreateAccessToken(args.accountUUID, args.sessionUUID)
+	token, tokenPayload, err = maker.CreateAccessToken(ctx, args.accountUUID, args.sessionUUID)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
 
-func createTestRefreshToken(t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *tokenPayload) {
+func createTestRefreshToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *tokenPayload) {
 	var err error
-	token, tokenPayload, err = maker.CreateRefreshToken(args.accountUUID, args.sessionUUID)
+	token, tokenPayload, err = maker.CreateRefreshToken(ctx, args.accountUUID, args.sessionUUID)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
@@ -75,10 +77,11 @@ func validateTokenCreation(t *testing.T, args utilArgs, token string, tokenPaylo
 
 func validateTokenMaker(t *testing.T, args utilArgs) {
 
+	ctx := context.Background()
 	cfg := getConfig(t, args)
 	require.NotNil(t, cfg)
 
-	maker, err := NewAuthToken(cfg.App.Auth)
+	maker, err := NewAuthToken(cfg.App.Auth, logger.NewNoop())
 	if args.wantErr != (err != nil) {
 		t.Errorf("NewAuthToken() error = %v, wantErr %v", err, args.wantErr)
 	}
@@ -87,6 +90,6 @@ func validateTokenMaker(t *testing.T, args utilArgs) {
 	if args.wantErr {
 		return
 	}
-	createTestAccessToken(t, maker, args)
-	createTestRefreshToken(t, maker, args)
+	createTestAccessToken(ctx, t, maker, args)
+	createTestRefreshToken(ctx, t, maker, args)
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
@@ -27,7 +27,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	loggedAccountUUID, ok := ctx.Value(auth.AccountUUIDKey).(string)
+	loggedAccountUUID, ok := ctx.Value(infra.AccountUUIDKey).(string)
 	if !ok {
 		errMsg := "accountUUID should not be empty"
 		s.svc.log.Error(ctx, errMsg)
@@ -82,7 +82,7 @@ func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	loggedAccountUUID, ok := ctx.Value(auth.AccountUUIDKey).(string)
+	loggedAccountUUID, ok := ctx.Value(infra.AccountUUIDKey).(string)
 	if !ok {
 		errMsg := "accountUUID should not be empty"
 		s.svc.log.Error(ctx, errMsg)

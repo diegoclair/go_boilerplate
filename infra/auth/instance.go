@@ -1,17 +1,19 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/logger"
 )
 
 type AuthToken interface {
-	CreateAccessToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
-	CreateRefreshToken(accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
-	VerifyToken(token string) (*tokenPayload, error)
+	CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
+	CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
+	VerifyToken(ctx context.Context, token string) (*tokenPayload, error)
 }
 
 const (
@@ -31,24 +33,12 @@ var (
 	errInvalidPrivateKey = fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 )
 
-type Key string
-
-func (k Key) String() string {
-	return string(k)
-}
-
-const (
-	AccountUUIDKey Key = "AccountUUID"
-	TokenKey       Key = "user-token"
-	SessionKey     Key = "Session"
-)
-
-func NewAuthToken(cfg config.AuthConfig) (AuthToken, error) {
+func NewAuthToken(cfg config.AuthConfig, log logger.Logger) (AuthToken, error) {
 	accessTokenDurationTime = cfg.AccessTokenDuration
 	refreshTokenDurationTime = cfg.RefreshTokenDuration
 
 	if cfg.AccessTokenType == tokenTypeJWT {
-		return newJwtAuth(cfg.JWTPrivateKey)
+		return newJwtAuth(cfg.JWTPrivateKey, log)
 	}
-	return newPasetoAuth(cfg.PasetoSymmetricKey)
+	return newPasetoAuth(cfg.PasetoSymmetricKey, log)
 }

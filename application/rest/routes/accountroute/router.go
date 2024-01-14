@@ -31,5 +31,4 @@ func (r *UserRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
 	router.GET(rootRoute, r.ctrl.handleGetAccounts)
 	router.GET(accountByID, r.ctrl.handleGetAccountByID)
 	router.GET(accountBalanceByID, r.ctrl.handleGetAccountBalanceByID)
-
 }

@@ -8,14 +8,13 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_newTransferService(t *testing.T) {
-
 	_, svc, ctrl := newServiceTestMock(t)
 	defer ctrl.Finish()
 
@@ -294,7 +293,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			}
 
 			if tt.args.accountUUIDFromContext != "" {
-				ctx = context.WithValue(ctx, auth.AccountUUIDKey, tt.args.accountUUIDFromContext)
+				ctx = context.WithValue(ctx, infra.AccountUUIDKey, tt.args.accountUUIDFromContext)
 			}
 
 			if tt.buildMock != nil {
@@ -394,7 +393,7 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			}
 
 			if tt.args.accountUUIDFromContext != "" {
-				ctx = context.WithValue(ctx, auth.AccountUUIDKey, tt.args.accountUUIDFromContext)
+				ctx = context.WithValue(ctx, infra.AccountUUIDKey, tt.args.accountUUIDFromContext)
 			}
 
 			if tt.buildMock != nil {

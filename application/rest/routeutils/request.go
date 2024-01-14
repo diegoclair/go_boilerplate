@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
 )
@@ -27,8 +27,8 @@ func newRequestUtils() RequestUtils {
 // GetContext returns a filled ctx
 func (r *reqUtils) GetContext(c echo.Context) (ctx context.Context) {
 	ctx = c.Request().Context()
-	ctx = context.WithValue(ctx, auth.AccountUUIDKey, c.Get(auth.AccountUUIDKey.String()))
-	ctx = context.WithValue(ctx, auth.SessionKey, c.Get(auth.SessionKey.String()))
+	ctx = context.WithValue(ctx, infra.AccountUUIDKey, c.Get(infra.AccountUUIDKey.String()))
+	ctx = context.WithValue(ctx, infra.SessionKey, c.Get(infra.SessionKey.String()))
 	return ctx
 }
 
