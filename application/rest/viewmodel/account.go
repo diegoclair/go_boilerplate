@@ -4,16 +4,19 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
 type AddAccount struct {
 	Name     string `json:"name,omitempty" validate:"required,min=3"`
-	CPF      string `json:"cpf,omitempty" validate:"required,min=11,max=11,cpf"`
+	CPF      string `json:"cpf,omitempty" validate:"required,cpf"`
 	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
 func (a *AddAccount) Validate(validator validator.Validator) error {
+	a.CPF = number.CleanNumber(a.CPF)
+
 	err := validator.ValidateStruct(a)
 	if err != nil {
 		return err
