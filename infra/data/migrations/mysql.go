@@ -2,7 +2,7 @@ package migrations
 
 import "github.com/GuiaBolso/darwin"
 
-//Only work doing 1 command per version, you cannot create two tables in the same script, need to create a new version
+// Only work doing 1 command per version, you cannot create two tables in the same script, need to create a new version
 var (
 	Migrations = []darwin.Migration{
 		{
@@ -85,7 +85,7 @@ var (
 				UNIQUE INDEX session_id_UNIQUE (session_id ASC) VISIBLE,
 				INDEX fk_tab_session_tab_account_idx (account_id ASC) VISIBLE,
 				
-				CONSTRAINT fk_tab_session_tab_user
+				CONSTRAINT fk_tab_session_tab_account
 					FOREIGN KEY (account_id)
 					REFERENCES tab_account (account_id)
 					ON DELETE NO ACTION
