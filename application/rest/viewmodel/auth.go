@@ -3,15 +3,18 @@ package viewmodel
 import (
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
 type Login struct {
-	CPF      string `json:"cpf,omitempty" validate:"required,min=11,max=11,cpf"`
+	CPF      string `json:"cpf,omitempty" validate:"required,cpf"`
 	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
 func (l *Login) Validate(v validator.Validator) error {
+	l.CPF = number.CleanNumber(l.CPF)
+
 	err := v.ValidateStruct(l)
 	if err != nil {
 		return err
