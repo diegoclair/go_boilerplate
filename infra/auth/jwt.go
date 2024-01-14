@@ -23,6 +23,7 @@ func newJwtAuth(jwtPrivateKey string, log logger.Logger) (AuthToken, error) {
 
 	return &jwtAuth{
 		jwtPrivateKey: jwtPrivateKey,
+		log:           log,
 	}, nil
 }
 
