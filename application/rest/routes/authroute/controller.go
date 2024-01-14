@@ -22,19 +22,19 @@ var (
 )
 
 type Controller struct {
-	authService     contract.AuthService
-	authToken       auth.AuthToken
-	utils           routeutils.Utils
-	structValidator validator.Validator
+	authService contract.AuthService
+	authToken   auth.AuthToken
+	utils       routeutils.Utils
+	validator   validator.Validator
 }
 
-func NewController(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils, structValidator validator.Validator) *Controller {
+func NewController(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils, validator validator.Validator) *Controller {
 	once.Do(func() {
 		instance = &Controller{
-			authService:     authService,
-			authToken:       authToken,
-			utils:           utils,
-			structValidator: structValidator,
+			authService: authService,
+			authToken:   authToken,
+			utils:       utils,
+			validator:   validator,
 		}
 	})
 
@@ -50,7 +50,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
-	err = input.Validate(s.structValidator)
+	err = input.Validate(s.validator)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
@@ -104,7 +104,7 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
-	err = input.Validate(s.structValidator)
+	err = input.Validate(s.validator)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}

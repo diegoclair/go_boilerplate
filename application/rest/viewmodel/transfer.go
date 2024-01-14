@@ -12,8 +12,8 @@ type TransferReq struct {
 	Amount                 float64 `json:"amount,omitempty" validate:"required"`
 }
 
-func (t *TransferReq) Validate(structValidator validator.Validator) error {
-	return structValidator.ValidateStruct(t)
+func (t *TransferReq) Validate(v validator.Validator) error {
+	return v.ValidateStruct(t)
 }
 
 func (t *TransferReq) ToEntity() entity.Transfer {

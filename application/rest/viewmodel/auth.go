@@ -11,8 +11,8 @@ type Login struct {
 	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
-func (l *Login) Validate(structValidator validator.Validator) error {
-	err := structValidator.ValidateStruct(l)
+func (l *Login) Validate(v validator.Validator) error {
+	err := v.ValidateStruct(l)
 	if err != nil {
 		return err
 	}
@@ -31,8 +31,8 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
-func (t *RefreshTokenRequest) Validate(structValidator validator.Validator) error {
-	err := structValidator.ValidateStruct(t)
+func (t *RefreshTokenRequest) Validate(v validator.Validator) error {
+	err := v.ValidateStruct(t)
 	if err != nil {
 		return err
 	}

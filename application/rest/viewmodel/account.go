@@ -13,8 +13,8 @@ type AddAccount struct {
 	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
-func (a *AddAccount) Validate(strucValidator validator.Validator) error {
-	err := strucValidator.ValidateStruct(a)
+func (a *AddAccount) Validate(validator validator.Validator) error {
+	err := validator.ValidateStruct(a)
 	if err != nil {
 		return err
 	}
@@ -42,8 +42,8 @@ type AddBalance struct {
 	Amount float64 `json:"amount" validate:"required,gt=0"`
 }
 
-func (a *AddBalance) Validate(strucValidator validator.Validator) error {
-	err := strucValidator.ValidateStruct(a)
+func (a *AddBalance) Validate(validator validator.Validator) error {
+	err := validator.ValidateStruct(a)
 	if err != nil {
 		return err
 	}

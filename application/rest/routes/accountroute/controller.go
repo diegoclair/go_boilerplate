@@ -18,17 +18,17 @@ var (
 )
 
 type Controller struct {
-	accountService  contract.AccountService
-	utils           routeutils.Utils
-	structValidator validator.Validator
+	accountService contract.AccountService
+	utils          routeutils.Utils
+	validator      validator.Validator
 }
 
-func NewController(accountService contract.AccountService, utils routeutils.Utils, structValidator validator.Validator) *Controller {
+func NewController(accountService contract.AccountService, utils routeutils.Utils, validator validator.Validator) *Controller {
 	once.Do(func() {
 		instance = &Controller{
-			accountService:  accountService,
-			utils:           utils,
-			structValidator: structValidator,
+			accountService: accountService,
+			utils:          utils,
+			validator:      validator,
 		}
 	})
 
@@ -44,7 +44,7 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate(s.structValidator)
+	err = input.Validate(s.validator)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
@@ -72,7 +72,7 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate(s.structValidator)
+	err = input.Validate(s.validator)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
