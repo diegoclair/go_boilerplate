@@ -10,7 +10,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
-	"github.com/diegoclair/go_utils-lib/resterrors"
+	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 
