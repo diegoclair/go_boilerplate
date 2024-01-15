@@ -12,7 +12,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 )
 
-// Connect returns a instace of mysql db
+// Connect returns a instance of mysql db
 func Connect(ctx context.Context, cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
 	rootDir, err := os.Getwd()
 	if err != nil {
