@@ -12,7 +12,7 @@ type Services struct {
 	TransferService contract.TransferService
 }
 
-// New to get instace of all services
+// New to get instance of all services
 func New(dm contract.DataManager, cfg *config.Config, cache contract.CacheManager, crypto contract.Crypto, log logger.Logger) (*Services, error) {
 
 	svc := newService(dm, cfg, cache, crypto, log)

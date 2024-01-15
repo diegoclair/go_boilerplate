@@ -87,10 +87,10 @@ func Test_authService_Login(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			tt.buildMock(ctx, allMockss, tt.args)
+			tt.buildMock(ctx, allMocks, tt.args)
 
 			s := newAuthService(svc)
 			_, err := s.Login(ctx, tt.args.cpf, tt.args.password)
@@ -143,11 +143,11 @@ func Test_authService_CreateSession(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMockss, tt.args)
+				tt.buildMock(ctx, allMocks, tt.args)
 			}
 			s := newAuthService(svc)
 			if err := s.CreateSession(ctx, tt.args.session); (err != nil) != tt.wantErr {
@@ -196,11 +196,11 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMockss, tt.args)
+				tt.buildMock(ctx, allMocks, tt.args)
 			}
 			s := newAuthService(svc)
 			gotSession, err := s.GetSessionByUUID(ctx, tt.args.sessionUUID)

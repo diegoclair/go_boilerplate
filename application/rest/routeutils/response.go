@@ -14,7 +14,7 @@ type ResponseUtils interface {
 	BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult
 	ResponseNoContent(c echo.Context) error
 	ResponseCreated(c echo.Context) error
-	ResponseAPIOK(c echo.Context, data interface{}) error
+	ResponseAPIOk(c echo.Context, data interface{}) error
 	ResponseNotFoundError(c echo.Context, err error) error
 	ResponseBadRequestError(c echo.Context, err error) error
 	ResponseUnauthorizedError(c echo.Context, err error) error
@@ -53,7 +53,7 @@ func (r *respUtils) ResponseCreated(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
 
-func (r *respUtils) ResponseAPIOK(c echo.Context, data interface{}) error {
+func (r *respUtils) ResponseAPIOk(c echo.Context, data interface{}) error {
 	return c.JSON(http.StatusOK, data)
 }
 

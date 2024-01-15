@@ -46,7 +46,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 
 	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
-		s.svc.log.Errorf(ctx, "error to get destionation account by uuid: %s", err.Error())
+		s.svc.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
 		return err
 	}
 

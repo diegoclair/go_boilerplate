@@ -26,7 +26,7 @@ type mock struct {
 	accountService *mocks.MockAccountService
 }
 
-func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gomock.Controller, accountControler *Controller) {
+func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gomock.Controller, accountController *Controller) {
 	ctrl = gomock.NewController(t)
 	accountMock = mock{
 		accountService: mocks.NewMockAccountService(ctrl),
@@ -34,8 +34,8 @@ func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gom
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	accountControler = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop()), v}
-	accountRoute := NewRouter(accountControler, RouteName)
+	accountController = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop()), v}
+	accountRoute := NewRouter(accountController, RouteName)
 
 	server = echo.New()
 	appGroup := server.Group("/")
@@ -59,7 +59,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			name: "Should complete request with no error",
 			args: args{
 				body: viewmodel.AddAccount{
-					Name:     "Add withou Error",
+					Name:     "Add without Error",
 					CPF:      "01234567890",
 					Password: "secret@123",
 				},
@@ -170,13 +170,13 @@ func TestController_handleAddAccount(t *testing.T) {
 	}
 }
 
-func buildAccoununtByID(id int) entity.Account {
+func buildAccountByID(id int) entity.Account {
 	return entity.Account{UUID: "random", Name: "diego" + strconv.Itoa(id)}
 }
 
 func buildAccountsByQuantity(qtd int) (accounts []entity.Account) {
 	for i := 0; i < qtd; i++ {
-		accounts = append(accounts, buildAccoununtByID(i))
+		accounts = append(accounts, buildAccountByID(i))
 	}
 
 	return
@@ -281,12 +281,12 @@ func TestController_GetAccountByID(t *testing.T) {
 				accountUUID: "random",
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				account := buildAccoununtByID(1)
+				account := buildAccountByID(1)
 				mock.accountService.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(account, nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
-				account := buildAccoununtByID(1)
+				account := buildAccountByID(1)
 
 				response := viewmodel.Account{}
 				response.FillFromEntity(account)

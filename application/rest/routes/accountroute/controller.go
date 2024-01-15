@@ -109,7 +109,7 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 
 	responsePaginated := s.utils.Resp().BuildPaginatedResult(response, skip, take, totalRecords)
 
-	return s.utils.Resp().ResponseAPIOK(c, responsePaginated)
+	return s.utils.Resp().ResponseAPIOk(c, responsePaginated)
 }
 
 func (s *Controller) handleGetAccountByID(c echo.Context) error {
@@ -128,7 +128,7 @@ func (s *Controller) handleGetAccountByID(c echo.Context) error {
 	response := viewmodel.Account{}
 	response.FillFromEntity(account)
 
-	return s.utils.Resp().ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOk(c, response)
 }
 
 func (s *Controller) handleGetAccountBalanceByID(c echo.Context) error {
@@ -148,5 +148,5 @@ func (s *Controller) handleGetAccountBalanceByID(c echo.Context) error {
 		Balance: account.Balance,
 	}
 
-	return s.utils.Resp().ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOk(c, response)
 }

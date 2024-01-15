@@ -72,5 +72,5 @@ func (s *Controller) handleGetTransfers(c echo.Context) error {
 		response = append(response, resp)
 	}
 
-	return s.utils.Resp().ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOk(c, response)
 }

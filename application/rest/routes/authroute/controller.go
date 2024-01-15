@@ -92,7 +92,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt,
 	}
 
-	return s.utils.Resp().ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOk(c, response)
 }
 
 func (s *Controller) handleRefreshToken(c echo.Context) error {
@@ -139,5 +139,5 @@ func (s *Controller) handleRefreshToken(c echo.Context) error {
 		AccessTokenExpiresAt: accessPayload.ExpiredAt,
 	}
 
-	return s.utils.Resp().ResponseAPIOK(c, response)
+	return s.utils.Resp().ResponseAPIOk(c, response)
 }

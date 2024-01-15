@@ -110,7 +110,7 @@ func Test_accountService_CreateAccount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			s := &accountService{
@@ -118,7 +118,7 @@ func Test_accountService_CreateAccount(t *testing.T) {
 			}
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMockss, tt.args)
+				tt.buildMock(ctx, allMocks, tt.args)
 			}
 			if err := s.CreateAccount(ctx, tt.args.account); (err != nil) != tt.wantErr {
 				t.Errorf("CreateAccount() error = %v, wantErr %v", err, tt.wantErr)
@@ -167,7 +167,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			s := &accountService{
@@ -175,7 +175,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 			}
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMockss, tt.args)
+				tt.buildMock(ctx, allMocks, tt.args)
 			}
 
 			gotAccount, err := s.GetAccountByUUID(ctx, tt.args.accountUUID)
@@ -250,7 +250,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			s := &accountService{
@@ -258,7 +258,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 			}
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMockss, tt.args)
+				tt.buildMock(ctx, allMocks, tt.args)
 			}
 			if err := s.AddBalance(ctx, tt.args.accountUUID, tt.args.amount); (err != nil) != tt.wantErr {
 				t.Errorf("AddBalance() error = %v, wantErr %v", err, tt.wantErr)

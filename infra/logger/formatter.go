@@ -117,23 +117,23 @@ func (f *customJSONFormatter) getLevel(level slog.Level) string {
 	return level.String()
 }
 
-func (f *customJSONFormatter) getRuntimeData() (funcname, filename string, line int) {
+func (f *customJSONFormatter) getRuntimeData() (funcName, filename string, line int) {
 	pc, filePath, line, ok := runtime.Caller(5)
 	if !ok {
 		panic("Could not get context info for logger!")
 	}
 	filename = filepath.Base(filePath)
 	funcPath := runtime.FuncForPC(pc).Name()
-	funcname = funcPath[strings.LastIndex(funcPath, ".")+1:]
+	funcName = funcPath[strings.LastIndex(funcPath, ".")+1:]
 
 	//handle go func called inside of a function
 	/*
-		for example, we have a func Example() and inside of it, we have a go func() without a name, the it will output funcname as func1, with this handle, it will
+		for example, we have a func Example() and inside of it, we have a go func() without a name, the it will output funcName as func1, with this handle, it will
 		output func name as Example.func1
 	*/
-	if strings.Contains(funcname, "func") {
+	if strings.Contains(funcName, "func") {
 		funcBefore := funcPath[:strings.LastIndex(funcPath, ".")]
-		funcname = funcPath[strings.LastIndex(funcBefore, ".")+1:]
+		funcName = funcPath[strings.LastIndex(funcBefore, ".")+1:]
 	}
 	return
 }

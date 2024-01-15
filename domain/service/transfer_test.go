@@ -285,7 +285,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			s := &transferService{
@@ -297,7 +297,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			}
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMockss, tt.args)
+				tt.buildMock(ctx, allMocks, tt.args)
 			}
 
 			if err := s.CreateTransfer(ctx, tt.args.transfer); (err != nil) != tt.wantErr {
@@ -385,7 +385,7 @@ func Test_transferService_GetTransfers(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMockss, svc, ctrl := newServiceTestMock(t)
+			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			s := &transferService{
@@ -397,7 +397,7 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			}
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMockss, tt.args)
+				tt.buildMock(ctx, allMocks, tt.args)
 			}
 
 			if _, err := s.GetTransfers(ctx); (err != nil) != tt.wantErr {

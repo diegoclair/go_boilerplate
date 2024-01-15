@@ -71,7 +71,7 @@ func (r *reqUtils) GetTakeSkipFromPageQuantity(page, quantity int64) (take, skip
 		quantity = 10
 	}
 
-	take = quantity // itens per page
+	take = quantity // items per page
 	skip = (page - 1) * quantity
 	return
 }

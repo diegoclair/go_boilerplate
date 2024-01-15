@@ -46,7 +46,7 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 	return tokenMaker
 }
 
-func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo, ctrl *gomock.Controller, transferControler *Controller) {
+func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo, ctrl *gomock.Controller, transferController *Controller) {
 	ctrl = gomock.NewController(t)
 
 	transferMock = mocks.NewMockTransferService(ctrl)
@@ -55,8 +55,8 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	transferControler = &Controller{transferMock, routeutils.New(logger.NewNoop()), v}
-	transferRoute := NewRouter(transferControler, "transfers")
+	transferController = &Controller{transferMock, routeutils.New(logger.NewNoop()), v}
+	transferRoute := NewRouter(transferController, "transfers")
 
 	server = echo.New()
 	appGroup := server.Group("/")

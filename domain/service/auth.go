@@ -25,7 +25,7 @@ func newAuthService(svc *service) contract.AuthService {
 	}
 }
 
-// TODO: criar logout process
+// TODO: create logout process
 
 func (s *authService) Login(ctx context.Context, cpf, secret string) (account entity.Account, err error) {
 	s.svc.log.Info(ctx, "Process Started")
