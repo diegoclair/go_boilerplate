@@ -5,8 +5,8 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	utilerrors "github.com/diegoclair/go_boilerplate/util/errors"
 	"github.com/diegoclair/go_boilerplate/util/number"
+	"github.com/diegoclair/go_utils-lib/v2/mysqlutils"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
 )
@@ -26,7 +26,7 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 	defer s.svc.log.Info(ctx, "Process Finished")
 
 	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
-	if err != nil && !utilerrors.SQLNotFound(err.Error()) {
+	if err != nil && !mysqlutils.SQLNotFound(err.Error()) {
 		s.svc.log.Errorf(ctx, "error to get account by document: %s", err.Error())
 		return err
 	} else if err == nil {
