@@ -10,6 +10,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_utils-lib/resterrors"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 
@@ -100,8 +101,10 @@ func (c *mysqlConn) WithTransaction(ctx context.Context, fn func(dm contract.Dat
 	if err != nil {
 		rbErr := tx.Rollback()
 		if rbErr != nil {
-			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)
+			return resterrors.NewInternalServerError("error rolling back transaction", rbErr.Error(), err.Error())
 		}
+
+		return err
 	}
 
 	return tx.Commit()
