@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	}
 	migrationsPath := rootDir + "/../migrations/mysql"
 
-	log := logger.New(*cfg)
+	log := logger.NewNoop()
 	cfg.DB.MySQL.DBName = cfg.DB.MySQL.DBName + "_test"
 
 	ctx := context.Background()
