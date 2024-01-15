@@ -7,11 +7,8 @@ import (
 
 	"sync"
 
-	"github.com/GuiaBolso/darwin"
-
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_boilerplate/infra/data/migrations"
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
@@ -70,11 +67,7 @@ func Instance(ctx context.Context, cfg *config.Config, log logger.Logger) (contr
 		log.Info(ctx, "Database successfully configured")
 
 		log.Info(ctx, "Running the migrations")
-		driver := darwin.NewGenericDriver(db, darwin.MySQLDialect{})
-
-		d := darwin.New(driver, migrations.Migrations, nil)
-
-		connErr = d.Migrate()
+		connErr = Migrate(db)
 		if connErr != nil {
 			log.Errorf(ctx, "Migrate Error: %v", connErr)
 			return
