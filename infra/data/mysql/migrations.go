@@ -13,10 +13,10 @@ import (
 // Migrate applies database migrations to the provided SQL database.
 // It reads SQL migration files from the specified directory and executes them in order.
 // The function returns an error if any migration fails to execute.
-func Migrate(db *sql.DB, migrationsPath string) error {
+func Migrate(db *sql.DB, migrationsDir string) error {
 	driver := darwin.NewGenericDriver(db, darwin.MySQLDialect{})
 
-	files, err := os.ReadDir(migrationsPath)
+	files, err := os.ReadDir(migrationsDir)
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func Migrate(db *sql.DB, migrationsPath string) error {
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".sql") {
-			migrationFile := migrationsPath + "/" + file.Name()
+			migrationFile := migrationsDir + "/" + file.Name()
 
 			migration, err := os.ReadFile(migrationFile)
 			if err != nil {
