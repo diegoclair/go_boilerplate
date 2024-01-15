@@ -21,11 +21,17 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot get config: ", err)
 	}
 
-	log := logger.NewNoop()
+	rootDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("error getting root dir: %v", err)
+	}
+	migrationsPath := rootDir + "/../migrations/mysql"
+
+	log := logger.New(*cfg)
 	cfg.DB.MySQL.DBName = cfg.DB.MySQL.DBName + "_test"
 
 	ctx := context.Background()
-	mysql, err := mysql.Instance(ctx, cfg, log)
+	mysql, err := mysql.Instance(ctx, cfg, log, migrationsPath)
 	if err != nil {
 		log.Fatalf(ctx, "cannot connect to mysql: %v", err)
 	}

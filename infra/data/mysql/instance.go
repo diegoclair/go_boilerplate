@@ -28,7 +28,7 @@ type mysqlConn struct {
 }
 
 // Instance returns an instance of a MySQLRepo
-func Instance(ctx context.Context, cfg *config.Config, log logger.Logger) (contract.DataManager, error) {
+func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrationsPath string) (contract.DataManager, error) {
 	onceDB.Do(func() {
 
 		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/?charset=utf8&parseTime=true",
@@ -67,7 +67,7 @@ func Instance(ctx context.Context, cfg *config.Config, log logger.Logger) (contr
 		log.Info(ctx, "Database successfully configured")
 
 		log.Info(ctx, "Running the migrations")
-		connErr = Migrate(db)
+		connErr = Migrate(db, migrationsPath)
 		if connErr != nil {
 			log.Errorf(ctx, "Migrate Error: %v", connErr)
 			return
