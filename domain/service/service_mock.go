@@ -22,7 +22,7 @@ type allMocks struct {
 
 func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Controller) {
 
-	cfg, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultName)
+	cfg, err := config.GetConfigEnvironment("../../" + config.ProfileTest)
 	require.NoError(t, err)
 
 	ctrl = gomock.NewController(t)

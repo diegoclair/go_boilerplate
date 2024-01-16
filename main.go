@@ -32,7 +32,7 @@ import (
 
 func main() {
 
-	cfg, err := config.GetConfigEnvironment(config.ConfigDefaultName)
+	cfg, err := config.GetConfigEnvironment(config.ProfileRun)
 	if err != nil {
 		log.Fatalf("Error to load config: %v", err)
 	}

@@ -23,7 +23,7 @@ type utilArgs struct {
 }
 
 func getConfig(t *testing.T, args utilArgs) config.Config {
-	cfgPointer, err := config.GetConfigEnvironment("../../" + config.ConfigDefaultName)
+	cfgPointer, err := config.GetConfigEnvironment("../../" + config.ProfileTest)
 	cfg := *cfgPointer //do not use pointer here because GetConfigEnvironment return the same pointer and it can generate problem when run multiple tests
 	cfg.App.Auth.AccessTokenType = args.tokenType
 

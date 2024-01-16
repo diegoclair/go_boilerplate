@@ -10,8 +10,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Profile configuration profile
+type Profile string
+
+func (p Profile) String() string {
+	return string(p)
+}
+
+// Profile default values
 const (
-	ConfigDefaultName = "config.toml"
+	ProfileRun  Profile = "config"
+	ProfileTest Profile = "config" // if you need a different file for test, you can create a different and change the name here
 )
 
 var (
@@ -23,12 +32,27 @@ var (
 // EnvKeyReplacer replace for environment variable parse
 var EnvKeyReplacer = strings.NewReplacer(".", "_", "-", "_")
 
+func setup(profile Profile) {
+	viper.AutomaticEnv()
+
+	viper.SetConfigName(profile.String())
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(".")
+
+	if profile == ProfileTest {
+		// a test file that use config, can be in deep structure, so we need to add more paths to be possible find the config file.
+		viper.AddConfigPath("../")
+		viper.AddConfigPath("../../")
+		viper.AddConfigPath("../../../")
+		viper.AddConfigPath("../../../../")
+	}
+}
+
 // GetConfigEnvironment to read initial config from a config file with it full path
-func GetConfigEnvironment(filepath string) (*Config, error) {
+func GetConfigEnvironment(profile Profile) (*Config, error) {
 	once.Do(func() {
 
-		viper.SetConfigFile(filepath)
-		viper.AutomaticEnv()
+		setup(profile)
 
 		configError = viper.ReadInConfig()
 		if configError != nil {
@@ -36,18 +60,16 @@ func GetConfigEnvironment(filepath string) (*Config, error) {
 			return
 		}
 
-		// here we will try to find the key on Environment variables and if we find, we will Set the value with viper.
-		// this set of the value, will be used as default instead of it finds on your config file
+		// set default variables on viper
 		// for example, if we have a file .toml like this:
 		// [db]
 		// pass
-		// it will mount the key as db.pass and will transform it to DB_PASS to try to find it on env vars.
-		// it helps when we have a file with local config but to deploy we haver another env var defined.
+		// then the ley will be DB_PASS and if we find this key on environment variables, we will set the value on viper
 		for _, k := range viper.AllKeys() {
 			key := strings.ToUpper(EnvKeyReplacer.Replace(k))
 			envValue := os.Getenv(key)
 			if envValue != "" {
-				viper.Set(k, envValue)
+				viper.Set(k, envValue) // set as default (ignoring config file value)
 			}
 		}
 
