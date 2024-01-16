@@ -36,6 +36,13 @@ func GetConfigEnvironment(filepath string) (*Config, error) {
 			return
 		}
 
+		// here we will try to find the key on Environment variables and if we find, we will Set the value with viper.
+		// this set of the value, will be used as default instead of it finds on your config file
+		// for example, if we have a file .toml like this:
+		// [db]
+		// pass
+		// it will mount the key as db.pass and will transform it to DB_PASS to try to find it on env vars.
+		// it helps when we have a file with local config but to deploy we haver another env var defined.
 		for _, k := range viper.AllKeys() {
 			key := strings.ToUpper(EnvKeyReplacer.Replace(k))
 			envValue := os.Getenv(key)
