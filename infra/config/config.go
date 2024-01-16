@@ -48,7 +48,7 @@ func setup(profile Profile) {
 	}
 }
 
-// GetConfigEnvironment to read initial config from a config file with it full path
+// GetConfigEnvironment read config from environment variables and config.toml file
 func GetConfigEnvironment(profile Profile) (*Config, error) {
 	once.Do(func() {
 
