@@ -32,8 +32,8 @@ type mysqlConn struct {
 func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrationsDir string) (contract.DataManager, error) {
 	onceDB.Do(func() {
 
-		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/?charset=utf8&parseTime=true",
-			cfg.DB.MySQL.Username, cfg.DB.MySQL.Host, cfg.DB.MySQL.Port,
+		dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
+			cfg.DB.MySQL.Username, cfg.DB.MySQL.Password, cfg.DB.MySQL.Host, cfg.DB.MySQL.Port,
 		)
 
 		var db *sql.DB
