@@ -12,7 +12,7 @@ port = "5000"
 
 [cache]
   [cache.redis]
-  host = "localhost"
+  host = "cache" # redis container name
   port = 6379
   db = 0
   pass = "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
@@ -22,7 +22,7 @@ port = "5000"
   [db.mysql]
   username = "root"
   password = "root"
-  host = "localhost"
+  host = "db" # mysql container name
   port = 3306
   db-name = "boiler_db"
   max-life-in-minutes = 1

@@ -10,8 +10,6 @@ services:
       - 5000:5000
     environment:
       WAIT_HOSTS: db:3306
-      DB_MYSQL_HOST: go-boilerplate-mysql
-      CACHE_REDIS_HOST: cache-redis
     volumes:
       - ./:/app   #use this volume to set the live reload
     depends_on:
@@ -21,7 +19,7 @@ services:
       - app-network
 
   cache:
-    container_name: go-boilerplate-cache-redis
+    container_name: cache-redis
     image: redis:7.0-alpine
     restart: unless-stopped
     ports:
