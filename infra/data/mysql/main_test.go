@@ -27,14 +27,13 @@ func TestMain(m *testing.M) {
 	}
 	migrationsDir := rootDir + "/../migrations/mysql"
 
-	log := logger.NewNoop()
 	cfg.DB.MySQL.DBName = cfg.DB.MySQL.DBName + "_test"
 	cfg.DB.MySQL.Host = "localhost"
 
 	ctx := context.Background()
-	mysql, err := mysql.Instance(ctx, cfg, log, migrationsDir)
+	mysql, err := mysql.Instance(ctx, cfg, logger.NewNoop(), migrationsDir)
 	if err != nil {
-		log.Fatalf(ctx, "cannot connect to mysql: %v", err)
+		log.Fatalf("cannot connect to mysql: %v", err)
 	}
 
 	testMysql = mysql
