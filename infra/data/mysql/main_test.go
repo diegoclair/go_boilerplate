@@ -29,6 +29,7 @@ func TestMain(m *testing.M) {
 
 	log := logger.NewNoop()
 	cfg.DB.MySQL.DBName = cfg.DB.MySQL.DBName + "_test"
+	cfg.DB.MySQL.Host = "localhost"
 
 	ctx := context.Background()
 	mysql, err := mysql.Instance(ctx, cfg, log, migrationsDir)
