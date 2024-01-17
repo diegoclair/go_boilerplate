@@ -31,9 +31,9 @@ services:
       - app-network
   
   db:
-    container_name: go-boilerplate-mysql
+    container_name: licitanow-mysql
     build: .docker/images/mysql
-    command: --innodb-use-native-aio=0
+    command: --innodb-use-native-aio=0 --disable-log-bin
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE - this is to not show the error 'mbind: Operation not permitted' in database docker log
     restart: unless-stopped
@@ -44,8 +44,8 @@ services:
       - ./.docker/volumes/dbdata:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=boiler_db
-      - MYSQL_USER=root
+      - MYSQL_DATABASE=licitanow_db
+      - MYSQL_USER=user
       - MYSQL_PASSWORD=root
     networks:
       - app-network
