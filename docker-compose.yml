@@ -3,14 +3,14 @@ version: '3'
 services:
 
   app:
-    container_name: go_boilerplate-app
+    container_name: go-boilerplate-app
     build: .
     command: .docker/entrypoint.sh
     ports:
       - 5000:5000
     environment:
       WAIT_HOSTS: db:3306
-      DB_MYSQL_HOST: go_boilerplate-mysql
+      DB_MYSQL_HOST: go-boilerplate-mysql
       CACHE_REDIS_HOST: cache-redis
     volumes:
       - ./:/app   #use this volume to set the live reload
@@ -21,7 +21,7 @@ services:
       - app-network
 
   cache:
-    container_name: cache-redis
+    container_name: go-boilerplate-cache-redis
     image: redis:7.0-alpine
     restart: unless-stopped
     ports:
@@ -33,7 +33,7 @@ services:
       - app-network
   
   db:
-    container_name: go_boilerplate-mysql
+    container_name: go-boilerplate-mysql
     build: .docker/images/mysql
     command: --innodb-use-native-aio=0
     cap_add:
@@ -54,7 +54,7 @@ services:
 
   prometheus:
     image: prom/prometheus
-    container_name: prometheus
+    container_name: go-boilerplate-prometheus
     ports:
       - 9090:9090
     command:
@@ -69,7 +69,7 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
-    container_name: grafana
+    container_name: go-boilerplate-grafana
     depends_on:
       - prometheus
     networks:
