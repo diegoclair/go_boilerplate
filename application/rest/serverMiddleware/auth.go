@@ -9,11 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// JWTConfig defines the config for JWT middleware.
-type JWTConfig struct {
-	PrivateKey string
-}
-
 func AuthMiddlewarePrivateRoute(authToken auth.AuthToken) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
