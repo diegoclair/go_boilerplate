@@ -34,7 +34,7 @@ var (
 
 func getTokenMaker(t *testing.T) auth.AuthToken {
 	onceToken.Do(func() {
-		cfg, err := config.GetConfigEnvironment("../../../../" + config.ProfileTest)
+		cfg, err := config.GetConfigEnvironment(config.ProfileTest)
 		require.NoError(t, err)
 
 		cfg.App.Auth.AccessTokenDuration = 2 * time.Second
@@ -55,7 +55,7 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	transferController = &Controller{transferMock, routeutils.New(logger.NewNoop()), v}
+	transferController = &Controller{transferMock, routeutils.New(), v}
 	transferRoute := NewRouter(transferController, "transfers")
 
 	server = echo.New()
@@ -64,7 +64,12 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 		servermiddleware.AuthMiddlewarePrivateRoute(tokenMaker),
 	)
 
-	transferRoute.RegisterRoutes(appGroup, privateGroup)
+	g := &routeutils.EchoGroups{
+		AppGroup:     appGroup,
+		PrivateGroup: privateGroup,
+	}
+
+	transferRoute.RegisterRoutes(g)
 	return
 }
 

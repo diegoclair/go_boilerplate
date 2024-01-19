@@ -1,20 +1,13 @@
 package routeutils
 
-import "github.com/diegoclair/go_boilerplate/infra/logger"
-
-type Utils interface {
-	Resp() ResponseUtils
-	Req() RequestUtils
-}
-
 type routeUtils struct {
 	resp ResponseUtils
 	req  RequestUtils
 }
 
-func New(log logger.Logger) Utils {
+func New() Utils {
 	return &routeUtils{
-		resp: newResponseUtils(log),
+		resp: newResponseUtils(),
 		req:  newRequestUtils(),
 	}
 }

@@ -1,8 +1,6 @@
 package transferroute
 
-import (
-	"github.com/labstack/echo/v4"
-)
+import "github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 
 const RouteName = "transfers"
 
@@ -22,8 +20,8 @@ func NewRouter(ctrl *Controller, routeName string) *TransferRouter {
 	}
 }
 
-func (r *TransferRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
-	router := privateGroup.Group(r.routeName)
+func (r *TransferRouter) RegisterRoutes(g *routeutils.EchoGroups) {
+	router := g.PrivateGroup.Group(r.routeName)
 	router.POST(rootRoute, r.ctrl.handleAddTransfer)
 	router.GET(rootRoute, r.ctrl.handleGetTransfers)
 }

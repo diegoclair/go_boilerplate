@@ -1,8 +1,6 @@
 package authroute
 
-import (
-	"github.com/labstack/echo/v4"
-)
+import "github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 
 const RouteName = "auth"
 
@@ -22,8 +20,8 @@ func NewRouter(ctrl *Controller, routeName string) *AccountRouter {
 	}
 }
 
-func (r *AccountRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
-	router := appGroup.Group(r.routeName)
+func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
+	router := g.AppGroup.Group(r.routeName)
 	router.POST(loginRoute, r.ctrl.handleLogin)
 	router.POST("/refresh-token", r.ctrl.handleRefreshToken)
 

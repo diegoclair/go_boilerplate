@@ -10,21 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type RequestUtils interface {
-	// GetContext returns a filled ctx with the account uuid and session code if route has access token
-	GetContext(c echo.Context) (ctx context.Context)
-	GetAndValidateParam(c echo.Context, paramName string, errorMessage string) (paramValue string, err error)
-	GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (take int64, skip int64)
-	GetTakeSkipFromPageQuantity(page, quantity int64) (take, skip int64)
-}
-
 type reqUtils struct{}
 
 func newRequestUtils() RequestUtils {
 	return &reqUtils{}
 }
 
-// GetContext returns a filled ctx
 func (r *reqUtils) GetContext(c echo.Context) (ctx context.Context) {
 	ctx = c.Request().Context()
 	ctx = context.WithValue(ctx, infra.AccountUUIDKey, c.Get(infra.AccountUUIDKey.String()))
@@ -71,7 +62,7 @@ func (r *reqUtils) GetTakeSkipFromPageQuantity(page, quantity int64) (take, skip
 		quantity = 10
 	}
 
-	take = quantity // items per page
+	take = quantity // itens per page
 	skip = (page - 1) * quantity
 	return
 }

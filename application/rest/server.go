@@ -20,19 +20,14 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-// IRouter interface for routers
-type IRouter interface {
-	RegisterRoutes(appGroup, privateGroup *echo.Group)
-}
-
 type Server struct {
-	routers []IRouter
+	routers []routeutils.IRouter
 	Srv     *echo.Echo
 	cfg     *config.Config
 }
 
 func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, v validator.Validator) {
-	server := newRestServer(services, authToken, cfg, log, v)
+	server := newRestServer(services, authToken, cfg, v)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -45,11 +40,11 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 	}
 }
 
-func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, log logger.Logger, v validator.Validator) *Server {
+func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, v validator.Validator) *Server {
 
 	srv := echo.New()
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-	routeUtils := routeutils.New(log)
+	routeUtils := routeutils.New()
 
 	pingController := pingroute.NewController()
 	accountController := accountroute.NewController(services.AccountService, routeUtils, v)
@@ -73,19 +68,20 @@ func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *co
 	return server
 }
 
-func (r *Server) addRouters(router IRouter) {
+func (r *Server) addRouters(router routeutils.IRouter) {
 	r.routers = append(r.routers, router)
 }
 
 func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 
-	appGroup := r.Srv.Group("/")
-	privateGroup := appGroup.Group("",
+	g := &routeutils.EchoGroups{}
+	g.AppGroup = r.Srv.Group("/")
+	g.PrivateGroup = g.AppGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(authToken),
 	)
 
 	for _, appRouter := range r.routers {
-		appRouter.RegisterRoutes(appGroup, privateGroup)
+		appRouter.RegisterRoutes(g)
 	}
 
 }

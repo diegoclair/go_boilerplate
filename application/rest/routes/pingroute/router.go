@@ -1,7 +1,7 @@
 package pingroute
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 )
 
 const RouteName = "ping"
@@ -22,7 +22,7 @@ func NewRouter(ctrl *Controller, routeName string) *PingRouter {
 	}
 }
 
-func (r *PingRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
-	router := appGroup.Group(r.routeName)
+func (r *PingRouter) RegisterRoutes(g *routeutils.EchoGroups) {
+	router := g.AppGroup.Group(r.routeName)
 	router.GET(rootRoute, r.ctrl.handlePing)
 }

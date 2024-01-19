@@ -5,29 +5,15 @@ import (
 	"net/http"
 
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
-	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
 )
 
-type ResponseUtils interface {
-	BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult
-	ResponseNoContent(c echo.Context) error
-	ResponseCreated(c echo.Context) error
-	ResponseAPIOk(c echo.Context, data interface{}) error
-	ResponseNotFoundError(c echo.Context, err error) error
-	ResponseBadRequestError(c echo.Context, err error) error
-	ResponseUnauthorizedError(c echo.Context, err error) error
-	ResponseAPIError(c echo.Context, status int, message string, err string, causes interface{}) error
-	HandleAPIError(c echo.Context, errorToHandle error) (err error)
-}
-
 type respUtils struct {
-	log logger.Logger
 }
 
-func newResponseUtils(log logger.Logger) ResponseUtils {
-	return &respUtils{log: log}
+func newResponseUtils() ResponseUtils {
+	return &respUtils{}
 }
 
 // BuildPaginatedResult returns a paginatedResult instance
@@ -79,8 +65,6 @@ func (r *respUtils) HandleAPIError(c echo.Context, errorToHandle error) (err err
 	errorMessage := ErrorMessageServiceUnavailable
 
 	if errorToHandle != nil {
-		r.log.Errorf(c.Request().Context(), "HandleAPIError: %s", errorToHandle)
-
 		errorString := errorToHandle.Error()
 
 		restErr, ok := errorToHandle.(resterrors.RestErr)

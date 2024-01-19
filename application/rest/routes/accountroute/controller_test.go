@@ -14,7 +14,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
 	"github.com/golang/mock/gomock"
@@ -31,16 +30,20 @@ func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gom
 	accountMock = mock{
 		accountService: mocks.NewMockAccountService(ctrl),
 	}
+
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	accountController = &Controller{accountMock.accountService, routeutils.New(logger.NewNoop()), v}
+	accountController = &Controller{accountMock.accountService, routeutils.New(), v}
 	accountRoute := NewRouter(accountController, RouteName)
 
 	server = echo.New()
 	appGroup := server.Group("/")
-	accountRoute.RegisterRoutes(appGroup, nil)
+	g := &routeutils.EchoGroups{
+		AppGroup: appGroup,
+	}
 
+	accountRoute.RegisterRoutes(g)
 	return
 }
 
