@@ -1,12 +1,32 @@
 package config
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 type Config struct {
-	App   AppConfig   `mapstructure:"app"`
-	Cache CacheConfig `mapstructure:"cache"`
-	DB    DBConfig    `mapstructure:"db"`
-	Log   LogConfig   `mapstructure:"log"`
+	App      AppConfig   `mapstructure:"app"`
+	Cache    CacheConfig `mapstructure:"cache"`
+	DB       DBConfig    `mapstructure:"db"`
+	Log      LogConfig   `mapstructure:"log"`
+	closers  []func()
+	closerMu sync.Mutex
+}
+
+func (c *Config) AddCloser(close func()) {
+	c.closerMu.Lock()
+	defer c.closerMu.Unlock()
+	c.closers = append(c.closers, close)
+}
+
+func (c *Config) Close() {
+	c.closerMu.Lock()
+	defer c.closerMu.Unlock()
+
+	for _, close := range c.closers {
+		close()
+	}
 }
 
 type AppConfig struct {

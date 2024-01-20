@@ -32,6 +32,6 @@ type Logger interface {
 
 // New creates a new logger based on the provided configuration.
 // It returns an instance of the Logger interface.
-func New(cfg config.Config) Logger {
+func New(cfg *config.Config) Logger {
 	return newSlogLogger(cfg)
 }

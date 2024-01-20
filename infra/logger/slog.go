@@ -23,11 +23,11 @@ var CustomLevels = map[int]string{
 }
 
 type SlogLogger struct {
-	cfg config.Config
+	cfg *config.Config
 	*slog.Logger
 }
 
-func newSlogLogger(cfg config.Config) *SlogLogger {
+func newSlogLogger(cfg *config.Config) *SlogLogger {
 	logger := &SlogLogger{cfg: cfg}
 	opts := slog.HandlerOptions{}
 	if cfg.Log.Debug {

@@ -36,9 +36,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error to load config: %v", err)
 	}
+	defer cfg.Close()
 
 	ctx := context.Background()
-	log := logger.New(*cfg)
+	log := logger.New(cfg)
 
 	authToken, err := auth.NewAuthToken(cfg.App.Auth, log)
 	if err != nil {
@@ -51,7 +52,7 @@ func main() {
 	}
 
 	log.Infof(ctx, "Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
-	cache, err := cache.Instance(cfg.Cache.Redis, log)
+	cache, err := cache.Instance(ctx, cfg, log)
 	if err != nil {
 		log.Fatalf(ctx, "Error connecting to cache server: %v", err)
 	}
@@ -68,5 +69,5 @@ func main() {
 		log.Fatalf(ctx, "error to get validator: %v", err)
 	}
 
-	rest.StartRestServer(ctx, cfg, services, log, authToken, v) //TODO: receive flags for what server it will starts
+	rest.StartRestServer(ctx, cfg, services, log, authToken, v) // TODO: receive flags for what server it will starts
 }

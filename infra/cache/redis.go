@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 	"time"
@@ -19,20 +20,31 @@ type RedisCache struct {
 }
 
 // NewRedisCache returns a RedisCache instance
-func NewRedisCache(cfg config.RedisConfig, log logger.Logger) (*RedisCache, error) {
+func NewRedisCache(ctx context.Context, cfg *config.Config, log logger.Logger) (*RedisCache, error) {
+	rCfg := cfg.Cache.Redis
 	client := redis.NewClient(&redis.Options{
-		Addr:     cfg.Host + ":" + strconv.Itoa(cfg.Port),
-		Password: cfg.Pass,
-		DB:       cfg.DB,
+		Addr:     rCfg.Host + ":" + strconv.Itoa(rCfg.Port),
+		Password: rCfg.Pass,
+		DB:       rCfg.DB,
+	})
+
+	cfg.AddCloser(func() {
+		log.Info(ctx, "Closing redis connection...")
+		if err := client.Close(); err != nil {
+			log.Errorf(ctx, "Error closing redis connection: %v", err)
+		}
 	})
 
 	_, err := client.Ping().Result()
+	if err != nil {
+		return nil, err
+	}
 
 	return &RedisCache{
-		cfg:   cfg,
+		cfg:   rCfg,
 		redis: client,
 		log:   log,
-	}, err
+	}, nil
 }
 
 // GetItem returns an Item from cache

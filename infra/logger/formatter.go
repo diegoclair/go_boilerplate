@@ -23,7 +23,7 @@ type customJSONFormatter struct {
 	attr []slog.Attr
 }
 
-func newCustomJSONFormatter(w io.Writer, opts slog.HandlerOptions, cfg config.Config) *customJSONFormatter {
+func newCustomJSONFormatter(w io.Writer, opts slog.HandlerOptions, cfg *config.Config) *customJSONFormatter {
 
 	hostname, err := os.Hostname()
 	if err != nil {

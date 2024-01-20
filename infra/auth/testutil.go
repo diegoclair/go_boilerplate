@@ -23,8 +23,11 @@ type utilArgs struct {
 }
 
 func getConfig(t *testing.T, args utilArgs) config.Config {
-	cfgPointer, err := config.GetConfigEnvironment("../../" + config.ProfileTest)
-	cfg := *cfgPointer //do not use pointer here because GetConfigEnvironment return the same pointer and it can generate problem when run multiple tests
+	cfgPointer, err := config.GetConfigEnvironment(config.ProfileTest)
+	require.NoError(t, err)
+	require.NotNil(t, cfgPointer)
+
+	cfg := *cfgPointer // do not use pointer here because GetConfigEnvironment return the same pointer and it can generate problem when run multiple tests
 	cfg.App.Auth.AccessTokenType = args.tokenType
 
 	if args.accessTokenDuration.String() != "0s" {
@@ -43,8 +46,7 @@ func getConfig(t *testing.T, args utilArgs) config.Config {
 		cfg.App.Auth.JWTPrivateKey = ""
 		cfg.App.Auth.PasetoSymmetricKey = ""
 	}
-	require.NoError(t, err)
-	require.NotNil(t, cfg)
+
 	require.NotEmpty(t, cfg)
 	return cfg
 }
