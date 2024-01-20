@@ -18,6 +18,10 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/diegoclair/go_boilerplate/application/rest"
 	"github.com/diegoclair/go_boilerplate/domain/service"
@@ -28,6 +32,10 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
+)
+
+const (
+	gracefulShutdownTimeout = 10 * time.Second
 )
 
 func main() {
@@ -69,5 +77,23 @@ func main() {
 		log.Fatalf(ctx, "error to get validator: %v", err)
 	}
 
-	rest.StartRestServer(ctx, cfg, services, log, authToken, v) // TODO: receive flags for what server it will starts
+	server := rest.StartRestServer(ctx, cfg, services, log, authToken, v)
+
+	gracefulShutdown(server, log)
+}
+
+// will wait for a SIGTERM or SIGINT signal and wait the server to finish processing requests or timeout after 10 seconds
+func gracefulShutdown(server *rest.Server, log logger.Logger) {
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
+	defer cancel()
+
+	log.Info(ctx, "Shutting down...")
+
+	if err := server.Srv.Shutdown(ctx); err != nil {
+		log.Errorf(ctx, "Error to shutdown rest server: %v", err)
+	}
 }

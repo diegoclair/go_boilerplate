@@ -26,7 +26,7 @@ type Server struct {
 	cfg     *config.Config
 }
 
-func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, v validator.Validator) {
+func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, v validator.Validator) *Server {
 	server := newRestServer(services, authToken, cfg, v)
 	port := cfg.App.Port
 	if port == "" {
@@ -38,6 +38,14 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 	if err := server.Start(port); err != nil {
 		panic(err)
 	}
+
+	go func() {
+		if err := server.Start(port); err != nil {
+			panic(err)
+		}
+	}()
+
+	return server
 }
 
 func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, v validator.Validator) *Server {
