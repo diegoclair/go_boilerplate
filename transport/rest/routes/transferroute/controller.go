@@ -3,9 +3,9 @@ package transferroute
 import (
 	"sync"
 
-	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
-	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
+	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
 
 	"github.com/labstack/echo/v4"

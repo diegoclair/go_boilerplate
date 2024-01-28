@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/diegoclair/go_boilerplate/application/rest/routeutils"
-	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
+	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
