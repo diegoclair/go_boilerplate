@@ -31,7 +31,7 @@ services:
       - app-network
   
   db:
-    container_name: licitanow-mysql
+    container_name: go-boilerplate-mysql
     build: .docker/images/mysql
     command: --innodb-use-native-aio=0 --disable-log-bin
     cap_add:
