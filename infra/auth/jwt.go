@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/chacha20poly1305"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"

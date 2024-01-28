@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/stretchr/testify/require"
 )
 
