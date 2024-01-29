@@ -10,6 +10,7 @@ services:
       - 5000:5000
     environment:
       WAIT_HOSTS: db:3306
+      WAIT_HOSTS_TIMEOUT: 60
     volumes:
       - ./:/app   #use this volume to set the live reload
     depends_on:
