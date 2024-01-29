@@ -23,14 +23,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/application/rest"
 	"github.com/diegoclair/go_boilerplate/domain/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/cache"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/infra/data"
-	"github.com/diegoclair/go_boilerplate/infra/logger"
+	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
+	"github.com/diegoclair/go_boilerplate/transport/rest"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
+	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
@@ -47,7 +48,7 @@ func main() {
 	defer cfg.Close()
 
 	ctx := context.Background()
-	log := logger.New(cfg)
+	log := infraLogger.New(cfg)
 
 	authToken, err := auth.NewAuthToken(cfg.App.Auth, log)
 	if err != nil {

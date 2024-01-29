@@ -3,7 +3,7 @@ package routeutils
 import (
 	"context"
 
-	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
+	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/labstack/echo/v4"
 )
 

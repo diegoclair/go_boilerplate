@@ -4,7 +4,7 @@ import (
 	"math"
 	"net/http"
 
-	"github.com/diegoclair/go_boilerplate/application/rest/viewmodel"
+	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
 )

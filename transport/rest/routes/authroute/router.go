@@ -1,6 +1,6 @@
 package authroute
 
-import "github.com/diegoclair/go_boilerplate/application/rest/routeutils"
+import "github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 
 const RouteName = "auth"
 
