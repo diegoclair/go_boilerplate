@@ -43,6 +43,13 @@ func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrat
 			return
 		}
 
+		cfg.AddCloser(func() {
+			log.Info(ctx, "Closing mysql connection...")
+			if err := db.Close(); err != nil {
+				log.Errorf(ctx, "Error closing mysql connection: %v", err)
+			}
+		})
+
 		log.Info(ctx, "Database Ping...")
 		connErr = db.PingContext(ctx)
 		if connErr != nil {
