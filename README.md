@@ -1,5 +1,5 @@
 ## 📝 Project
-Go Boilerplate API
+Go Boilerplate/Template for API projects
   
 ## Description ✈️
 Here I tried to create an golang boilerplate with experiences that I got with doing some projects using Go.
