@@ -7,7 +7,7 @@ type ReturnPagination struct {
 	CurrentPage    int64 `json:"current_page"`
 }
 
-type PaginatedResult struct {
+type PaginatedResult[T any] struct {
 	Pagination ReturnPagination `json:"pagination,omitempty"`
-	List       interface{}      `json:"data,omitempty"`
+	List       T                `json:"data,omitempty"`
 }

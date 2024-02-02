@@ -219,7 +219,7 @@ func TestController_GetAccounts(t *testing.T) {
 					response = append(response, item)
 				}
 
-				paginatedResp := s.utils.Resp().BuildPaginatedResult(response, skip, take, int64(args.accountsToBuild))
+				paginatedResp := routeutils.BuildPaginatedResult(response, skip, take, int64(args.accountsToBuild))
 				expectedResp, err := json.Marshal(paginatedResp)
 				require.NoError(t, err)
 				require.Contains(t, resp.Body.String(), string(expectedResp))

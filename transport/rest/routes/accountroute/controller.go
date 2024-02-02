@@ -107,7 +107,7 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 		response = append(response, item)
 	}
 
-	responsePaginated := s.utils.Resp().BuildPaginatedResult(response, skip, take, totalRecords)
+	responsePaginated := routeutils.BuildPaginatedResult(response, skip, take, totalRecords)
 
 	return s.utils.Resp().ResponseAPIOk(c, responsePaginated)
 }

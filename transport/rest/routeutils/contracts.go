@@ -3,7 +3,6 @@ package routeutils
 import (
 	"context"
 
-	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,7 +28,6 @@ type RequestUtils interface {
 
 // ResponseUtils aggregates the response utils
 type ResponseUtils interface {
-	BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult
 	ResponseNoContent(c echo.Context) error
 	ResponseCreated(c echo.Context) error
 	ResponseAPIOk(c echo.Context, data interface{}) error

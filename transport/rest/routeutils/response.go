@@ -17,8 +17,8 @@ func newResponseUtils() ResponseUtils {
 }
 
 // BuildPaginatedResult returns a paginatedResult instance
-func (r *respUtils) BuildPaginatedResult(list interface{}, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult {
-	return viewmodel.PaginatedResult{
+func BuildPaginatedResult[T any](list T, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult[T] {
+	return viewmodel.PaginatedResult[T]{
 		List: list,
 		Pagination: viewmodel.ReturnPagination{
 			CurrentPage:    (skip / take) + 1,
