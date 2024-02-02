@@ -3,7 +3,7 @@ package contract
 import "time"
 
 // CacheManager defines the main caching interface
-// 	- Get methods can return domain.ErrCacheMiss
+//   - Get methods can return domain.ErrCacheMiss
 type CacheManager interface {
 	GetItem(key string) ([]byte, error)
 	SetItem(key string, data []byte) error
