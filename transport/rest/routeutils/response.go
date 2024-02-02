@@ -16,7 +16,10 @@ func newResponseUtils() ResponseUtils {
 	return &respUtils{}
 }
 
-// BuildPaginatedResult returns a paginatedResult instance
+// BuildPaginatedResult is a function that builds a paginated result based on the given parameters.
+// It takes a list of type T, the number of records to skip, the number of records to take,
+// and the total number of records available.
+// It returns a PaginatedResult of type T, which contains the paginated list and pagination information.
 func BuildPaginatedResult[T any](list T, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult[T] {
 	return viewmodel.PaginatedResult[T]{
 		List: list,
