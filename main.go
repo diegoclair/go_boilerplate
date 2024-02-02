@@ -1,8 +1,3 @@
-/*
-Copyright © 2021 Diego Clair Rodrigues <diego93rodrigues@gmail.com>
-
-Licensed under the MIT License <http://opensource.org/licenses/MIT>
-*/
 package main
 
 import (
