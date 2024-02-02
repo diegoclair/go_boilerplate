@@ -3,7 +3,7 @@ Go Boilerplate/Template for API projects
   
 ## Description ✈️
 Here I tried to create an golang boilerplate with experiences that I got with doing some projects using Go.
-I tried to use some concepts from DDD, Clean Arch and some design patterns. 
+I tried to use concepts from DDD, Clean Arch and some design patterns. 
   
 The code are with all layers tested.
 Feel free to help me improve the project/structure. 
