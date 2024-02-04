@@ -23,4 +23,4 @@ EXPOSE 5000
 #This is used to run the application with live reload
 RUN go install github.com/githubnemo/CompileDaemon@latest
 
-ENTRYPOINT /wait && CompileDaemon --build="go build -buildvcs=false -o myapp ./cmd/go_boilerplate/" --command="./myapp"
+ENTRYPOINT /wait && CompileDaemon --build="go build -buildvcs=false -o myapp ." --command="./myapp"
