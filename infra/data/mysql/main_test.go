@@ -16,7 +16,7 @@ var testMysql contract.DataManager
 
 func TestMain(m *testing.M) {
 
-	cfg, err := config.GetConfigEnvironment("./../../../config.toml")
+	cfg, err := config.GetConfigEnvironment(config.ProfileTest)
 	if err != nil {
 		log.Fatal("cannot get config: ", err)
 	}
