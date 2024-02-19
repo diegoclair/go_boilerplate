@@ -28,6 +28,7 @@ I used concepts from DDD, Clean Arch and some design patterns.
   
 The code are with all layers tested.  
 Feel free to help me improve the project/structure. 
+![project architecture](/.github/assets/architecture.png)
   
 ## ▶️ Start application 💻 
 
