@@ -22,7 +22,6 @@ func newTransferService(svc *service) contract.TransferService {
 }
 
 func (s *transferService) CreateTransfer(ctx context.Context, t transfer.Transfer) (err error) {
-
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -47,6 +46,10 @@ func (s *transferService) CreateTransfer(ctx context.Context, t transfer.Transfe
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
 		return err
+	}
+
+	if fromAccount.ID == destAccount.ID {
+		return resterrors.NewConflictError("You can't transfer to yourself")
 	}
 
 	t.TransferUUID = uuid.NewV4().String()
@@ -78,7 +81,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, t transfer.Transfe
 	})
 }
 
-func (s *transferService) GetTransfers(ctx context.Context) (transfers []transfer.Transfer, err error) {
+func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (transfers []transfer.Transfer, totalRecords int64, err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -86,30 +89,31 @@ func (s *transferService) GetTransfers(ctx context.Context) (transfers []transfe
 	if !ok {
 		errMsg := "accountUUID should not be empty"
 		s.svc.log.Error(ctx, errMsg)
-		return transfers, errors.New(errMsg)
+		return transfers, totalRecords, errors.New(errMsg)
 	}
 
 	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get logged account by uuid: %s", err.Error())
-		return transfers, err
+		return transfers, totalRecords, err
 	}
 
-	madeTransfers, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, true)
+	madeTransfers, madeTotalRecords, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, take, skip, true)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get made transfers: %s", err.Error())
-		return transfers, err
+		return transfers, totalRecords, err
 	}
 
 	transfers = append(transfers, madeTransfers...)
 
-	receivedTransfers, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
+	receivedTransfers, receivedTotalRecords, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, take, skip, false)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get received transfers: %s", err.Error())
-		return transfers, err
+		return transfers, totalRecords, err
 	}
 
 	transfers = append(transfers, receivedTransfers...)
+	totalRecords = madeTotalRecords + receivedTotalRecords
 
-	return transfers, nil
+	return transfers, totalRecords, nil
 }

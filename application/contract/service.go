@@ -23,5 +23,5 @@ type AuthService interface {
 
 type TransferService interface {
 	CreateTransfer(ctx context.Context, transfer transfer.Transfer) (err error)
-	GetTransfers(ctx context.Context) (transfers []transfer.Transfer, err error)
+	GetTransfers(ctx context.Context, take, skip int64) (transfers []transfer.Transfer, totalRecords int64, err error)
 }

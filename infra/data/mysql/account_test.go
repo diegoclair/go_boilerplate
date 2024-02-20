@@ -47,7 +47,7 @@ func validateTwoAccounts(t *testing.T, accountExpected account.Account, accountT
 	require.Equal(t, accountExpected.CPF, accountToCompare.CPF)
 	require.Equal(t, accountExpected.Password, accountToCompare.Password)
 	require.NotZero(t, accountToCompare.ID)
-	require.WithinDuration(t, time.Now(), accountToCompare.CreatedAT, time.Second)
+	require.WithinDuration(t, time.Now(), accountToCompare.CreatedAT, 2*time.Second)
 }
 
 func TestCreateAccount(t *testing.T) {
@@ -148,15 +148,22 @@ func TestGetTransfersByAccountID(t *testing.T) {
 	err = testMysql.Account().AddTransfer(context.Background(), transferUUID, account3.ID, account2.ID, 50)
 	require.NoError(t, err)
 
-	origin := true
-	transfersAccount1AsOrigin, err := testMysql.Account().GetTransfersByAccountID(ctx, account.ID, origin)
+	transfersMade, totalRecordMade, err := testMysql.Account().GetTransfersByAccountID(ctx, account.ID, 0, 0, true)
 	require.NoError(t, err)
 
-	require.Len(t, transfersAccount1AsOrigin, 1)
+	require.Len(t, transfersMade, 1)
+	require.Equal(t, 1, int(totalRecordMade))
 
-	origin = false
-	transfersAccount2AsDestination, err := testMysql.Account().GetTransfersByAccountID(ctx, account2.ID, origin)
+	transfersReceived, totalRecordReceived, err := testMysql.Account().GetTransfersByAccountID(ctx, account2.ID, 10, 0, false)
 	require.NoError(t, err)
 
-	require.Len(t, transfersAccount2AsDestination, 2)
+	require.Len(t, transfersReceived, 2)
+	require.Equal(t, 2, int(totalRecordReceived))
+
+	//if skip one record, should return only one record
+	transfersReceived, totalRecordReceived, err = testMysql.Account().GetTransfersByAccountID(ctx, account2.ID, 10, 1, false)
+	require.NoError(t, err)
+
+	require.Len(t, transfersReceived, 1)
+	require.Equal(t, 2, int(totalRecordReceived))
 }

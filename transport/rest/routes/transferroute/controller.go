@@ -60,7 +60,9 @@ func (s *Controller) handleAddTransfer(c echo.Context) error {
 func (s *Controller) handleGetTransfers(c echo.Context) error {
 	ctx := s.utils.Req().GetContext(c)
 
-	transfers, err := s.transferService.GetTransfers(ctx)
+	take, skip := s.utils.Req().GetPagingParams(c, "page", "quantity")
+
+	transfers, totalRecords, err := s.transferService.GetTransfers(ctx, take, skip)
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
@@ -72,5 +74,7 @@ func (s *Controller) handleGetTransfers(c echo.Context) error {
 		response = append(response, resp)
 	}
 
-	return s.utils.Resp().ResponseAPIOk(c, response)
+	responsePaginated := routeutils.BuildPaginatedResult(response, skip, take, totalRecords)
+
+	return s.utils.Resp().ResponseAPIOk(c, responsePaginated)
 }

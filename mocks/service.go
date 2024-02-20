@@ -201,16 +201,17 @@ func (mr *MockTransferServiceMockRecorder) CreateTransfer(ctx, transfer interfac
 }
 
 // GetTransfers mocks base method.
-func (m *MockTransferService) GetTransfers(ctx context.Context) ([]transfer.Transfer, error) {
+func (m *MockTransferService) GetTransfers(ctx context.Context, take, skip int64) ([]transfer.Transfer, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransfers", ctx)
+	ret := m.ctrl.Call(m, "GetTransfers", ctx, take, skip)
 	ret0, _ := ret[0].([]transfer.Transfer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetTransfers indicates an expected call of GetTransfers.
-func (mr *MockTransferServiceMockRecorder) GetTransfers(ctx interface{}) *gomock.Call {
+func (mr *MockTransferServiceMockRecorder) GetTransfers(ctx, take, skip interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfers", reflect.TypeOf((*MockTransferService)(nil).GetTransfers), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfers", reflect.TypeOf((*MockTransferService)(nil).GetTransfers), ctx, take, skip)
 }

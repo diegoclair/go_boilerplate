@@ -50,6 +50,7 @@ func (r *accountRepo) parseAccount(row scanner) (account account.Account, err er
 
 	return account, nil
 }
+
 func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (err error) {
 	query := `
 		INSERT INTO tab_transfer (
@@ -146,14 +147,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 		SELECT COUNT(*) FROM (
 	` + query + `) as count`
 
-	stmt, err := r.db.Prepare(queryCount)
-	if err != nil {
-		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRow()
-	err = row.Scan(&totalRecords)
+	totalRecords, err = getTotalRecords(ctx, r.db, queryCount, params...)
 	if err != nil {
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
@@ -176,10 +170,11 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 		params = append(params, skip)
 	}
 
-	stmt, err = r.db.Prepare(query)
+	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
+
 	defer stmt.Close()
 
 	rows, err := stmt.Query(params...)
@@ -193,8 +188,10 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 		if err != nil {
 			return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 		}
+
 		accounts = append(accounts, account)
 	}
+
 	return accounts, totalRecords, nil
 }
 
@@ -222,15 +219,15 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 	return account, nil
 }
 
-func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int64, origin bool) (transfers []transfer.Transfer, err error) {
+func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) (transfers []transfer.Transfer, totalRecords int64, err error) {
 	var params = []interface{}{}
 
 	query := ` 
 		SELECT 
 			tt.transfer_id,
 			tt.transfer_uuid,
-			origin.account_uuid,
-			dest.account_uuid,
+			origin.account_uuid AS account_origin_uuid,
+			dest.account_uuid AS account_destination_uuid,
 			tt.amount,
 			tt.created_at
 		
@@ -243,25 +240,56 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 			ON dest.account_id = tt.account_destination_id
 
 	`
+
 	if origin {
 		query += `WHERE	tt.account_origin_id 		= 	? `
 	} else {
 		query += `WHERE	tt.account_destination_id 	= 	? `
 	}
+
 	params = append(params, accountID)
+
+	var queryCount = `
+		SELECT COUNT(*) FROM (
+	` + query + `) as count`
+
+	totalRecords, err = getTotalRecords(ctx, r.db, queryCount, params...)
+	if err != nil {
+		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
+	}
+
+	if totalRecords < 1 {
+		return transfers, totalRecords, nil
+	}
 
 	query += `
 		ORDER BY tt.created_at desc
 	`
+
+	if take > 0 {
+		query += `
+			LIMIT ?
+		`
+		params = append(params, take)
+	}
+
+	if skip > 0 {
+		query += `
+			OFFSET ?
+		`
+		params = append(params, skip)
+	}
+
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
-		return transfers, mysqlutils.HandleMySQLError(err)
+		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
+
 	defer stmt.Close()
 
 	rows, err := stmt.Query(params...)
 	if err != nil {
-		return transfers, mysqlutils.HandleMySQLError(err)
+		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
 
 	transfer := transfer.Transfer{}
@@ -275,13 +303,13 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID int
 			&transfer.CreatedAt,
 		)
 		if err != nil {
-			return transfers, err
+			return transfers, totalRecords, err
 		}
 
 		transfers = append(transfers, transfer)
 	}
 
-	return transfers, nil
+	return transfers, totalRecords, nil
 }
 
 func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64, balance float64) (err error) {

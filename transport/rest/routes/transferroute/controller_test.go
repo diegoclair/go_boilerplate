@@ -204,7 +204,7 @@ func TestController_handleGetTransfers(t *testing.T) {
 				sessionUUID: uuid.NewV4().String(),
 			},
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
-				mock.EXPECT().GetTransfers(ctx).Return([]transfer.Transfer{}, nil).Times(1)
+				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]transfer.Transfer{}, int64(0), nil).Times(1)
 			},
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
 				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)

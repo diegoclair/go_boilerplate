@@ -231,18 +231,19 @@ func (mr *MockAccountRepoMockRecorder) GetAccounts(ctx, take, skip interface{}) 
 }
 
 // GetTransfersByAccountID mocks base method.
-func (m *MockAccountRepo) GetTransfersByAccountID(ctx context.Context, accountID int64, origin bool) ([]transfer.Transfer, error) {
+func (m *MockAccountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) ([]transfer.Transfer, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransfersByAccountID", ctx, accountID, origin)
+	ret := m.ctrl.Call(m, "GetTransfersByAccountID", ctx, accountID, take, skip, origin)
 	ret0, _ := ret[0].([]transfer.Transfer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetTransfersByAccountID indicates an expected call of GetTransfersByAccountID.
-func (mr *MockAccountRepoMockRecorder) GetTransfersByAccountID(ctx, accountID, origin interface{}) *gomock.Call {
+func (mr *MockAccountRepoMockRecorder) GetTransfersByAccountID(ctx, accountID, take, skip, origin interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfersByAccountID", reflect.TypeOf((*MockAccountRepo)(nil).GetTransfersByAccountID), ctx, accountID, origin)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfersByAccountID", reflect.TypeOf((*MockAccountRepo)(nil).GetTransfersByAccountID), ctx, accountID, take, skip, origin)
 }
 
 // UpdateAccountBalance mocks base method.

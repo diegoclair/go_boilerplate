@@ -162,7 +162,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			args: args{
 				accountUUIDFromContext: "account-123",
 				transfer: transfer.Transfer{
-					AccountDestinationUUID: "account-dest-123",
+					AccountDestinationUUID: "account-123",
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
@@ -171,6 +171,24 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						Return(account.Account{}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
 						Return(account.Account{}, assert.AnError).Times(1),
+				)
+			},
+			wantErr: true,
+		},
+		{
+			name: "Should return error if the destination account is the same as the origin account",
+			args: args{
+				accountUUIDFromContext: "account-123",
+				transfer: transfer.Transfer{
+					AccountDestinationUUID: "account-123",
+				},
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
+						Return(account.Account{ID: 1}, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
+						Return(account.Account{ID: 1}, nil).Times(1),
 				)
 			},
 			wantErr: true,
@@ -186,9 +204,9 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(account.Account{}, nil).Times(1),
+						Return(account.Account{ID: 1}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(account.Account{}, nil).Times(1),
+						Return(account.Account{ID: 2}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).Return(assert.AnError).Times(1),
 				)
 			},
@@ -326,10 +344,10 @@ func Test_transferService_GetTransfers(t *testing.T) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
 						Return(account.Account{ID: 1}, nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), true).
-						Return([]transfer.Transfer{}, nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), false).
-						Return([]transfer.Transfer{}, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), int64(0), int64(0), true).
+						Return([]transfer.Transfer{}, int64(0), nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), int64(0), int64(0), false).
+						Return([]transfer.Transfer{}, int64(0), nil).Times(1),
 				)
 			},
 		},
@@ -359,8 +377,8 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
 					Return(account.Account{ID: 1}, nil).Times(1)
-				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), true).
-					Return([]transfer.Transfer{}, assert.AnError).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), int64(0), int64(0), true).
+					Return([]transfer.Transfer{}, int64(0), assert.AnError).Times(1)
 			},
 			wantErr: true,
 		},
@@ -372,10 +390,10 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
 					Return(account.Account{ID: 1}, nil).Times(1)
-				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), true).
-					Return([]transfer.Transfer{}, nil).Times(1)
-				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), false).
-					Return([]transfer.Transfer{}, assert.AnError).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), int64(0), int64(0), true).
+					Return([]transfer.Transfer{}, int64(0), nil).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), int64(0), int64(0), false).
+					Return([]transfer.Transfer{}, int64(0), assert.AnError).Times(1)
 			},
 			wantErr: true,
 		},
@@ -400,7 +418,7 @@ func Test_transferService_GetTransfers(t *testing.T) {
 				tt.buildMock(ctx, allMocks, tt.args)
 			}
 
-			if _, err := s.GetTransfers(ctx); (err != nil) != tt.wantErr {
+			if _, _, err := s.GetTransfers(ctx, 0, 0); (err != nil) != tt.wantErr {
 				t.Errorf("transferService.GetTransfers() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
