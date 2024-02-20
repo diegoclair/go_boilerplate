@@ -22,12 +22,12 @@ type utilArgs struct {
 	wantErrValue         error
 }
 
-func getConfig(t *testing.T, args utilArgs) config.Config {
+func getConfig(t *testing.T, args utilArgs) *config.Config {
 	cfgPointer, err := config.GetConfigEnvironment(config.ProfileTest)
 	require.NoError(t, err)
 	require.NotNil(t, cfgPointer)
 
-	cfg := *cfgPointer // do not use pointer here because GetConfigEnvironment return the same pointer and it can generate problem when run multiple tests
+	cfg := copyConfig(cfgPointer)
 	cfg.App.Auth.AccessTokenType = args.tokenType
 
 	if args.accessTokenDuration.String() != "0s" {
@@ -49,6 +49,16 @@ func getConfig(t *testing.T, args utilArgs) config.Config {
 
 	require.NotEmpty(t, cfg)
 	return cfg
+}
+
+// copyConfig returns a copy of the config avoiding problems with pointer and multiple tests
+func copyConfig(cfg *config.Config) *config.Config {
+	return &config.Config{
+		App:   cfg.App,
+		Cache: cfg.Cache,
+		DB:    cfg.DB,
+		Log:   cfg.Log,
+	}
 }
 
 func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *tokenPayload) {
