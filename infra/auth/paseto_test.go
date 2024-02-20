@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_utils-lib/v2/logger"
+	"github.com/diegoclair/go_utils/logger"
 	"github.com/stretchr/testify/require"
 )
 

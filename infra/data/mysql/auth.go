@@ -5,7 +5,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/application/dto"
-	"github.com/diegoclair/go_utils-lib/v2/mysqlutils"
+	"github.com/diegoclair/go_utils/mysqlutils"
 )
 
 type authRepo struct {

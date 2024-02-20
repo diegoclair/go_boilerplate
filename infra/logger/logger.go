@@ -5,7 +5,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_utils-lib/v2/logger"
+	"github.com/diegoclair/go_utils/logger"
 )
 
 func New(cfg *config.Config) logger.Logger {

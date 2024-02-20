@@ -5,7 +5,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/mocks"
-	"github.com/diegoclair/go_utils-lib/v2/logger"
+	"github.com/diegoclair/go_utils/logger"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )

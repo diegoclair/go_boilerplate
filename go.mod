@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/GuiaBolso/darwin v0.0.0-20191218124601-fd6d2aa3d244
-	github.com/diegoclair/go_utils-lib/v2 v2.4.17
+	github.com/diegoclair/go_utils v1.0.1
 	github.com/diegoclair/goswag v1.0.4
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-sql-driver/mysql v1.7.1

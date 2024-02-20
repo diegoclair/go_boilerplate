@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_utils-lib/v2/resterrors"
+	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/labstack/echo/v4"
 )
 

@@ -7,7 +7,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/domain/transfer"
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_utils-lib/v2/resterrors"
+	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/twinj/uuid"
 )
 

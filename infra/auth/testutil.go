@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_utils-lib/v2/logger"
+	"github.com/diegoclair/go_utils/logger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -61,21 +61,21 @@ func copyConfig(cfg *config.Config) *config.Config {
 	}
 }
 
-func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *tokenPayload) {
+func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
 	var err error
 	token, tokenPayload, err = maker.CreateAccessToken(ctx, args.accountUUID, args.sessionUUID)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
 
-func createTestRefreshToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *tokenPayload) {
+func createTestRefreshToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
 	var err error
 	token, tokenPayload, err = maker.CreateRefreshToken(ctx, args.accountUUID, args.sessionUUID)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
 
-func validateTokenCreation(t *testing.T, args utilArgs, token string, tokenPayload *tokenPayload, err error) {
+func validateTokenCreation(t *testing.T, args utilArgs, token string, tokenPayload *TokenPayload, err error) {
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotNil(t, tokenPayload)

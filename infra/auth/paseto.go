@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/diegoclair/go_utils-lib/v2/logger"
-	"github.com/diegoclair/go_utils-lib/v2/resterrors"
+	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -28,16 +28,16 @@ func newPasetoAuth(symmetricKey string, log logger.Logger) (AuthToken, error) {
 	}, nil
 }
 
-func (a *pasetoAuth) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
+func (a *pasetoAuth) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
 	return a.createToken(ctx, accountUUID, sessionUUID, accessTokenDurationTime)
 }
 
-func (a *pasetoAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
+func (a *pasetoAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
 	return a.createToken(ctx, accountUUID, sessionUUID, refreshTokenDurationTime)
 }
 
-func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*tokenPayload, error) {
-	payload := &tokenPayload{}
+func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*TokenPayload, error) {
+	payload := &TokenPayload{}
 
 	err := a.paseto.Decrypt(token, a.symmetricKey, payload, nil)
 	if err != nil {
@@ -54,7 +54,7 @@ func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*tokenPaylo
 	return payload, payload.Valid()
 }
 
-func (a *pasetoAuth) createToken(ctx context.Context, accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *tokenPayload, err error) {
+func (a *pasetoAuth) createToken(ctx context.Context, accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
 	payload = newPayload(accountUUID, sessionUUID, duration)
 
 	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)

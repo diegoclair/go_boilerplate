@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_utils-lib/v2/logger"
+	"github.com/diegoclair/go_utils/logger"
 )
 
 type AuthToken interface {
-	CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
-	CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error)
-	VerifyToken(ctx context.Context, token string) (*tokenPayload, error)
+	CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error)
+	CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error)
+	VerifyToken(ctx context.Context, token string) (*TokenPayload, error)
 }
 
 const (

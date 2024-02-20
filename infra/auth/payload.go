@@ -4,7 +4,8 @@ import (
 	"time"
 )
 
-type tokenPayload struct {
+// TokenPayload represents the payload of a JWT token
+type TokenPayload struct {
 	AccountUUID  string
 	SessionUUID  string
 	RefreshToken string
@@ -12,8 +13,8 @@ type tokenPayload struct {
 	ExpiredAt    time.Time
 }
 
-func newPayload(accountUUID, sessionUUID string, duration time.Duration) *tokenPayload {
-	return &tokenPayload{
+func newPayload(accountUUID, sessionUUID string, duration time.Duration) *TokenPayload {
+	return &TokenPayload{
 		SessionUUID: sessionUUID,
 		AccountUUID: accountUUID,
 		IssuedAt:    time.Now(),
@@ -22,7 +23,7 @@ func newPayload(accountUUID, sessionUUID string, duration time.Duration) *tokenP
 }
 
 // Valid checks if the token payload is valid or not
-func (p *tokenPayload) Valid() error {
+func (p *TokenPayload) Valid() error {
 	if time.Now().After(p.ExpiredAt) {
 		return errExpiredToken
 	}

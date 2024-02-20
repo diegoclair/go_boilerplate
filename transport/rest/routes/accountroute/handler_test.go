@@ -15,7 +15,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/go_utils/validator"
 	"github.com/diegoclair/goswag"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
@@ -146,8 +146,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			accountMock, server, ctrl, s := getServerTest(t)
+			accountMock, server, ctrl, accountHandler := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -161,7 +160,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				e := echo.New()
-				ctx := s.utils.Req().GetContext(e.NewContext(req, recorder))
+				ctx := accountHandler.utils.Req().GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 

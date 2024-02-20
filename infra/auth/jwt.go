@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/diegoclair/go_utils-lib/v2/logger"
-	"github.com/diegoclair/go_utils-lib/v2/resterrors"
+	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -27,15 +27,15 @@ func newJwtAuth(jwtPrivateKey string, log logger.Logger) (AuthToken, error) {
 	}, nil
 }
 
-func (a *jwtAuth) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
+func (a *jwtAuth) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
 	return a.createToken(ctx, accountUUID, sessionUUID, accessTokenDurationTime)
 }
 
-func (a *jwtAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *tokenPayload, err error) {
+func (a *jwtAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
 	return a.createToken(ctx, accountUUID, sessionUUID, refreshTokenDurationTime)
 }
 
-func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *tokenPayload, err error) {
+func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *TokenPayload, err error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -44,7 +44,7 @@ func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *token
 		return []byte(a.jwtPrivateKey), nil
 	}
 
-	jwtToken, err := jwt.ParseWithClaims(token, &tokenPayload{}, keyFunc)
+	jwtToken, err := jwt.ParseWithClaims(token, &TokenPayload{}, keyFunc)
 	if err != nil {
 		verr, ok := err.(*jwt.ValidationError)
 		if ok && strings.Contains(verr.Inner.Error(), errExpiredToken.Error()) {
@@ -55,7 +55,7 @@ func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *token
 	}
 
 	var ok bool
-	payload, ok = jwtToken.Claims.(*tokenPayload)
+	payload, ok = jwtToken.Claims.(*TokenPayload)
 	if !ok {
 		a.log.Errorf(ctx, "could not parse jwt token: %v", err)
 		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
@@ -63,7 +63,7 @@ func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *token
 	return payload, nil
 }
 
-func (a *jwtAuth) createToken(ctx context.Context, accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *tokenPayload, err error) {
+func (a *jwtAuth) createToken(ctx context.Context, accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
 	key := []byte(a.jwtPrivateKey)
 	payload = newPayload(accountUUID, sessionUUID, duration)
 

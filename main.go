@@ -16,8 +16,8 @@ import (
 	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/transport/rest"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
-	"github.com/diegoclair/go_utils-lib/v2/logger"
-	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_utils/validator"
 )
 
 const (

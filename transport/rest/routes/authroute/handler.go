@@ -10,7 +10,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/go_utils/validator"
 	"github.com/twinj/uuid"
 
 	"github.com/labstack/echo/v4"
@@ -42,14 +42,15 @@ func NewHandler(authService contract.AuthService, authToken auth.AuthToken, util
 }
 
 func (s *Handler) handleLogin(c echo.Context) error {
-
 	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.Login{}
+
 	err := c.Bind(&input)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
+
 	err = input.Validate(s.validator)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
@@ -96,14 +97,15 @@ func (s *Handler) handleLogin(c echo.Context) error {
 }
 
 func (s *Handler) handleRefreshToken(c echo.Context) error {
-
 	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.RefreshTokenRequest{}
+
 	err := c.Bind(&input)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
 	}
+
 	err = input.Validate(s.validator)
 	if err != nil {
 		return s.utils.Resp().ResponseBadRequestError(c, err)
@@ -122,9 +124,11 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 	if session.IsBlocked {
 		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("blocked session"))
 	}
+
 	if session.RefreshToken != input.RefreshToken {
 		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("mismatched session token"))
 	}
+
 	if time.Now().After(session.RefreshTokenExpiredAt) {
 		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
 	}

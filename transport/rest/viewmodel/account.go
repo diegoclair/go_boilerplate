@@ -5,7 +5,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/account"
 	"github.com/diegoclair/go_boilerplate/util/number"
-	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/go_utils/validator"
 )
 
 type AddAccount struct {

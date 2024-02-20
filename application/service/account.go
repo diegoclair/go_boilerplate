@@ -5,8 +5,8 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/domain/account"
-	"github.com/diegoclair/go_utils-lib/v2/mysqlutils"
-	"github.com/diegoclair/go_utils-lib/v2/resterrors"
+	"github.com/diegoclair/go_utils/mysqlutils"
+	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/twinj/uuid"
 )
 

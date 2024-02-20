@@ -50,8 +50,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/diegoclair/go_utils-lib/v2 v2.4.17 h1:W3U9B/sgcHq9AU02Oek68CBxHn7KHt4+uT3drmOhDvc=
-github.com/diegoclair/go_utils-lib/v2 v2.4.17/go.mod h1:riN3iJMF6VYLgU1UspzRGzjk4gS5ATMgC2iYfrdKk10=
+github.com/diegoclair/go_utils v1.0.1 h1:Rfg3/gVapv+EtjjmLoTOueimCfSeRrVKTBwkHCjHm1k=
+github.com/diegoclair/go_utils v1.0.1/go.mod h1:S6UstwCUwsnePNuaFI/RtWaXl1jA6T8CvoFEN9FOUKI=
 github.com/diegoclair/goswag v1.0.4 h1:6qiYUt+pUL+8cq8eAX/6hr3TtJ4aK9ZrjlSsNM3WRos=
 github.com/diegoclair/goswag v1.0.4/go.mod h1:1UCALDkM8ix9C/fkS5kGAcDgJoryZNSawaDeFHd1uqI=
 github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712 h1:aaQcKT9WumO6JEJcRyTqFVq4XUZiUcKR2/GI31TOcz8=

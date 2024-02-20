@@ -6,7 +6,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/go_utils/validator"
 
 	"github.com/labstack/echo/v4"
 )
