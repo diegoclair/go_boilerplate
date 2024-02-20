@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/diegoclair/go_boilerplate/domain/service"
+	"github.com/diegoclair/go_boilerplate/application/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/accountroute"

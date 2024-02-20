@@ -3,7 +3,7 @@ package viewmodel
 import (
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/domain/transfer"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
 )
 
@@ -16,8 +16,8 @@ func (t *TransferReq) Validate(v validator.Validator) error {
 	return v.ValidateStruct(t)
 }
 
-func (t *TransferReq) ToEntity() entity.Transfer {
-	return entity.Transfer{
+func (t *TransferReq) ToEntity() transfer.Transfer {
+	return transfer.Transfer{
 		AccountDestinationUUID: t.AccountDestinationUUID,
 		Amount:                 t.Amount,
 	}
@@ -31,7 +31,7 @@ type TransferResp struct {
 	CreateAt               time.Time `json:"create_at,omitempty"`
 }
 
-func (t *TransferResp) FillFromEntity(transfer entity.Transfer) {
+func (t *TransferResp) FillFromEntity(transfer transfer.Transfer) {
 	t.TransferUUID = transfer.TransferUUID
 	t.AccountOriginUUID = transfer.AccountOriginUUID
 	t.AccountDestinationUUID = transfer.AccountDestinationUUID

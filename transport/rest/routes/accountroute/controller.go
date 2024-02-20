@@ -3,8 +3,8 @@ package accountroute
 import (
 	"sync"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/domain/account"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
@@ -49,7 +49,7 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
-	account := entity.Account{
+	account := account.Account{
 		Name:     input.Name,
 		CPF:      input.CPF,
 		Password: input.Password,

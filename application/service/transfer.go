@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/domain/transfer"
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/twinj/uuid"
 )
@@ -22,7 +21,7 @@ func newTransferService(svc *service) contract.TransferService {
 	}
 }
 
-func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Transfer) (err error) {
+func (s *transferService) CreateTransfer(ctx context.Context, t transfer.Transfer) (err error) {
 
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
@@ -40,35 +39,37 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 		return err
 	}
 
-	if fromAccount.Balance < transfer.Amount {
+	if !fromAccount.HasSufficientFunds(t.Amount) {
 		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
 	}
 
-	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
+	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, t.AccountDestinationUUID)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
 		return err
 	}
 
-	transfer.TransferUUID = uuid.NewV4().String()
+	t.TransferUUID = uuid.NewV4().String()
 
 	return s.svc.dm.WithTransaction(ctx, func(tx contract.DataManager) error {
 
-		err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
+		err = tx.Account().AddTransfer(ctx, t.TransferUUID, fromAccount.ID, destAccount.ID, t.Amount)
 		if err != nil {
 			s.svc.log.Errorf(ctx, "error to add transfer: %s", err.Error())
 			return err
 		}
 
-		originBalance := number.RoundFloat(fromAccount.Balance-transfer.Amount, 2)
-		err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, originBalance)
+		fromAccount.SubtractBalance(t.Amount)
+
+		err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, fromAccount.Balance)
 		if err != nil {
 			s.svc.log.Errorf(ctx, "error to update origin account balance: %s", err.Error())
 			return err
 		}
 
-		destBalance := number.RoundFloat(destAccount.Balance+transfer.Amount, 2)
-		err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destBalance)
+		destAccount.AddBalance(t.Amount)
+
+		err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destAccount.Balance)
 		if err != nil {
 			s.svc.log.Errorf(ctx, "error to update destination account balance: %s", err.Error())
 			return err
@@ -77,8 +78,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, transfer entity.Tr
 	})
 }
 
-func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.Transfer, err error) {
-
+func (s *transferService) GetTransfers(ctx context.Context) (transfers []transfer.Transfer, err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -100,6 +100,7 @@ func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.
 		s.svc.log.Errorf(ctx, "error to get made transfers: %s", err.Error())
 		return transfers, err
 	}
+
 	transfers = append(transfers, madeTransfers...)
 
 	receivedTransfers, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, false)
@@ -107,6 +108,7 @@ func (s *transferService) GetTransfers(ctx context.Context) (transfers []entity.
 		s.svc.log.Errorf(ctx, "error to get received transfers: %s", err.Error())
 		return transfers, err
 	}
+
 	transfers = append(transfers, receivedTransfers...)
 
 	return transfers, nil

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/domain/account"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
@@ -69,7 +69,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(nil)
+				mock.accountService.EXPECT().CreateAccount(ctx, account.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -134,7 +134,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(errors.New("some error"))
+				mock.accountService.EXPECT().CreateAccount(ctx, account.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -173,11 +173,11 @@ func TestController_handleAddAccount(t *testing.T) {
 	}
 }
 
-func buildAccountByID(id int) entity.Account {
-	return entity.Account{UUID: "random", Name: "diego" + strconv.Itoa(id)}
+func buildAccountByID(id int) account.Account {
+	return account.Account{UUID: "random", Name: "diego" + strconv.Itoa(id)}
 }
 
-func buildAccountsByQuantity(qtd int) (accounts []entity.Account) {
+func buildAccountsByQuantity(qtd int) (accounts []account.Account) {
 	for i := 0; i < qtd; i++ {
 		accounts = append(accounts, buildAccountByID(i))
 	}
@@ -305,7 +305,7 @@ func TestController_GetAccountByID(t *testing.T) {
 				accountUUID: "random",
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				mock.accountService.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, fmt.Errorf("some service error"))
+				mock.accountService.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(account.Account{}, fmt.Errorf("some service error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)

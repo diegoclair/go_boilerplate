@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
@@ -71,7 +71,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
-	sessionReq := entity.Session{
+	sessionReq := dto.Session{
 		SessionUUID:           sessionUUID,
 		AccountID:             account.ID,
 		RefreshToken:          refreshToken,

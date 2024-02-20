@@ -6,8 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/domain/account"
+	"github.com/diegoclair/go_boilerplate/domain/transfer"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/golang/mock/gomock"
@@ -26,10 +27,9 @@ func Test_newTransferService(t *testing.T) {
 }
 
 func Test_transferService_CreateTransfer(t *testing.T) {
-
 	type args struct {
 		accountUUIDFromContext string
-		transfer               entity.Transfer
+		transfer               transfer.Transfer
 	}
 
 	tests := []struct {
@@ -42,7 +42,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should pass without error",
 			args: args{
 				accountUUIDFromContext: "account-from-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					Amount:                 5.0,
 					AccountDestinationUUID: "account-dest-123",
 				},
@@ -50,12 +50,12 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(entity.Account{
+						Return(account.Account{
 							ID:      1,
 							Balance: 10.50,
 						}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(entity.Account{
+						Return(account.Account{
 							ID:      2,
 							Balance: 25.50,
 						}, nil).Times(1),
@@ -76,7 +76,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 		{
 			name: "Should return error if accountUUID from context is empty",
 			args: args{
-				transfer: entity.Transfer{},
+				transfer: transfer.Transfer{},
 			},
 			wantErr: true,
 		},
@@ -84,11 +84,11 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should return error if accountUUID does not exists on database",
 			args: args{
 				accountUUIDFromContext: "account-non-exists",
-				transfer:               entity.Transfer{},
+				transfer:               transfer.Transfer{},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-					Return(entity.Account{}, fmt.Errorf("account not found")).Times(1)
+					Return(account.Account{}, fmt.Errorf("account not found")).Times(1)
 			},
 			wantErr: true,
 		},
@@ -96,13 +96,13 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should return error if from account has not sufficient balance to transfer",
 			args: args{
 				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					Amount: 18,
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-					Return(entity.Account{
+					Return(account.Account{
 						Balance: 15,
 					}, nil).Times(1)
 			},
@@ -112,7 +112,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should not receive value with floating point problem",
 			args: args{
 				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					Amount: 0.1,
 				},
 			},
@@ -120,12 +120,12 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 				gomock.InOrder(
 
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(entity.Account{
+						Return(account.Account{
 							ID:      1,
 							Balance: 0.3,
 						}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(entity.Account{
+						Return(account.Account{
 							ID:      2,
 							Balance: 0.2,
 						}, nil).Times(1),
@@ -153,7 +153,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-					Return(entity.Account{}, assert.AnError).Times(1)
+					Return(account.Account{}, assert.AnError).Times(1)
 			},
 			wantErr: true,
 		},
@@ -161,16 +161,16 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should return error if there is some error to get account destination by uuid",
 			args: args{
 				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					AccountDestinationUUID: "account-dest-123",
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(entity.Account{}, nil).Times(1),
+						Return(account.Account{}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(entity.Account{}, assert.AnError).Times(1),
+						Return(account.Account{}, assert.AnError).Times(1),
 				)
 			},
 			wantErr: true,
@@ -179,16 +179,16 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should return error if there is some error to begin transaction",
 			args: args{
 				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					AccountDestinationUUID: "account-dest-123",
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(entity.Account{}, nil).Times(1),
+						Return(account.Account{}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(entity.Account{}, nil).Times(1),
+						Return(account.Account{}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).Return(assert.AnError).Times(1),
 				)
 			},
@@ -198,16 +198,16 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should return error if there is some error to add transfer",
 			args: args{
 				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					AccountDestinationUUID: "account-dest-123",
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(entity.Account{ID: 1}, nil).Times(1),
+						Return(account.Account{ID: 1}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(entity.Account{ID: 2}, nil).Times(1),
+						Return(account.Account{ID: 2}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).DoAndReturn(
 						func(ctx context.Context, fn func(r contract.DataManager) error) error {
 							return fn(mocks.mockDataManager)
@@ -223,18 +223,18 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should return error if there is some error to update origin account balance",
 			args: args{
 				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					AccountDestinationUUID: "account-dest-123",
 					Amount:                 2,
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				respAccountFrom := entity.Account{ID: 1, Balance: 4}
+				respAccountFrom := account.Account{ID: 1, Balance: 4}
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
 						Return(respAccountFrom, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
-						Return(entity.Account{ID: 2}, nil).Times(1),
+						Return(account.Account{ID: 2}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(ctx, gomock.Any()).DoAndReturn(
 						func(ctx context.Context, fn func(r contract.DataManager) error) error {
 							return fn(mocks.mockDataManager)
@@ -252,14 +252,14 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			name: "Should return error if there is some error to update destination account balance",
 			args: args{
 				accountUUIDFromContext: "account-123",
-				transfer: entity.Transfer{
+				transfer: transfer.Transfer{
 					AccountDestinationUUID: "account-dest-123",
 					Amount:                 2,
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				respAccountFrom := entity.Account{ID: 1, Balance: 4}
-				respAccountDest := entity.Account{ID: 2, Balance: 5}
+				respAccountFrom := account.Account{ID: 1, Balance: 4}
+				respAccountDest := account.Account{ID: 2, Balance: 5}
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
 						Return(respAccountFrom, nil).Times(1),
@@ -325,11 +325,11 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-						Return(entity.Account{ID: 1}, nil).Times(1),
+						Return(account.Account{ID: 1}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), true).
-						Return([]entity.Transfer{}, nil).Times(1),
+						Return([]transfer.Transfer{}, nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), false).
-						Return([]entity.Transfer{}, nil).Times(1),
+						Return([]transfer.Transfer{}, nil).Times(1),
 				)
 			},
 		},
@@ -347,7 +347,7 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-					Return(entity.Account{}, assert.AnError).Times(1)
+					Return(account.Account{}, assert.AnError).Times(1)
 			},
 			wantErr: true,
 		},
@@ -358,9 +358,9 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-					Return(entity.Account{ID: 1}, nil).Times(1)
+					Return(account.Account{ID: 1}, nil).Times(1)
 				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), true).
-					Return([]entity.Transfer{}, assert.AnError).Times(1)
+					Return([]transfer.Transfer{}, assert.AnError).Times(1)
 			},
 			wantErr: true,
 		},
@@ -371,11 +371,11 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUIDFromContext).
-					Return(entity.Account{ID: 1}, nil).Times(1)
+					Return(account.Account{ID: 1}, nil).Times(1)
 				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), true).
-					Return([]entity.Transfer{}, nil).Times(1)
+					Return([]transfer.Transfer{}, nil).Times(1)
 				mocks.mockAccountRepo.EXPECT().GetTransfersByAccountID(ctx, int64(1), false).
-					Return([]entity.Transfer{}, assert.AnError).Times(1)
+					Return([]transfer.Transfer{}, assert.AnError).Times(1)
 			},
 			wantErr: true,
 		},

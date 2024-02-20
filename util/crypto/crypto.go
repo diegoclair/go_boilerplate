@@ -3,7 +3,7 @@ package crypto
 import (
 	"fmt"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/application/contract"
 	"golang.org/x/crypto/bcrypt"
 )
 

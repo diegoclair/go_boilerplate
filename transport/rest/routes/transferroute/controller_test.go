@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/domain/transfer"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
@@ -112,7 +112,7 @@ func TestController_handleAddBalance(t *testing.T) {
 			buildMocks: func(ctx context.Context, transferMock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				transferMock.EXPECT().CreateTransfer(ctx,
-					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					transfer.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(nil).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -136,7 +136,7 @@ func TestController_handleAddBalance(t *testing.T) {
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				mock.EXPECT().CreateTransfer(ctx,
-					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					transfer.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -204,7 +204,7 @@ func TestController_handleGetTransfers(t *testing.T) {
 				sessionUUID: uuid.NewV4().String(),
 			},
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
-				mock.EXPECT().GetTransfers(ctx).Return([]entity.Transfer{}, nil).Times(1)
+				mock.EXPECT().GetTransfers(ctx).Return([]transfer.Transfer{}, nil).Times(1)
 			},
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
 				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)

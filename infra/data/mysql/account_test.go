@@ -6,15 +6,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/domain/account"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_boilerplate/util/random"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
 )
 
-func createRandomAccount(t *testing.T) entity.Account {
-	args := entity.Account{
+func createRandomAccount(t *testing.T) account.Account {
+	args := account.Account{
 		UUID: uuid.NewV4().String(),
 		Name: random.RandomName(),
 		CPF:  random.RandomCPF(),
@@ -40,7 +40,7 @@ func createRandomAccount(t *testing.T) entity.Account {
 	return account
 }
 
-func validateTwoAccounts(t *testing.T, accountExpected entity.Account, accountToCompare entity.Account) {
+func validateTwoAccounts(t *testing.T, accountExpected account.Account, accountToCompare account.Account) {
 	require.Equal(t, float64(0), accountExpected.Balance)
 	require.Equal(t, accountExpected.UUID, accountToCompare.UUID)
 	require.Equal(t, accountExpected.Name, accountToCompare.Name)

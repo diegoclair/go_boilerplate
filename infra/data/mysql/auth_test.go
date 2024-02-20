@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
 )
 
-func validateTwoSessions(t *testing.T, sessionExpected entity.Session, sessionToCompare entity.Session) {
+func validateTwoSessions(t *testing.T, sessionExpected dto.Session, sessionToCompare dto.Session) {
 	require.NotZero(t, sessionToCompare.AccountID)
 	require.Equal(t, sessionExpected.SessionUUID, sessionToCompare.SessionUUID)
 	require.Equal(t, sessionExpected.RefreshToken, sessionToCompare.RefreshToken)
@@ -24,7 +24,7 @@ func TestCreateAndGetSession(t *testing.T) {
 	ctx := context.Background()
 	account := createRandomAccount(t)
 
-	session := entity.Session{
+	session := dto.Session{
 		SessionUUID:           uuid.NewV4().String(),
 		AccountID:             account.ID,
 		RefreshToken:          uuid.NewV4().String(),

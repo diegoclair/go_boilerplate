@@ -6,7 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/application/dto"
+	"github.com/diegoclair/go_boilerplate/domain/account"
 	"github.com/golang/mock/gomock"
 )
 
@@ -40,7 +41,7 @@ func Test_authService_Login(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
-					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(account.Account{
 						ID:       1,
 						UUID:     "uuid",
 						Name:     "name",
@@ -59,7 +60,7 @@ func Test_authService_Login(t *testing.T) {
 				password: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{}, errors.New("some error")).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(account.Account{}, errors.New("some error")).Times(1)
 			},
 			wantErr: true,
 		},
@@ -70,7 +71,7 @@ func Test_authService_Login(t *testing.T) {
 				password: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(account.Account{
 					ID:       1,
 					UUID:     "uuid",
 					Name:     "name",
@@ -104,7 +105,7 @@ func Test_authService_Login(t *testing.T) {
 
 func Test_authService_CreateSession(t *testing.T) {
 	type args struct {
-		session entity.Session
+		session dto.Session
 	}
 	tests := []struct {
 		name      string
@@ -115,7 +116,7 @@ func Test_authService_CreateSession(t *testing.T) {
 		{
 			name: "Should create session without any errors",
 			args: args{
-				session: entity.Session{
+				session: dto.Session{
 					AccountID:   1,
 					SessionUUID: "uuid",
 				},
@@ -127,7 +128,7 @@ func Test_authService_CreateSession(t *testing.T) {
 		{
 			name: "Should return error when there is some error to create session",
 			args: args{
-				session: entity.Session{
+				session: dto.Session{
 					AccountID:   1,
 					SessionUUID: "uuid",
 				},
@@ -165,7 +166,7 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 		name        string
 		buildMock   func(ctx context.Context, mocks allMocks, args args)
 		args        args
-		wantSession entity.Session
+		wantSession dto.Session
 		wantErr     bool
 	}{
 		{
@@ -174,10 +175,10 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 				sessionUUID: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				result := entity.Session{SessionID: 1, SessionUUID: "123"}
+				result := dto.Session{SessionID: 1, SessionUUID: "123"}
 				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).Return(result, nil).Times(1)
 			},
-			wantSession: entity.Session{SessionID: 1, SessionUUID: "123"},
+			wantSession: dto.Session{SessionID: 1, SessionUUID: "123"},
 			wantErr:     false,
 		},
 		{
@@ -186,9 +187,9 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 				sessionUUID: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).Return(entity.Session{}, errors.New("some error")).Times(1)
+				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).Return(dto.Session{}, errors.New("some error")).Times(1)
 			},
-			wantSession: entity.Session{},
+			wantSession: dto.Session{},
 			wantErr:     true,
 		},
 	}

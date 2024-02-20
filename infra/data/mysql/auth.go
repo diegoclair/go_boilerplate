@@ -3,8 +3,8 @@ package mysql
 import (
 	"context"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_utils-lib/v2/mysqlutils"
 )
 
@@ -18,7 +18,7 @@ func newAuthRepo(db dbConnection) contract.AuthRepo {
 	}
 }
 
-func (r *authRepo) CreateSession(ctx context.Context, session entity.Session) (err error) {
+func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (err error) {
 	query := `
 		INSERT INTO tab_session (
 			session_uuid,
@@ -54,7 +54,7 @@ func (r *authRepo) CreateSession(ctx context.Context, session entity.Session) (e
 	return nil
 }
 
-func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (session entity.Session, err error) {
+func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (session dto.Session, err error) {
 	query := ` 
 		SELECT 
 			ts.session_id,

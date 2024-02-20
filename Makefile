@@ -9,7 +9,7 @@ mock:
 # mockgen -package mocks -destination mocks/repo.go github.com/diegoclair/go_boilerplate/domain/contract DataManager,AccountRepo,AuthRepo
 	go install github.com/golang/mock/mockgen@latest
 	rm -rf mocks
-	for file in domain/contract/*.go; do \
+	for file in application/contract/*.go; do \
 		filename=$$(basename $$file); \
 		mockgen -package mocks -source=$$file -destination=mocks/$$filename; \
 	done
