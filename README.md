@@ -49,7 +49,7 @@ For the presentation layer, which I refer to as the transport layer, its purpose
 ### Launching the Application  ▶️
 To start the application, execute the command `docker-compose up`. Once you see the message `your server started on [::]:5000`, the application is up and running!
 
-### 📝 API Documentation:
+## 📝 API Documentation:
 For detailed API endpoint documentation, navigate to the `/docs` directory where you will find the Swagger documentation.  
 These swagger docs was generated using [goswag](https://github.com/diegoclair/goswag)
 
