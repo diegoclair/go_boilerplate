@@ -47,7 +47,7 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 	return tokenMaker
 }
 
-func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server goswag.Echo, ctrl *gomock.Controller, transferController *Controller) {
+func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server goswag.Echo, ctrl *gomock.Controller, transferHandler *Handler) {
 	ctrl = gomock.NewController(t)
 
 	transferMock = mocks.NewMockTransferService(ctrl)
@@ -56,8 +56,8 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	transferController = &Controller{transferMock, routeutils.New(), v}
-	transferRoute := NewRouter(transferController, "transfers")
+	transferHandler = &Handler{transferMock, routeutils.New(), v}
+	transferRoute := NewRouter(transferHandler, "transfers")
 
 	server = goswag.NewEcho()
 	appGroup := server.Group("/")
@@ -81,7 +81,7 @@ func addAuthorization(ctx context.Context, t *testing.T, req *http.Request, toke
 	req.Header.Set(infra.TokenKey.String(), token)
 }
 
-func TestController_handleAddBalance(t *testing.T) {
+func TestHandler_handleAddBalance(t *testing.T) {
 	ctx := context.Background()
 
 	type args struct {
@@ -183,7 +183,7 @@ func TestController_handleAddBalance(t *testing.T) {
 	}
 }
 
-func TestController_handleGetTransfers(t *testing.T) {
+func TestHandler_handleGetTransfers(t *testing.T) {
 	ctx := context.Background()
 
 	type args struct {

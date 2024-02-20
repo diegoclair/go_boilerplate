@@ -14,11 +14,11 @@ const (
 )
 
 type PingRouter struct {
-	ctrl      *Controller
+	ctrl      *Handler
 	routeName string
 }
 
-func NewRouter(ctrl *Controller, routeName string) *PingRouter {
+func NewRouter(ctrl *Handler, routeName string) *PingRouter {
 	return &PingRouter{
 		ctrl:      ctrl,
 		routeName: routeName,

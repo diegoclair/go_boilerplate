@@ -18,11 +18,11 @@ const (
 )
 
 type UserRouter struct {
-	ctrl      *Controller
+	ctrl      *Handler
 	routeName string
 }
 
-func NewRouter(ctrl *Controller, routeName string) *UserRouter {
+func NewRouter(ctrl *Handler, routeName string) *UserRouter {
 	return &UserRouter{
 		ctrl:      ctrl,
 		routeName: routeName,

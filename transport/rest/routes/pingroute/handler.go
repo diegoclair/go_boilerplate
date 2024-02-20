@@ -7,16 +7,16 @@ import (
 )
 
 var (
-	instance *Controller
+	instance *Handler
 	once     sync.Once
 )
 
-type Controller struct {
+type Handler struct {
 }
 
-func NewController() *Controller {
+func NewHandler() *Handler {
 	once.Do(func() {
-		instance = &Controller{}
+		instance = &Handler{}
 	})
 	return instance
 }
@@ -25,7 +25,7 @@ type pingResponse struct {
 	Message string `json:"message"`
 }
 
-func (s *Controller) handlePing(c echo.Context) error {
+func (s *Handler) handlePing(c echo.Context) error {
 	response := pingResponse{
 		Message: "pong",
 	}

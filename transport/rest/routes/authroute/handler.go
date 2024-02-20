@@ -17,20 +17,20 @@ import (
 )
 
 var (
-	instance *Controller
+	instance *Handler
 	once     sync.Once
 )
 
-type Controller struct {
+type Handler struct {
 	authService contract.AuthService
 	authToken   auth.AuthToken
 	utils       routeutils.Utils
 	validator   validator.Validator
 }
 
-func NewController(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils, validator validator.Validator) *Controller {
+func NewHandler(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils, validator validator.Validator) *Handler {
 	once.Do(func() {
-		instance = &Controller{
+		instance = &Handler{
 			authService: authService,
 			authToken:   authToken,
 			utils:       utils,
@@ -41,7 +41,7 @@ func NewController(authService contract.AuthService, authToken auth.AuthToken, u
 	return instance
 }
 
-func (s *Controller) handleLogin(c echo.Context) error {
+func (s *Handler) handleLogin(c echo.Context) error {
 
 	ctx := s.utils.Req().GetContext(c)
 
@@ -95,7 +95,7 @@ func (s *Controller) handleLogin(c echo.Context) error {
 	return s.utils.Resp().ResponseAPIOk(c, response)
 }
 
-func (s *Controller) handleRefreshToken(c echo.Context) error {
+func (s *Handler) handleRefreshToken(c echo.Context) error {
 
 	ctx := s.utils.Req().GetContext(c)
 

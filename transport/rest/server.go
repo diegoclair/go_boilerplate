@@ -53,15 +53,15 @@ func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *co
 	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	routeUtils := routeutils.New()
 
-	pingController := pingroute.NewController()
-	accountController := accountroute.NewController(services.AccountService, routeUtils, v)
-	authController := authroute.NewController(services.AuthService, authToken, routeUtils, v)
-	transferController := transferroute.NewController(services.TransferService, routeUtils, v)
+	pingHandler := pingroute.NewHandler()
+	accountHandler := accountroute.NewHandler(services.AccountService, routeUtils, v)
+	authHandler := authroute.NewHandler(services.AuthService, authToken, routeUtils, v)
+	transferHandler := transferroute.NewHandler(services.TransferService, routeUtils, v)
 
-	pingRoute := pingroute.NewRouter(pingController, pingroute.RouteName)
-	accountRoute := accountroute.NewRouter(accountController, accountroute.RouteName)
-	authRoute := authroute.NewRouter(authController, authroute.RouteName)
-	transferRoute := transferroute.NewRouter(transferController, transferroute.RouteName)
+	pingRoute := pingroute.NewRouter(pingHandler, pingroute.RouteName)
+	accountRoute := accountroute.NewRouter(accountHandler, accountroute.RouteName)
+	authRoute := authroute.NewRouter(authHandler, authroute.RouteName)
+	transferRoute := transferroute.NewRouter(transferHandler, transferroute.RouteName)
 
 	server := &Server{Router: router, cfg: cfg}
 	server.addRouters(accountRoute)

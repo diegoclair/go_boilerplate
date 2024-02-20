@@ -26,7 +26,7 @@ type mock struct {
 	accountService *mocks.MockAccountService
 }
 
-func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *gomock.Controller, accountController *Controller) {
+func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *gomock.Controller, accountHandler *Handler) {
 	ctrl = gomock.NewController(t)
 	accountMock = mock{
 		accountService: mocks.NewMockAccountService(ctrl),
@@ -35,8 +35,8 @@ func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *go
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	accountController = &Controller{accountMock.accountService, routeutils.New(), v}
-	accountRoute := NewRouter(accountController, RouteName)
+	accountHandler = &Handler{accountMock.accountService, routeutils.New(), v}
+	accountRoute := NewRouter(accountHandler, RouteName)
 
 	server = goswag.NewEcho()
 	appGroup := server.Group("/")
@@ -48,7 +48,7 @@ func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *go
 	return
 }
 
-func TestController_handleAddAccount(t *testing.T) {
+func TestHandler_handleAddAccount(t *testing.T) {
 	type args struct {
 		body any
 	}
@@ -186,7 +186,7 @@ func buildAccountsByQuantity(qtd int) (accounts []account.Account) {
 	return
 }
 
-func TestController_GetAccounts(t *testing.T) {
+func TestHandler_GetAccounts(t *testing.T) {
 	type args struct {
 		page            int
 		quantity        int
@@ -197,7 +197,7 @@ func TestController_GetAccounts(t *testing.T) {
 		name          string
 		args          args
 		buildMocks    func(ctx context.Context, mocks mock, args args)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mock, args args, s *Controller)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mock, args args, s *Handler)
 	}{
 		{
 			name: "Should complete request with no error",
@@ -208,7 +208,7 @@ func TestController_GetAccounts(t *testing.T) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args, s *Controller) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args, s *Handler) {
 				require.Equal(t, http.StatusOK, resp.Code)
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				take, skip := s.utils.Req().GetTakeSkipFromPageQuantity(int64(args.page), int64(args.quantity))
@@ -235,7 +235,7 @@ func TestController_GetAccounts(t *testing.T) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args, s *Controller) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args, s *Handler) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
 				require.Contains(t, resp.Body.String(), "some service error")
 			},
@@ -268,7 +268,7 @@ func TestController_GetAccounts(t *testing.T) {
 	}
 }
 
-func TestController_GetAccountByID(t *testing.T) {
+func TestHandler_GetAccountByID(t *testing.T) {
 	type args struct {
 		accountUUID string
 	}
@@ -350,7 +350,7 @@ func TestController_GetAccountByID(t *testing.T) {
 	}
 }
 
-func TestController_handleAddBalance(t *testing.T) {
+func TestHandler_handleAddBalance(t *testing.T) {
 	type args struct {
 		body        any
 		accountUUID string

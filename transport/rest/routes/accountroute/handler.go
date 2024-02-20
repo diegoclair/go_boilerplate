@@ -13,19 +13,19 @@ import (
 )
 
 var (
-	instance *Controller
+	instance *Handler
 	once     sync.Once
 )
 
-type Controller struct {
+type Handler struct {
 	accountService contract.AccountService
 	utils          routeutils.Utils
 	validator      validator.Validator
 }
 
-func NewController(accountService contract.AccountService, utils routeutils.Utils, validator validator.Validator) *Controller {
+func NewHandler(accountService contract.AccountService, utils routeutils.Utils, validator validator.Validator) *Handler {
 	once.Do(func() {
-		instance = &Controller{
+		instance = &Handler{
 			accountService: accountService,
 			utils:          utils,
 			validator:      validator,
@@ -35,7 +35,7 @@ func NewController(accountService contract.AccountService, utils routeutils.Util
 	return instance
 }
 
-func (s *Controller) handleAddAccount(c echo.Context) error {
+func (s *Handler) handleAddAccount(c echo.Context) error {
 	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.AddAccount{}
@@ -63,7 +63,7 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 	return s.utils.Resp().ResponseCreated(c)
 }
 
-func (s *Controller) handleAddBalance(c echo.Context) error {
+func (s *Handler) handleAddBalance(c echo.Context) error {
 	ctx := s.utils.Req().GetContext(c)
 
 	input := viewmodel.AddBalance{}
@@ -90,7 +90,7 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 	return s.utils.Resp().ResponseCreated(c)
 }
 
-func (s *Controller) handleGetAccounts(c echo.Context) error {
+func (s *Handler) handleGetAccounts(c echo.Context) error {
 	ctx := s.utils.Req().GetContext(c)
 
 	take, skip := s.utils.Req().GetPagingParams(c, "page", "quantity")
@@ -112,7 +112,7 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 	return s.utils.Resp().ResponseAPIOk(c, responsePaginated)
 }
 
-func (s *Controller) handleGetAccountByID(c echo.Context) error {
+func (s *Handler) handleGetAccountByID(c echo.Context) error {
 	ctx := s.utils.Req().GetContext(c)
 
 	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")

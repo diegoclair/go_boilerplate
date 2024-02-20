@@ -12,19 +12,19 @@ import (
 )
 
 var (
-	instance *Controller
+	instance *Handler
 	once     sync.Once
 )
 
-type Controller struct {
+type Handler struct {
 	transferService contract.TransferService
 	utils           routeutils.Utils
 	structValidator validator.Validator
 }
 
-func NewController(transferService contract.TransferService, utils routeutils.Utils, structValidator validator.Validator) *Controller {
+func NewHandler(transferService contract.TransferService, utils routeutils.Utils, structValidator validator.Validator) *Handler {
 	once.Do(func() {
-		instance = &Controller{
+		instance = &Handler{
 			transferService: transferService,
 			utils:           utils,
 			structValidator: structValidator,
@@ -34,7 +34,7 @@ func NewController(transferService contract.TransferService, utils routeutils.Ut
 	return instance
 }
 
-func (s *Controller) handleAddTransfer(c echo.Context) error {
+func (s *Handler) handleAddTransfer(c echo.Context) error {
 	input := viewmodel.TransferReq{}
 
 	err := c.Bind(&input)
@@ -57,7 +57,7 @@ func (s *Controller) handleAddTransfer(c echo.Context) error {
 	return s.utils.Resp().ResponseCreated(c)
 }
 
-func (s *Controller) handleGetTransfers(c echo.Context) error {
+func (s *Handler) handleGetTransfers(c echo.Context) error {
 	ctx := s.utils.Req().GetContext(c)
 
 	take, skip := s.utils.Req().GetPagingParams(c, "page", "quantity")

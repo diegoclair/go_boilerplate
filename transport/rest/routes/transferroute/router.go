@@ -15,11 +15,11 @@ const (
 )
 
 type TransferRouter struct {
-	ctrl      *Controller
+	ctrl      *Handler
 	routeName string
 }
 
-func NewRouter(ctrl *Controller, routeName string) *TransferRouter {
+func NewRouter(ctrl *Handler, routeName string) *TransferRouter {
 	return &TransferRouter{
 		ctrl:      ctrl,
 		routeName: routeName,
