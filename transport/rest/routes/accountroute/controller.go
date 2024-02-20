@@ -77,7 +77,7 @@ func (s *Controller) handleAddBalance(c echo.Context) error {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
-	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")
+	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_uuid", "account_uuid is required")
 	if err != nil {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}

@@ -349,3 +349,103 @@ func TestController_GetAccountByID(t *testing.T) {
 		})
 	}
 }
+
+func TestController_handleAddBalance(t *testing.T) {
+	type args struct {
+		body        any
+		accountUUID string
+	}
+
+	tests := []struct {
+		name          string
+		args          args
+		buildMocks    func(ctx context.Context, mock mock, args args)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "Should complete request with no error",
+			args: args{
+				body: viewmodel.AddBalance{
+					Amount: 100,
+				},
+				accountUUID: "random",
+			},
+			buildMocks: func(ctx context.Context, mock mock, args args) {
+				accountUUID := "random"
+				mock.accountService.EXPECT().AddBalance(ctx, accountUUID, args.body.(viewmodel.AddBalance).Amount).Times(1).Return(nil)
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusCreated, resp.Code)
+				require.Empty(t, resp.Body)
+			},
+		},
+		{
+			name: "Should validate required fields",
+			args: args{
+				body: viewmodel.AddBalance{},
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "Invalid input data")
+				require.Contains(t, resp.Body.String(), "The field 'Amount' is required")
+			},
+		},
+		{
+			name: "Should return error if we do not have an account_uuid in the url",
+			args: args{
+				body: viewmodel.AddBalance{
+					Amount: 100,
+				},
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "account_uuid is required")
+			},
+		},
+		{
+			name: "Should return error if we have any error with service",
+			args: args{
+				body: viewmodel.AddBalance{
+					Amount: 100,
+				},
+				accountUUID: "random",
+			},
+			buildMocks: func(ctx context.Context, mock mock, args args) {
+				mock.accountService.EXPECT().AddBalance(ctx, "random", args.body.(viewmodel.AddBalance).Amount).Times(1).Return(errors.New("some error"))
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
+				require.Contains(t, resp.Body.String(), "Service temporarily unavailable")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			accountMock, server, ctrl, s := getServerTest(t)
+			defer ctrl.Finish()
+
+			recorder := httptest.NewRecorder()
+			url := fmt.Sprintf("/%s/%s/balance", RouteName, tt.args.accountUUID)
+
+			body, err := json.Marshal(tt.args.body)
+			require.NoError(t, err)
+
+			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
+			require.NoError(t, err)
+
+			if tt.buildMocks != nil {
+				e := echo.New()
+				ctx := s.utils.Req().GetContext(e.NewContext(req, recorder))
+				tt.buildMocks(ctx, accountMock, tt.args)
+			}
+
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			server.Echo().ServeHTTP(recorder, req)
+			if tt.checkResponse != nil {
+				tt.checkResponse(t, recorder)
+			}
+		})
+	}
+}
