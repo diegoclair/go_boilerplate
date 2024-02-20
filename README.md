@@ -7,10 +7,18 @@
     </em>
 </p>
 <p align="center">
-	<img src="https://img.shields.io/github/license/diegoclair/go_boilerplate?style=flat&color=0080ff" alt="license">
-	<img src="https://img.shields.io/github/last-commit/diegoclair/go_boilerplate?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
-	<img src="https://img.shields.io/github/languages/top/diegoclair/go_boilerplate?style=flat&color=0080ff" alt="repo-top-language">
-	<img src="https://img.shields.io/github/languages/count/diegoclair/go_boilerplate?style=flat&color=0080ff" alt="repo-language-count">
+	<a href="https://opensource.org/licenses/MIT">
+     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+    </a>
+    <a>
+	 <img src="https://img.shields.io/github/last-commit/diegoclair/go_boilerplate?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
+    </a>
+	<a href="https://github.com/diegoclair/go_boilerplate/actions">
+     <img src="https://github.com/diegoclair/go_boilerplate/actions/workflows/ci.yaml/badge.svg" alt="build status">
+    </a>
+	<a href='https://goreportcard.com/badge/github.com/diegoclair/go_boilerplate'>
+     <img src='https://goreportcard.com/badge/github.com/diegoclair/go_boilerplate' alt='Go Report'/>
+    </a>
 <p>
 <p align="center">
 		<em>Developed with the software and tools below.</em>
@@ -18,19 +26,20 @@
 <p align="center">
     <img src="https://skillicons.dev/icons?i=githubactions,mysql,go,docker" >
 </p>
-
-## 📝 Project
-Go Boilerplate/Template for API projects
   
 ## Description ✈️
-I tried to create a golang boilerplate with experiences that I got doing some projects using Go.
-I used concepts from DDD, Clean Arch and some design patterns. 
+This project is a boilerplate for creating API projects in Go, incorporating key principles of Domain-Driven Design and Clean Architecture. It reflects my expertise in Golang, drawn from previous projects, and is structured to facilitate maintainability and scalability.
+
+All layers of the codebase are tested to ensure reliability and robustness. The project is open to contributions and improvements. Feel free to fork the repository, submit pull requests, or open issues to discuss enhancements or report bugs.
   
-The code are with all layers tested.  
-Feel free to help me improve the project/structure. 
-![project architecture](/.github/assets/architecture.png)
-  
-## ▶️ Start application 💻 
+### Project architecture:
+<div align="center">
+    <img src='./.github/assets/architecture.png' />
+</div>
+
+For the presentation layer, which I refer to as the transport layer, its purpose is to handle data transportation. It is responsible for receiving and responding to various types of requests, including API calls, gRPC, and messaging via RMQ, among others.
+
+## ▶️ Getting Started 💻 
 
 ### ❗ First of all:
 * You need to have docker installed in your computer.
@@ -56,7 +65,7 @@ Contributions are welcome! Here are several ways you can contribute:
 1. **Fork the Repository**: Start by forking the project repository to your GitHub account.
 2. **Clone Locally**: Clone the forked repository to your local machine using a Git client.
    ```sh
-   git clone https://github.com/diegoclair/go_boilerplate
+   git clone https://github.com/<your_username>/go_boilerplate
    ```
 3. **Create a New Branch**: Always work on a new branch, giving it a descriptive name.
    ```sh
