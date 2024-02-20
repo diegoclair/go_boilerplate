@@ -78,6 +78,16 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 		},
 		{
+			name: "Should return error when body is invalid",
+			args: args{
+				body: "invalid body",
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, resp.Code)
+				require.Contains(t, resp.Body.String(), "Unmarshal type error")
+			},
+		},
+		{
 			name: "Should validate Login required fields",
 			args: args{
 				body: viewmodel.AddAccount{},
@@ -376,6 +386,16 @@ func TestHandler_handleAddBalance(t *testing.T) {
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
 				require.Empty(t, resp.Body)
+			},
+		},
+		{
+			name: "Should return error when body is invalid",
+			args: args{
+				body: "invalid body",
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, resp.Code)
+				require.Contains(t, resp.Body.String(), "Unmarshal type error")
 			},
 		},
 		{
