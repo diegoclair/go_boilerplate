@@ -16,6 +16,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/goswag"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -25,7 +26,7 @@ type mock struct {
 	accountService *mocks.MockAccountService
 }
 
-func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gomock.Controller, accountController *Controller) {
+func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *gomock.Controller, accountController *Controller) {
 	ctrl = gomock.NewController(t)
 	accountMock = mock{
 		accountService: mocks.NewMockAccountService(ctrl),
@@ -37,7 +38,7 @@ func getServerTest(t *testing.T) (accountMock mock, server *echo.Echo, ctrl *gom
 	accountController = &Controller{accountMock.accountService, routeutils.New(), v}
 	accountRoute := NewRouter(accountController, RouteName)
 
-	server = echo.New()
+	server = goswag.NewEcho()
 	appGroup := server.Group("/")
 	g := &routeutils.EchoGroups{
 		AppGroup: appGroup,
@@ -165,7 +166,7 @@ func TestController_handleAddAccount(t *testing.T) {
 			}
 
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-			server.ServeHTTP(recorder, req)
+			server.Echo().ServeHTTP(recorder, req)
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, recorder)
 			}
@@ -212,9 +213,9 @@ func TestController_GetAccounts(t *testing.T) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				take, skip := s.utils.Req().GetTakeSkipFromPageQuantity(int64(args.page), int64(args.quantity))
 
-				response := []viewmodel.Account{}
+				response := []viewmodel.AccountResponse{}
 				for _, account := range accounts {
-					item := viewmodel.Account{}
+					item := viewmodel.AccountResponse{}
 					item.FillFromEntity(account)
 					response = append(response, item)
 				}
@@ -259,7 +260,7 @@ func TestController_GetAccounts(t *testing.T) {
 			}
 
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-			server.ServeHTTP(recorder, req)
+			server.Echo().ServeHTTP(recorder, req)
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, recorder, accountMock, tt.args, s)
 			}
@@ -291,7 +292,7 @@ func TestController_GetAccountByID(t *testing.T) {
 				require.Equal(t, http.StatusOK, resp.Code)
 				account := buildAccountByID(1)
 
-				response := viewmodel.Account{}
+				response := viewmodel.AccountResponse{}
 				response.FillFromEntity(account)
 
 				expectedResp, err := json.Marshal(response)
@@ -341,7 +342,7 @@ func TestController_GetAccountByID(t *testing.T) {
 			}
 
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-			server.ServeHTTP(recorder, req)
+			server.Echo().ServeHTTP(recorder, req)
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, recorder, accountMock, tt.args)
 			}

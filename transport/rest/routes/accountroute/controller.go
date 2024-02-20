@@ -100,9 +100,9 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
-	response := []viewmodel.Account{}
+	response := []viewmodel.AccountResponse{}
 	for _, account := range accounts {
-		item := viewmodel.Account{}
+		item := viewmodel.AccountResponse{}
 		item.FillFromEntity(account)
 		response = append(response, item)
 	}
@@ -125,28 +125,8 @@ func (s *Controller) handleGetAccountByID(c echo.Context) error {
 		return s.utils.Resp().HandleAPIError(c, err)
 	}
 
-	response := viewmodel.Account{}
+	response := viewmodel.AccountResponse{}
 	response.FillFromEntity(account)
-
-	return s.utils.Resp().ResponseAPIOk(c, response)
-}
-
-func (s *Controller) handleGetAccountBalanceByID(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
-
-	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_id", "Invalid account_id")
-	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
-	}
-
-	account, err := s.accountService.GetAccountByUUID(ctx, accountUUID)
-	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
-	}
-
-	response := viewmodel.Account{
-		Balance: account.Balance,
-	}
 
 	return s.utils.Resp().ResponseAPIOk(c, response)
 }

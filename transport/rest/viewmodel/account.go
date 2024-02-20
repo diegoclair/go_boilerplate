@@ -25,7 +25,7 @@ func (a *AddAccount) Validate(validator validator.Validator) error {
 	return nil
 }
 
-type Account struct {
+type AccountResponse struct {
 	UUID      string    `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
 	CPF       string    `json:"cpf,omitempty"`
@@ -33,7 +33,7 @@ type Account struct {
 	CreatedAT time.Time `json:"create_at,omitempty"`
 }
 
-func (a *Account) FillFromEntity(account account.Account) {
+func (a *AccountResponse) FillFromEntity(account account.Account) {
 	a.UUID = account.UUID
 	a.Name = account.Name
 	a.CPF = account.CPF

@@ -21,11 +21,14 @@ func NewController() *Controller {
 	return instance
 }
 
+type pingResponse struct {
+	Message string `json:"message"`
+}
+
 func (s *Controller) handlePing(c echo.Context) error {
-	response := struct {
-		Message string `json:"message"`
-	}{
+	response := pingResponse{
 		Message: "pong",
 	}
+
 	return c.JSON(200, response)
 }

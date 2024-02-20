@@ -13,3 +13,13 @@ mock:
 		filename=$$(basename $$file); \
 		mockgen -package mocks -source=$$file -destination=mocks/$$filename; \
 	done
+
+# @ to avoid echoing the command
+.PHONY: docs
+docs:
+	@cd goswag && \
+	go run main.go && \
+	cd .. && \
+	swag init -g ./goswag/main.go && \
+	swag fmt -d ./goswag/
+

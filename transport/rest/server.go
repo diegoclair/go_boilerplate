@@ -15,19 +15,19 @@ import (
 	servermiddleware "github.com/diegoclair/go_boilerplate/transport/rest/serverMiddleware"
 	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/goswag"
 	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 type Server struct {
-	routers []routeutils.IRouter
-	Srv     *echo.Echo
-	cfg     *config.Config
+	routes []routeutils.IRoute
+	Router goswag.Echo
+	cfg    *config.Config
 }
 
 func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, v validator.Validator) *Server {
-	server := newRestServer(services, authToken, cfg, v)
+	server := NewRestServer(services, authToken, cfg, v)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -48,10 +48,9 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 	return server
 }
 
-func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, v validator.Validator) *Server {
-
-	srv := echo.New()
-	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, v validator.Validator) *Server {
+	router := goswag.NewEcho()
+	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	routeUtils := routeutils.New()
 
 	pingController := pingroute.NewController()
@@ -64,7 +63,7 @@ func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *co
 	authRoute := authroute.NewRouter(authController, authroute.RouteName)
 	transferRoute := transferroute.NewRouter(transferController, transferroute.RouteName)
 
-	server := &Server{Srv: srv, cfg: cfg}
+	server := &Server{Router: router, cfg: cfg}
 	server.addRouters(accountRoute)
 	server.addRouters(authRoute)
 	server.addRouters(pingRoute)
@@ -76,30 +75,27 @@ func newRestServer(services *service.Services, authToken auth.AuthToken, cfg *co
 	return server
 }
 
-func (r *Server) addRouters(router routeutils.IRouter) {
-	r.routers = append(r.routers, router)
+func (r *Server) addRouters(router routeutils.IRoute) {
+	r.routes = append(r.routes, router)
 }
 
 func (r *Server) registerAppRouters(authToken auth.AuthToken) {
-
 	g := &routeutils.EchoGroups{}
-	g.AppGroup = r.Srv.Group("/")
+	g.AppGroup = r.Router.Group("/")
 	g.PrivateGroup = g.AppGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(authToken),
 	)
 
-	for _, appRouter := range r.routers {
+	for _, appRouter := range r.routes {
 		appRouter.RegisterRoutes(g)
 	}
-
 }
 
 func (r *Server) setupPrometheus() {
-
 	p := prometheus.NewPrometheus(r.cfg.App.Name, nil)
-	p.Use(r.Srv)
+	p.Use(r.Router.Echo())
 }
 
 func (r *Server) Start(port string) error {
-	return r.Srv.Start(fmt.Sprintf(":%s", port))
+	return r.Router.Echo().Start(fmt.Sprintf(":%s", port))
 }

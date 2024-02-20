@@ -79,7 +79,7 @@ func gracefulShutdown(server *rest.Server, log logger.Logger) {
 
 	log.Info(ctx, "Shutting down...")
 
-	if err := server.Srv.Shutdown(ctx); err != nil {
+	if err := server.Router.Echo().Shutdown(ctx); err != nil {
 		log.Errorf(ctx, "Error to shutdown rest server: %v", err)
 	}
 }

@@ -21,6 +21,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/diegoclair/go_utils-lib/v2/validator"
+	"github.com/diegoclair/goswag"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -46,7 +47,7 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 	return tokenMaker
 }
 
-func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server *echo.Echo, ctrl *gomock.Controller, transferController *Controller) {
+func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server goswag.Echo, ctrl *gomock.Controller, transferController *Controller) {
 	ctrl = gomock.NewController(t)
 
 	transferMock = mocks.NewMockTransferService(ctrl)
@@ -58,7 +59,7 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	transferController = &Controller{transferMock, routeutils.New(), v}
 	transferRoute := NewRouter(transferController, "transfers")
 
-	server = echo.New()
+	server = goswag.NewEcho()
 	appGroup := server.Group("/")
 	privateGroup := appGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(tokenMaker),
@@ -174,7 +175,7 @@ func TestController_handleAddBalance(t *testing.T) {
 				tt.buildMocks(ctx, transferMock, tt.args)
 			}
 
-			server.ServeHTTP(recorder, req)
+			server.Echo().ServeHTTP(recorder, req)
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, recorder)
 			}
@@ -256,7 +257,7 @@ func TestController_handleGetTransfers(t *testing.T) {
 			if tt.sleep {
 				time.Sleep(2 * time.Second)
 			}
-			server.ServeHTTP(recorder, req)
+			server.Echo().ServeHTTP(recorder, req)
 
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, recorder)

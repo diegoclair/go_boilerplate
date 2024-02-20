@@ -1,357 +1,315 @@
-openapi: 3.0.0
+definitions:
+  pingroute.pingResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  viewmodel.AccountResponse:
+    properties:
+      balance:
+        type: number
+      cpf:
+        type: string
+      create_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  viewmodel.AddAccount:
+    properties:
+      cpf:
+        type: string
+      name:
+        minLength: 3
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - cpf
+    - name
+    - password
+    type: object
+  viewmodel.AddBalance:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
+    type: object
+  viewmodel.Login:
+    properties:
+      cpf:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - cpf
+    - password
+    type: object
+  viewmodel.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      access_token_expires_at:
+        type: string
+      refresh_token:
+        type: string
+      refresh_token_expires_at:
+        type: string
+    type: object
+  viewmodel.PaginatedResult-array_viewmodel_AccountResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/viewmodel.AccountResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/viewmodel.ReturnPagination'
+    type: object
+  viewmodel.PaginatedResult-array_viewmodel_TransferResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/viewmodel.TransferResp'
+        type: array
+      pagination:
+        $ref: '#/definitions/viewmodel.ReturnPagination'
+    type: object
+  viewmodel.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  viewmodel.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      access_token_expires_at:
+        type: string
+    type: object
+  viewmodel.ReturnPagination:
+    properties:
+      current_page:
+        type: integer
+      records_per_page:
+        type: integer
+      total_pages:
+        type: integer
+      total_records:
+        type: integer
+    type: object
+  viewmodel.TransferReq:
+    properties:
+      account_destination_id:
+        type: string
+      amount:
+        type: number
+    required:
+    - account_destination_id
+    - amount
+    type: object
+  viewmodel.TransferResp:
+    properties:
+      account_destination_id:
+        type: string
+      account_origin_id:
+        type: string
+      amount:
+        type: number
+      create_at:
+        type: string
+      id:
+        type: string
+    type: object
+host: localhost:5000
 info:
+  contact:
+    email: diego93rodrigues@gmail.com
+    name: Email
+  description: This is an API documentation for go boilerplate
   title: Go Boilerplate API
-  contact: {}
-  version: '1.0'
-servers:
-- url: http://localhost:5000
-
-tags:
-- name: Auth
-  description: 'Auth related resources'
-- name: Account
-  description: 'Account related resources'
-- name: Transfer
-  description: 'Transfer related resources'
-- name: Ping
-  description: 'Tests if the api is running'
-
-
+  version: "1.0"
 paths:
-  /ping:
+  /accounts:
     get:
-      tags:
-      - Ping
-      summary: /ping/
-      operationId: /ping/
-      parameters: []
+      description: Get all accounts with paginated response
+      parameters:
+      - description: number of page you want
+        in: query
+        name: page
+        type: string
+      - description: quantity of items per page
+        in: query
+        name: quantity
+        type: string
+      produces:
+      - application/json
       responses:
-        '200':
-          description: ''
-          headers: {}
-      deprecated: false
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/viewmodel.PaginatedResult-array_viewmodel_AccountResponse'
+      summary: Get all accounts
+      tags:
+      - accounts
+    post:
+      consumes:
+      - application/json
+      description: Add a new account
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/viewmodel.AddAccount'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Add a new account
+      tags:
+      - accounts
+  /accounts/:account_uuid/:
+    get:
+      description: Get account by it UUID value
+      parameters:
+      - description: accountUuid
+        in: path
+        name: account_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/viewmodel.AccountResponse'
+      summary: Get account by ID
+      tags:
+      - accounts
+  /accounts/:account_uuid/balance:
+    post:
+      consumes:
+      - application/json
+      description: Add balance to an account by account_uuid
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/viewmodel.AddBalance'
+      - description: accountUuid
+        in: path
+        name: account_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Add balance to an account
+      tags:
+      - accounts
   /auth/login:
     post:
-      tags:
-      - Auth
-      summary: /auth/login
-      operationId: /auth/login
-      parameters: []
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthLoginRequest'
-            example:
-              cpf: 01234567890
-              secret: '15412345'
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: Request
+        in: body
+        name: request
         required: true
-        
+        schema:
+          $ref: '#/definitions/viewmodel.Login'
+      produces:
+      - application/json
       responses:
-        200:
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthResponse'
-        422:
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-  /accounts:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/viewmodel.LoginResponse'
+      summary: Login
+      tags:
+      - auth
+  /auth/refresh-token:
     post:
-      tags:
-      - Account
-      summary: /accounts
-      operationId: /accounts
-      parameters: []
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateAccountsRequest'
-            example:
-              name: Diego Clair
-              cpf: 01234567890
-              secret: '15412345'
-        required: true
-      responses:
-        201:
-          description: 'Account successfully created'
-          headers: {}
-        422:
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-    get:
-      tags:
-      - Account
-      summary: /accounts
-      operationId: Get/accounts
-      parameters: []
-      responses:
-        200:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  allOf: 
-                  - $ref: '#/components/schemas/GetAccountsResponse'
-        422:
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-  /accounts/{account_id}:
-    get:
-      tags:
-      - Account
-      summary: /accounts/:account_id
-      operationId: /accounts/:account_id
+      consumes:
+      - application/json
+      description: Generate a new token using the refresh token
       parameters:
-      - name: account_id
-        in: path
-        description: ''
+      - description: Request
+        in: body
+        name: request
         required: true
-        style: simple
         schema:
-          type: string
-          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
+          $ref: '#/definitions/viewmodel.RefreshTokenRequest'
+      produces:
+      - application/json
       responses:
-        200:
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetAccountsResponse'
-        422:
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-     
-  /accounts/{account_id}/balance:
-    get:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/viewmodel.RefreshTokenResponse'
+      summary: Refresh Token
       tags:
-      - Account
-      summary: /accounts/:account_id/balance
-      operationId: /accounts/:account_id/balance
-      parameters:
-      - name: account_id
-        in: path
-        description: ''
-        required: true
-        style: simple
-        schema:
-          type: string
-          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
+      - auth
+  /ping/:
+    get:
+      description: Ping the server to check if it is alive
+      produces:
+      - application/json
       responses:
-        200:
-          description: ''
-          content:
-            application/json:
-              schema:
-                properties:
-                  balance:
-                    type: integer
-                    example: 27.35
-        422:
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pingroute.pingResponse'
+      summary: Ping the server
+      tags:
+      - ping
   /transfers:
     get:
-      tags:
-      - Transfer
-      summary: get all transfers (reiceved and sent) from an user
-      operationId: /transfers
-      parameters:
-      - name: Token
-        in: header
-        description: 'Token got after login'
-        required: true
-        style: simple
-        schema:
-          type: string
-          example: Bearer {{token}}
-
+      description: Get all transfers with paginated response
+      produces:
+      - application/json
       responses:
-        200:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  allOf: 
-                  - $ref: '#/components/schemas/GetTransfersResponse'
-        422:
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-      
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/viewmodel.PaginatedResult-array_viewmodel_TransferResp'
+      summary: Get all transfers
+      tags:
+      - transfers
     post:
-      tags:
-      - Transfer
-      summary: /transfers
-      operationId: Post/transfers
+      consumes:
+      - application/json
+      description: Add a new transfer
       parameters:
-      - name: Token
-        in: header
-        description: 'Token got after login'
+      - description: Request
+        in: body
+        name: request
         required: true
-        style: simple
         schema:
-          type: string
-          example: Bearer {{token}}
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TransfersRequest'
-            example:
-              account_destination_id: cf23a0bb-56e8-4d31-8b40-516724d85a3c
-              amount: 0.1
-        required: true
+          $ref: '#/definitions/viewmodel.TransferReq'
+      produces:
+      - application/json
       responses:
-        201:
-          description: 'Transfer executed with success'
-        422:
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-
-components:
-  schemas:
-    AuthLoginRequest:
-      title: /auth/loginrequest
-      required:
-      - cpf
-      - secret
-      type: object
-      properties:
-        cpf:
-          type: string
-        secret:
-          type: string
-      example:
-        cpf: 01234567890
-        secret: '15412345'
-    
-    AuthResponse:
-      description: Response from application authrization
-      type: object
-      properties:
-        token:
-          type: string
-          description: The token string for app authorization
-        valid_time:
-          type: integer
-          description: Token expiration time in Unix time format
-          format: int64
-        server_time:
-          type: integer
-          description: Server time in Unix time format
-          format: int64
-
-    
-    CreateAccountsRequest:
-      title: /accountsrequest
-      required:
-      - name
-      - cpf
-      - secret
-      type: object
-      properties:
-        name:
-          type: string
-        cpf:
-          type: string
-        secret:
-          type: string
-      example:
-        name: Diego Clair
-        cpf: 01234567890
-        secret: '15412345'
-    
-    GetAccountsResponse:
-      properties:
-        transfer_id:
-          type: string
-          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
-        name:
-          type: string
-          example: Diego Clair
-        cpf:
-          type: string
-          example: 01234567890
-        balance:
-          type: string
-          example: 399.59
-        create_at:
-          type: string
-          example: "2021-08-23T03:19:38Z"
-
-    GetTransfersResponse:
-      properties:
-        id:
-          type: string
-          example: 553b806a-04b8-4fa9-bff8-ffa6fe445ef2
-        account_origin_id:
-          type: string
-          example: 663b806a-04b8-4fa9-bff8-ffa6fe445ef3
-        account_destination_id:
-          type: string
-          example: 774b806a-04b8-4fa9-bff8-gga6fe445ef5
-        amount:
-          type: string
-          example: 399.59
-        create_at:
-          type: string
-          example: "2021-08-23T03:19:38Z"
-
-    TransfersRequest:
-      title: /transfersrequest
-      required:
-      - account_destination_id
-      - amount
-      type: object
-      properties:
-        account_destination_id:
-          type: string
-        amount:
-          type: number
-      example:
-        account_destination_id: cf23a0bb-56e8-4d31-8b40-516724d85a3c
-        amount: 0.1
-
-    DefaultErrorResponse:
-      title: Default error response
-      type: object
-      properties:
-        message:
-          type: string
-          example: Invalid request
-        status_code:
-          type: number
-          example: 422
-        error:
-          type: string
-          example: unprocessable_entity
+        "201":
+          description: Created
+      summary: Add a new transfer
+      tags:
+      - transfers
+schemes:
+- http
+swagger: "2.0"

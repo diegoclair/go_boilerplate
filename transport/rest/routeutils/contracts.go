@@ -6,8 +6,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// IRouter interface for routers
-type IRouter interface {
+// IRoute interface for register routes
+type IRoute interface {
 	RegisterRoutes(groups *EchoGroups)
 }
 
