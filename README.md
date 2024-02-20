@@ -46,11 +46,18 @@ For the presentation layer, which I refer to as the transport layer, its purpose
 
 ### Prerequisites ❗
 * Ensure Docker is installed on your machine.
-* Modify the entrypoint file permissions with the command `chmod +x .docker/entrypoint.sh`.
+* Modify the entrypoint file permissions with the command: 
+```bash
+chmod +x .docker/entrypoint.sh
+```
 * An installation of Go 1.18 or later. For installation instructions, see [Installing Go](https://go.dev/doc/install).
 
 ### Launching the Application  ▶️
-To start the application, execute the command `docker-compose up`. Once you see the message `your server started on [::]:5000`, the application is up and running!
+To start the application, execute the command: 
+```bash
+docker-compose up
+```
+Once you see the message `your server started on [::]:5000`, the application is up and running!
 
 ## 📝 API Documentation:
 For detailed API endpoint documentation, navigate to the `/docs` directory where you will find the Swagger documentation.  
