@@ -143,11 +143,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 
 	query := querySelectBase
 
-	var queryCount = `
-		SELECT COUNT(*) FROM (
-	` + query + `) as count`
-
-	totalRecords, err = getTotalRecords(ctx, r.db, queryCount, params...)
+	totalRecords, err = getTotalRecordsFromQuery(ctx, r.db, query, params...)
 	if err != nil {
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
@@ -249,11 +245,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 
 	params = append(params, accountID)
 
-	var queryCount = `
-		SELECT COUNT(*) FROM (
-	` + query + `) as count`
-
-	totalRecords, err = getTotalRecords(ctx, r.db, queryCount, params...)
+	totalRecords, err = getTotalRecordsFromQuery(ctx, r.db, query, params...)
 	if err != nil {
 		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
