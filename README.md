@@ -8,7 +8,7 @@
 </p>
 <p align="center">
    <a href='https://coveralls.io/github/diegoclair/go_boilerplate?branch=main'>
-	<img src='https://coveralls.io/repos/github/diegoclair/go_boilerplate/badge.png?branch=main' alt='Coverage Status' />
+	<img src='https://coveralls.io/repos/github/diegoclair/go_boilerplate/badge.svg?branch=main' alt='Coverage Status' />
    </a>
    <a href='https://github.com/diegoclair/go_boilerplate/commits/main'>
 	<img src="https://img.shields.io/github/last-commit/diegoclair/go_boilerplate?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
