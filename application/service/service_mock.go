@@ -27,11 +27,17 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 
 	ctrl = gomock.NewController(t)
 	log := logger.NewNoop()
+
 	dm := mocks.NewMockDataManager(ctrl)
+
 	accountRepo := mocks.NewMockAccountRepo(ctrl)
+	dm.EXPECT().Account().Return(accountRepo).AnyTimes()
+
+	authRepo := mocks.NewMockAuthRepo(ctrl)
+	dm.EXPECT().Auth().Return(authRepo).AnyTimes()
+
 	cm := mocks.NewMockCacheManager(ctrl)
 	crypto := mocks.NewMockCrypto(ctrl)
-	authRepo := mocks.NewMockAuthRepo(ctrl)
 
 	m = allMocks{
 		mockDataManager:  dm,
@@ -41,10 +47,12 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 		mockCrypto:       crypto,
 	}
 
-	dm.EXPECT().Account().Return(accountRepo).AnyTimes()
-	dm.EXPECT().Auth().Return(authRepo).AnyTimes()
-
 	svc = newService(dm, cfg, cm, crypto, log)
+
+	// validate func New
+	s, err := New(dm, cfg, cm, crypto, log)
+	require.NoError(t, err)
+	require.NotNil(t, s)
 
 	return
 }

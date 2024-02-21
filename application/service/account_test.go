@@ -127,69 +127,6 @@ func Test_accountService_CreateAccount(t *testing.T) {
 	}
 }
 
-func Test_accountService_GetAccountByUUID(t *testing.T) {
-
-	type args struct {
-		accountUUID string
-	}
-	tests := []struct {
-		name        string
-		buildMock   func(ctx context.Context, mocks allMocks, args args)
-		args        args
-		wantAccount account.Account
-		wantErr     bool
-	}{
-		{
-			name: "Should return an account without error",
-			args: args{
-				accountUUID: "123",
-			},
-			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				result := account.Account{ID: 1, UUID: "123", Name: "name"}
-				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1)
-			},
-			wantAccount: account.Account{ID: 1, UUID: "123", Name: "name"},
-			wantErr:     false,
-		},
-		{
-			name: "Should error if database return some error",
-			args: args{
-				accountUUID: "123",
-			},
-			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(account.Account{}, errors.New("some error")).Times(1)
-			},
-			wantAccount: account.Account{},
-			wantErr:     true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			ctx := context.Background()
-			allMocks, svc, ctrl := newServiceTestMock(t)
-			defer ctrl.Finish()
-
-			s := &accountService{
-				svc: svc,
-			}
-
-			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMocks, tt.args)
-			}
-
-			gotAccount, err := s.GetAccountByUUID(ctx, tt.args.accountUUID)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("accountService.GetAccountByUUID() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(gotAccount, tt.wantAccount) {
-				t.Errorf("accountService.GetAccountByUUID() = %v, want %v", gotAccount, tt.wantAccount)
-			}
-		})
-	}
-}
-
 func Test_accountService_AddBalance(t *testing.T) {
 
 	type args struct {
@@ -262,6 +199,134 @@ func Test_accountService_AddBalance(t *testing.T) {
 			}
 			if err := s.AddBalance(ctx, tt.args.accountUUID, tt.args.amount); (err != nil) != tt.wantErr {
 				t.Errorf("AddBalance() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_accountService_GetAccounts(t *testing.T) {
+	type args struct {
+		take int64
+		skip int64
+	}
+	tests := []struct {
+		name      string
+		buildMock func(ctx context.Context, mocks allMocks, args args)
+		args      args
+		want      []account.Account
+		want1     int64
+		wantErr   bool
+	}{
+		{
+			name: "Should return accounts without any errors",
+			args: args{take: 10, skip: 0},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				result := []account.Account{{ID: 1, UUID: "123", Name: "name"}}
+				mocks.mockAccountRepo.EXPECT().GetAccounts(ctx, args.take, args.skip).Return(result, int64(1), nil).Times(1)
+			},
+			want:    []account.Account{{ID: 1, UUID: "123", Name: "name"}},
+			want1:   1,
+			wantErr: false,
+		},
+		{
+			name: "Should return error with there is some error to get accounts",
+			args: args{take: 10, skip: 0},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAccountRepo.EXPECT().GetAccounts(ctx, args.take, args.skip).Return([]account.Account{}, int64(0), errors.New("some error")).Times(1)
+			},
+			want:    []account.Account{},
+			want1:   0,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			ctx := context.Background()
+			allMocks, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
+			s := &accountService{
+				svc: svc,
+			}
+
+			if tt.buildMock != nil {
+				tt.buildMock(ctx, allMocks, tt.args)
+			}
+
+			got, got1, err := s.GetAccounts(ctx, tt.args.take, tt.args.skip)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("accountService.GetAccounts() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("accountService.GetAccounts() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("accountService.GetAccounts() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func Test_accountService_GetAccountByUUID(t *testing.T) {
+
+	type args struct {
+		accountUUID string
+	}
+	tests := []struct {
+		name        string
+		buildMock   func(ctx context.Context, mocks allMocks, args args)
+		args        args
+		wantAccount account.Account
+		wantErr     bool
+	}{
+		{
+			name: "Should return an account without error",
+			args: args{
+				accountUUID: "123",
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				result := account.Account{ID: 1, UUID: "123", Name: "name"}
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1)
+			},
+			wantAccount: account.Account{ID: 1, UUID: "123", Name: "name"},
+			wantErr:     false,
+		},
+		{
+			name: "Should error if database return some error",
+			args: args{
+				accountUUID: "123",
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(account.Account{}, errors.New("some error")).Times(1)
+			},
+			wantAccount: account.Account{},
+			wantErr:     true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			ctx := context.Background()
+			allMocks, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
+			s := &accountService{
+				svc: svc,
+			}
+
+			if tt.buildMock != nil {
+				tt.buildMock(ctx, allMocks, tt.args)
+			}
+
+			gotAccount, err := s.GetAccountByUUID(ctx, tt.args.accountUUID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("accountService.GetAccountByUUID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotAccount, tt.wantAccount) {
+				t.Errorf("accountService.GetAccountByUUID() = %v, want %v", gotAccount, tt.wantAccount)
 			}
 		})
 	}
