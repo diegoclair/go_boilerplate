@@ -7,7 +7,7 @@
     </em>
 </p>
 <p align="center">
-   <a href='https://coveralls.io/github/diegoclair/go_boilerplate?branch=main&kill_cache=1'>
+   <a href='https://coveralls.io/github/diegoclair/go_boilerplate?branch=main&service=github'>
 	<img src='https://coveralls.io/repos/github/diegoclair/go_boilerplate/badge.svg?branch=main' alt='Coverage Status' />
    </a>
    <a href='https://github.com/diegoclair/go_boilerplate/commits/main'>
