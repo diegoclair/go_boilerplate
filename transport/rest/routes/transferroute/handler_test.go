@@ -81,7 +81,7 @@ func addAuthorization(ctx context.Context, t *testing.T, req *http.Request, toke
 	req.Header.Set(infra.TokenKey.String(), token)
 }
 
-func TestHandler_handleAddBalance(t *testing.T) {
+func TestHandler_handleAddTransfer(t *testing.T) {
 	ctx := context.Background()
 
 	type args struct {
@@ -119,6 +119,55 @@ func TestHandler_handleAddBalance(t *testing.T) {
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
 				require.Empty(t, resp.Body)
+			},
+		},
+		{
+			name: "Should return error if body is invalid",
+			args: args{
+				body:        "invalid body",
+				accountUUID: uuid.NewV4().String(),
+				sessionUUID: uuid.NewV4().String(),
+			},
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, resp.Code)
+				require.Contains(t, resp.Body.String(), "Unmarshal type error")
+			},
+		},
+		{
+			name: "Should return error when missing account destination uuid",
+			args: args{
+				body: viewmodel.TransferReq{
+					Amount: 5.55,
+				},
+				accountUUID: uuid.NewV4().String(),
+				sessionUUID: uuid.NewV4().String(),
+			},
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "The field 'AccountDestinationUUID' is required")
+			},
+		},
+		{
+			name: "Should return error when missing amount",
+			args: args{
+				body: viewmodel.TransferReq{
+					AccountDestinationUUID: "random",
+				},
+				accountUUID: uuid.NewV4().String(),
+				sessionUUID: uuid.NewV4().String(),
+			},
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Contains(t, resp.Body.String(), "The field 'Amount' is required")
 			},
 		},
 		{
@@ -205,7 +254,10 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 				sessionUUID: uuid.NewV4().String(),
 			},
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
-				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]transfer.Transfer{}, int64(0), nil).Times(1)
+				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]transfer.Transfer{
+					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 5.55, CreatedAt: time.Now()},
+					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 7.77, CreatedAt: time.Now()},
+				}, int64(0), nil).Times(1)
 			},
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
 				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
@@ -213,10 +265,12 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, resp.Code)
 				require.NotEmpty(t, resp.Body)
+				require.Contains(t, resp.Body.String(), "5.55")
+				require.Contains(t, resp.Body.String(), "7.77")
 			},
 		},
 		{
-			name: "Should return expired token",
+			name: "Should return expired token error",
 			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
 				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
 			},
@@ -225,6 +279,24 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 				require.Contains(t, resp.Body.String(), "token has expired")
 			},
 			sleep: true,
+		},
+		{
+			name: "Should return error if service get transfer returns error",
+			args: args{
+				accountUUID: uuid.NewV4().String(),
+				sessionUUID: uuid.NewV4().String(),
+			},
+			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
+				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return(nil, int64(0), fmt.Errorf("error to get transfers")).Times(1)
+			},
+			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
+				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
+			},
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
+				require.Contains(t, resp.Body.String(), "Service temporarily unavailable")
+				require.Contains(t, resp.Body.String(), "error to get transfers")
+			},
 		},
 	}
 	for _, tt := range tests {
