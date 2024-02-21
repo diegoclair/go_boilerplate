@@ -19,15 +19,13 @@ var (
 
 type Handler struct {
 	accountService contract.AccountService
-	utils          routeutils.Utils
 	validator      validator.Validator
 }
 
-func NewHandler(accountService contract.AccountService, utils routeutils.Utils, validator validator.Validator) *Handler {
+func NewHandler(accountService contract.AccountService, validator validator.Validator) *Handler {
 	once.Do(func() {
 		instance = &Handler{
 			accountService: accountService,
-			utils:          utils,
 			validator:      validator,
 		}
 	})
@@ -36,17 +34,17 @@ func NewHandler(accountService contract.AccountService, utils routeutils.Utils, 
 }
 
 func (s *Handler) handleAddAccount(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
+	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.AddAccount{}
 	err := c.Bind(&input)
 	if err != nil {
-		return s.utils.Resp().ResponseBadRequestError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	err = input.Validate(s.validator)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	account := account.Account{
@@ -57,47 +55,47 @@ func (s *Handler) handleAddAccount(c echo.Context) error {
 
 	err = s.accountService.CreateAccount(ctx, account)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
-	return s.utils.Resp().ResponseCreated(c)
+	return routeutils.ResponseCreated(c)
 }
 
 func (s *Handler) handleAddBalance(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
+	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.AddBalance{}
 	err := c.Bind(&input)
 	if err != nil {
-		return s.utils.Resp().ResponseBadRequestError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	err = input.Validate(s.validator)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
-	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_uuid", "account_uuid is required")
+	accountUUID, err := routeutils.GetAndValidateParam(c, "account_uuid", "account_uuid is required")
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	err = s.accountService.AddBalance(ctx, accountUUID, input.Amount)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
-	return s.utils.Resp().ResponseCreated(c)
+	return routeutils.ResponseCreated(c)
 }
 
 func (s *Handler) handleGetAccounts(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
+	ctx := routeutils.GetContext(c)
 
-	take, skip := s.utils.Req().GetPagingParams(c, "page", "quantity")
+	take, skip := routeutils.GetPagingParams(c, "page", "quantity")
 
 	accounts, totalRecords, err := s.accountService.GetAccounts(ctx, take, skip)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	response := []viewmodel.AccountResponse{}
@@ -109,24 +107,24 @@ func (s *Handler) handleGetAccounts(c echo.Context) error {
 
 	responsePaginated := routeutils.BuildPaginatedResult(response, skip, take, totalRecords)
 
-	return s.utils.Resp().ResponseAPIOk(c, responsePaginated)
+	return routeutils.ResponseAPIOk(c, responsePaginated)
 }
 
 func (s *Handler) handleGetAccountByID(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
+	ctx := routeutils.GetContext(c)
 
-	accountUUID, err := s.utils.Req().GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")
+	accountUUID, err := routeutils.GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	account, err := s.accountService.GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	response := viewmodel.AccountResponse{}
 	response.FillFromEntity(account)
 
-	return s.utils.Resp().ResponseAPIOk(c, response)
+	return routeutils.ResponseAPIOk(c, response)
 }

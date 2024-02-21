@@ -29,7 +29,7 @@ type mock struct {
 	authToken   *mocks.MockAuthToken
 }
 
-func getServerTest(t *testing.T) (authMock mock, server goswag.Echo, ctrl *gomock.Controller, accountHandler *Handler) {
+func getServerTest(t *testing.T) (authMock mock, server goswag.Echo, ctrl *gomock.Controller) {
 	ctrl = gomock.NewController(t)
 	authMock = mock{
 		authService: mocks.NewMockAuthService(ctrl),
@@ -39,7 +39,7 @@ func getServerTest(t *testing.T) (authMock mock, server goswag.Echo, ctrl *gomoc
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	accountHandler = NewHandler(authMock.authService, authMock.authToken, routeutils.New(), v)
+	accountHandler := NewHandler(authMock.authService, authMock.authToken, v)
 	accountRoute := NewRouter(accountHandler, RouteName)
 
 	server = goswag.NewEcho()
@@ -207,7 +207,7 @@ func TestHandler_handleLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			once = sync.Once{}
-			authMock, server, ctrl, authHandler := getServerTest(t)
+			authMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -221,7 +221,7 @@ func TestHandler_handleLogin(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				e := echo.New()
-				ctx := authHandler.utils.Req().GetContext(e.NewContext(req, recorder))
+				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, authMock, tt.args)
 			}
 
@@ -439,7 +439,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			once = sync.Once{}
-			authMock, server, ctrl, authHandler := getServerTest(t)
+			authMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -453,7 +453,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				e := echo.New()
-				ctx := authHandler.utils.Req().GetContext(e.NewContext(req, recorder))
+				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, authMock, tt.args)
 			}
 

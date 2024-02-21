@@ -24,16 +24,14 @@ var (
 type Handler struct {
 	authService contract.AuthService
 	authToken   auth.AuthToken
-	utils       routeutils.Utils
 	validator   validator.Validator
 }
 
-func NewHandler(authService contract.AuthService, authToken auth.AuthToken, utils routeutils.Utils, validator validator.Validator) *Handler {
+func NewHandler(authService contract.AuthService, authToken auth.AuthToken, validator validator.Validator) *Handler {
 	once.Do(func() {
 		instance = &Handler{
 			authService: authService,
 			authToken:   authToken,
-			utils:       utils,
 			validator:   validator,
 		}
 	})
@@ -42,34 +40,34 @@ func NewHandler(authService contract.AuthService, authToken auth.AuthToken, util
 }
 
 func (s *Handler) handleLogin(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
+	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.Login{}
 
 	err := c.Bind(&input)
 	if err != nil {
-		return s.utils.Resp().ResponseBadRequestError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	err = input.Validate(s.validator)
 	if err != nil {
-		return s.utils.Resp().ResponseBadRequestError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	account, err := s.authService.Login(ctx, input.CPF, input.Password)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	sessionUUID := uuid.NewV4().String()
 	token, tokenPayload, err := s.authToken.CreateAccessToken(ctx, account.UUID, sessionUUID)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(ctx, account.UUID, sessionUUID)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	sessionReq := dto.Session{
@@ -83,7 +81,7 @@ func (s *Handler) handleLogin(c echo.Context) error {
 
 	err = s.authService.CreateSession(ctx, sessionReq)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	response := viewmodel.LoginResponse{
@@ -93,49 +91,49 @@ func (s *Handler) handleLogin(c echo.Context) error {
 		RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt,
 	}
 
-	return s.utils.Resp().ResponseAPIOk(c, response)
+	return routeutils.ResponseAPIOk(c, response)
 }
 
 func (s *Handler) handleRefreshToken(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
+	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.RefreshTokenRequest{}
 
 	err := c.Bind(&input)
 	if err != nil {
-		return s.utils.Resp().ResponseBadRequestError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	err = input.Validate(s.validator)
 	if err != nil {
-		return s.utils.Resp().ResponseBadRequestError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	refreshPayload, err := s.authToken.VerifyToken(ctx, input.RefreshToken)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	session, err := s.authService.GetSessionByUUID(ctx, refreshPayload.SessionUUID)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	if session.IsBlocked {
-		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("blocked session"))
+		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("blocked session"))
 	}
 
 	if session.RefreshToken != input.RefreshToken {
-		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("mismatched session token"))
+		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("mismatched session token"))
 	}
 
 	if time.Now().After(session.RefreshTokenExpiredAt) {
-		return s.utils.Resp().ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
+		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
 	}
 
 	accessToken, accessPayload, err := s.authToken.CreateAccessToken(ctx, refreshPayload.AccountUUID, refreshPayload.SessionUUID)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	response := viewmodel.RefreshTokenResponse{
@@ -143,5 +141,5 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 		AccessTokenExpiresAt: accessPayload.ExpiredAt,
 	}
 
-	return s.utils.Resp().ResponseAPIOk(c, response)
+	return routeutils.ResponseAPIOk(c, response)
 }

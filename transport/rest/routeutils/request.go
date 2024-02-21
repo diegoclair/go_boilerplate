@@ -10,13 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type reqUtils struct{}
-
-func newRequestUtils() RequestUtils {
-	return &reqUtils{}
-}
-
-func (r *reqUtils) GetContext(c echo.Context) (ctx context.Context) {
+func GetContext(c echo.Context) (ctx context.Context) {
 	ctx = c.Request().Context()
 	ctx = context.WithValue(ctx, infra.AccountUUIDKey, c.Get(infra.AccountUUIDKey.String()))
 	ctx = context.WithValue(ctx, infra.SessionKey, c.Get(infra.SessionKey.String()))
@@ -24,7 +18,7 @@ func (r *reqUtils) GetContext(c echo.Context) (ctx context.Context) {
 }
 
 // GetAndValidateParam gets the param value and validates it, returning a validation error in case it's invalid
-func (r *reqUtils) GetAndValidateParam(c echo.Context, paramName string, errorMessage string) (paramValue string, err error) {
+func GetAndValidateParam(c echo.Context, paramName string, errorMessage string) (paramValue string, err error) {
 	paramValue = c.Param(paramName)
 
 	if strings.TrimSpace(paramValue) == "" {
@@ -35,8 +29,7 @@ func (r *reqUtils) GetAndValidateParam(c echo.Context, paramName string, errorMe
 }
 
 // GetPagingParams gets the standard paging params from the URL, returning how much data to take and skip
-func (r *reqUtils) GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (take int64, skip int64) {
-
+func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (take int64, skip int64) {
 	if pageParameter == "" {
 		pageParameter = "page"
 	}
@@ -50,10 +43,10 @@ func (r *reqUtils) GetPagingParams(c echo.Context, pageParameter, quantityParame
 	page, _ := strconv.ParseInt(pg, 10, 64)
 	quantity, _ := strconv.ParseInt(ipp, 10, 64)
 
-	return r.GetTakeSkipFromPageQuantity(page, quantity)
+	return GetTakeSkipFromPageQuantity(page, quantity)
 }
 
-func (r *reqUtils) GetTakeSkipFromPageQuantity(page, quantity int64) (take, skip int64) {
+func GetTakeSkipFromPageQuantity(page, quantity int64) (take, skip int64) {
 	if page < 1 {
 		page = 1
 	}

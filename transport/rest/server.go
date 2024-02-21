@@ -51,12 +51,11 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, v validator.Validator) *Server {
 	router := goswag.NewEcho()
 	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-	routeUtils := routeutils.New()
 
 	pingHandler := pingroute.NewHandler()
-	accountHandler := accountroute.NewHandler(services.AccountService, routeUtils, v)
-	authHandler := authroute.NewHandler(services.AuthService, authToken, routeUtils, v)
-	transferHandler := transferroute.NewHandler(services.TransferService, routeUtils, v)
+	accountHandler := accountroute.NewHandler(services.AccountService, v)
+	authHandler := authroute.NewHandler(services.AuthService, authToken, v)
+	transferHandler := transferroute.NewHandler(services.TransferService, v)
 
 	pingRoute := pingroute.NewRouter(pingHandler, pingroute.RouteName)
 	accountRoute := accountroute.NewRouter(accountHandler, accountroute.RouteName)

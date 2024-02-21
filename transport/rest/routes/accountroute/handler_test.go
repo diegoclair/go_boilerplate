@@ -27,7 +27,7 @@ type mock struct {
 	accountService *mocks.MockAccountService
 }
 
-func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *gomock.Controller, accountHandler *Handler) {
+func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *gomock.Controller) {
 	ctrl = gomock.NewController(t)
 	accountMock = mock{
 		accountService: mocks.NewMockAccountService(ctrl),
@@ -36,7 +36,7 @@ func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *go
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	accountHandler = NewHandler(accountMock.accountService, routeutils.New(), v)
+	accountHandler := NewHandler(accountMock.accountService, v)
 	accountRoute := NewRouter(accountHandler, RouteName)
 
 	server = goswag.NewEcho()
@@ -158,7 +158,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			once = sync.Once{}
-			accountMock, server, ctrl, accountHandler := getServerTest(t)
+			accountMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -172,7 +172,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				e := echo.New()
-				ctx := accountHandler.utils.Req().GetContext(e.NewContext(req, recorder))
+				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 
@@ -208,7 +208,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 		name          string
 		args          args
 		buildMocks    func(ctx context.Context, mocks mock, args args)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mock, args args, s *Handler)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mock, args args)
 	}{
 		{
 			name: "Should complete request with no error",
@@ -219,10 +219,10 @@ func TestHandler_GetAccounts(t *testing.T) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args, s *Handler) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				take, skip := s.utils.Req().GetTakeSkipFromPageQuantity(int64(args.page), int64(args.quantity))
+				take, skip := routeutils.GetTakeSkipFromPageQuantity(int64(args.page), int64(args.quantity))
 
 				response := []viewmodel.AccountResponse{}
 				for _, account := range accounts {
@@ -246,7 +246,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args, s *Handler) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
 				require.Contains(t, resp.Body.String(), "some service error")
 			},
@@ -255,7 +255,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			once = sync.Once{}
-			accountMock, server, ctrl, s := getServerTest(t)
+			accountMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -266,14 +266,14 @@ func TestHandler_GetAccounts(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				e := echo.New()
-				ctx := s.utils.Req().GetContext(e.NewContext(req, recorder))
+				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			server.Echo().ServeHTTP(recorder, req)
 			if tt.checkResponse != nil {
-				tt.checkResponse(t, recorder, accountMock, tt.args, s)
+				tt.checkResponse(t, recorder, accountMock, tt.args)
 			}
 		})
 	}
@@ -337,7 +337,7 @@ func TestHandler_GetAccountByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			once = sync.Once{}
-			accountMock, server, ctrl, s := getServerTest(t)
+			accountMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -348,7 +348,7 @@ func TestHandler_GetAccountByID(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				e := echo.New()
-				ctx := s.utils.Req().GetContext(e.NewContext(req, recorder))
+				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 
@@ -444,7 +444,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			once = sync.Once{}
-			accountMock, server, ctrl, s := getServerTest(t)
+			accountMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -458,7 +458,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 
 			if tt.buildMocks != nil {
 				e := echo.New()
-				ctx := s.utils.Req().GetContext(e.NewContext(req, recorder))
+				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 

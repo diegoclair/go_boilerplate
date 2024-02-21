@@ -18,15 +18,13 @@ var (
 
 type Handler struct {
 	transferService contract.TransferService
-	utils           routeutils.Utils
 	structValidator validator.Validator
 }
 
-func NewHandler(transferService contract.TransferService, utils routeutils.Utils, structValidator validator.Validator) *Handler {
+func NewHandler(transferService contract.TransferService, structValidator validator.Validator) *Handler {
 	once.Do(func() {
 		instance = &Handler{
 			transferService: transferService,
-			utils:           utils,
 			structValidator: structValidator,
 		}
 	})
@@ -39,32 +37,32 @@ func (s *Handler) handleAddTransfer(c echo.Context) error {
 
 	err := c.Bind(&input)
 	if err != nil {
-		return s.utils.Resp().ResponseBadRequestError(c, err)
+		return routeutils.ResponseBadRequestError(c, err)
 	}
 
 	err = input.Validate(s.structValidator)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
-	appContext := s.utils.Req().GetContext(c)
+	appContext := routeutils.GetContext(c)
 
 	err = s.transferService.CreateTransfer(appContext, input.ToEntity())
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
-	return s.utils.Resp().ResponseCreated(c)
+	return routeutils.ResponseCreated(c)
 }
 
 func (s *Handler) handleGetTransfers(c echo.Context) error {
-	ctx := s.utils.Req().GetContext(c)
+	ctx := routeutils.GetContext(c)
 
-	take, skip := s.utils.Req().GetPagingParams(c, "page", "quantity")
+	take, skip := routeutils.GetPagingParams(c, "page", "quantity")
 
 	transfers, totalRecords, err := s.transferService.GetTransfers(ctx, take, skip)
 	if err != nil {
-		return s.utils.Resp().HandleAPIError(c, err)
+		return routeutils.HandleAPIError(c, err)
 	}
 
 	response := []viewmodel.TransferResp{}
@@ -76,5 +74,5 @@ func (s *Handler) handleGetTransfers(c echo.Context) error {
 
 	responsePaginated := routeutils.BuildPaginatedResult(response, skip, take, totalRecords)
 
-	return s.utils.Resp().ResponseAPIOk(c, responsePaginated)
+	return routeutils.ResponseAPIOk(c, responsePaginated)
 }

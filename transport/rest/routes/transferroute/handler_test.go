@@ -47,7 +47,7 @@ func getTokenMaker(t *testing.T) auth.AuthToken {
 	return tokenMaker
 }
 
-func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server goswag.Echo, ctrl *gomock.Controller, transferHandler *Handler) {
+func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server goswag.Echo, ctrl *gomock.Controller) {
 	ctrl = gomock.NewController(t)
 
 	transferMock = mocks.NewMockTransferService(ctrl)
@@ -56,7 +56,7 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	transferHandler = NewHandler(transferMock, routeutils.New(), v)
+	transferHandler := NewHandler(transferMock, v)
 	transferRoute := NewRouter(transferHandler, "transfers")
 
 	server = goswag.NewEcho()
@@ -201,7 +201,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			once = sync.Once{}
-			transferMock, server, ctrl, s := getServerTest(t)
+			transferMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -222,7 +222,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 				c := echo.New().NewContext(req, recorder)
 				c.Set(infra.AccountUUIDKey.String(), tt.args.accountUUID)
 				c.Set(infra.SessionKey.String(), tt.args.sessionUUID)
-				ctx := s.utils.Req().GetContext(c)
+				ctx := routeutils.GetContext(c)
 				tt.buildMocks(ctx, transferMock, tt.args)
 			}
 
@@ -305,7 +305,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			once = sync.Once{}
-			transferMock, server, ctrl, s := getServerTest(t)
+			transferMock, server, ctrl := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -322,7 +322,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 				c := echo.New().NewContext(req, recorder)
 				c.Set(infra.AccountUUIDKey.String(), tt.args.accountUUID)
 				c.Set(infra.SessionKey.String(), tt.args.sessionUUID)
-				ctx := s.utils.Req().GetContext(c)
+				ctx := routeutils.GetContext(c)
 
 				tt.buildMocks(ctx, transferMock)
 			}
