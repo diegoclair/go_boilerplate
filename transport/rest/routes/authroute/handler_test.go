@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -38,7 +39,7 @@ func getServerTest(t *testing.T) (authMock mock, server goswag.Echo, ctrl *gomoc
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	accountHandler = &Handler{authMock.authService, authMock.authToken, routeutils.New(), v}
+	accountHandler = NewHandler(authMock.authService, authMock.authToken, routeutils.New(), v)
 	accountRoute := NewRouter(accountHandler, RouteName)
 
 	server = goswag.NewEcho()
@@ -205,6 +206,7 @@ func TestHandler_handleLogin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			once = sync.Once{}
 			authMock, server, ctrl, authHandler := getServerTest(t)
 			defer ctrl.Finish()
 
@@ -436,6 +438,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			once = sync.Once{}
 			authMock, server, ctrl, authHandler := getServerTest(t)
 			defer ctrl.Finish()
 

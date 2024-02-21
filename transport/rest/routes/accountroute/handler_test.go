@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/account"
@@ -35,7 +36,7 @@ func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *go
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	accountHandler = &Handler{accountMock.accountService, routeutils.New(), v}
+	accountHandler = NewHandler(accountMock.accountService, routeutils.New(), v)
 	accountRoute := NewRouter(accountHandler, RouteName)
 
 	server = goswag.NewEcho()
@@ -156,6 +157,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			once = sync.Once{}
 			accountMock, server, ctrl, accountHandler := getServerTest(t)
 			defer ctrl.Finish()
 
@@ -252,12 +254,12 @@ func TestHandler_GetAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
+			once = sync.Once{}
 			accountMock, server, ctrl, s := getServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/accounts%s", rootRoute)
+			url := fmt.Sprintf("/%s%s", RouteName, rootRoute)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -334,7 +336,7 @@ func TestHandler_GetAccountByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
+			once = sync.Once{}
 			accountMock, server, ctrl, s := getServerTest(t)
 			defer ctrl.Finish()
 
@@ -441,7 +443,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
+			once = sync.Once{}
 			accountMock, server, ctrl, s := getServerTest(t)
 			defer ctrl.Finish()
 

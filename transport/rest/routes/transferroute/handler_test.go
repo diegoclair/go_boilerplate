@@ -56,7 +56,7 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	transferHandler = &Handler{transferMock, routeutils.New(), v}
+	transferHandler = NewHandler(transferMock, routeutils.New(), v)
 	transferRoute := NewRouter(transferHandler, "transfers")
 
 	server = goswag.NewEcho()
@@ -196,9 +196,11 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
+			once = sync.Once{}
 			transferMock, server, ctrl, s := getServerTest(t)
 			defer ctrl.Finish()
 
@@ -302,6 +304,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
+			once = sync.Once{}
 			transferMock, server, ctrl, s := getServerTest(t)
 			defer ctrl.Finish()
 
