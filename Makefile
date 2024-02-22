@@ -17,7 +17,7 @@ mock:
 	done
 
 	@mockgen -package mocks -source=infra/auth/instance.go -destination=mocks/auth.go
-	@mockgen -package infra -source=infra/cache/redis.go -destination=mocks/infra/redis.go
+	@mockgen -package mocks -source=infra/cache/redis.go -destination=mocks/redis.go
 	
 	@echo "=====> Mocks generated"
 

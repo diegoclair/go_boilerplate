@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/mocks/infra"
+	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
 
-func getRedisCacheMock(ctrl *gomock.Controller) (*redisCache, *infra.MockIRedisCache) {
-	m := infra.NewMockIRedisCache(ctrl)
+func getRedisCacheMock(ctrl *gomock.Controller) (*redisCache, *mocks.MockIRedisCache) {
+	m := mocks.NewMockIRedisCache(ctrl)
 	return &redisCache{
 		redis: m,
 	}, m
@@ -32,14 +32,14 @@ func TestRedisCache_GetItem(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		want       []byte
 		wantErr    error
 	}{
 		{
 			name: "Cache hit",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("test_value", nil))
 			},
 			want:    []byte("test_value"),
@@ -48,7 +48,7 @@ func TestRedisCache_GetItem(t *testing.T) {
 		{
 			name: "Cache miss",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", redis.Nil))
 			},
 			want:    nil,
@@ -57,7 +57,7 @@ func TestRedisCache_GetItem(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", errors.New("some error")))
 			},
 			want:    nil,
@@ -91,13 +91,13 @@ func TestRedisCache_SetItem(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", data: []byte("test_value")},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Set(gomock.Any(), args.key, args.data, gomock.Any()).Return(redis.NewStatusCmd(ctx, args.key, "OK"))
 			},
 			wantErr: nil,
@@ -105,7 +105,7 @@ func TestRedisCache_SetItem(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", data: []byte("test_value")},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
 				cmd.SetErr(errors.New("some error"))
 				m.EXPECT().Set(gomock.Any(), args.key, args.data, gomock.Any()).
@@ -139,14 +139,14 @@ func TestRedisCache_GetInt(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		want       int64
 		wantErr    error
 	}{
 		{
 			name: "Cache hit",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("123", nil))
 			},
 			want:    123,
@@ -155,7 +155,7 @@ func TestRedisCache_GetInt(t *testing.T) {
 		{
 			name: "Cache miss",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", redis.Nil))
 			},
 			want:    0,
@@ -164,7 +164,7 @@ func TestRedisCache_GetInt(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", errors.New("some error")))
 			},
 			want:    0,
@@ -197,14 +197,14 @@ func TestRedisCache_GetString(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		want       string
 		wantErr    error
 	}{
 		{
 			name: "Cache hit",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("test_value", nil))
 			},
 			want:    "test_value",
@@ -213,7 +213,7 @@ func TestRedisCache_GetString(t *testing.T) {
 		{
 			name: "Cache miss",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", redis.Nil))
 			},
 			want:    "",
@@ -222,7 +222,7 @@ func TestRedisCache_GetString(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", errors.New("some error")))
 			},
 			want:    "",
@@ -256,13 +256,13 @@ func TestRedisCache_SetString(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", data: "test_value"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Set(ctx, args.key, []byte(args.data), gomock.Any()).Return(redis.NewStatusCmd(ctx, args.key, "OK"))
 			},
 			wantErr: nil,
@@ -270,7 +270,7 @@ func TestRedisCache_SetString(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", data: "test_value"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
 				cmd.SetErr(errors.New("some error"))
 				m.EXPECT().Set(ctx, args.key, []byte(args.data), gomock.Any()).
@@ -306,13 +306,13 @@ func TestRedisCache_SetStringWithExpiration(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", data: "test_value", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Set(gomock.Any(), args.key, []byte(args.data), gomock.Any()).Return(redis.NewStatusCmd(ctx, args.key, "OK"))
 			},
 			wantErr: nil,
@@ -320,7 +320,7 @@ func TestRedisCache_SetStringWithExpiration(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", data: "test_value", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
 				cmd.SetErr(errors.New("some error"))
 				m.EXPECT().Set(gomock.Any(), args.key, []byte(args.data), gomock.Any()).
@@ -356,13 +356,13 @@ func TestRedisCache_SetItemWithExpiration(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", data: []byte("test_value"), expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Set(gomock.Any(), args.key, args.data, gomock.Any()).Return(redis.NewStatusCmd(ctx, args.key, "OK"))
 			},
 			wantErr: nil,
@@ -370,7 +370,7 @@ func TestRedisCache_SetItemWithExpiration(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", data: []byte("test_value"), expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
 				cmd.SetErr(errors.New("some error"))
 				m.EXPECT().Set(gomock.Any(), args.key, args.data, gomock.Any()).
@@ -404,13 +404,13 @@ func TestRedisCache_Increase(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Incr(gomock.Any(), args.key).Return(redis.NewIntResult(1, nil))
 			},
 			wantErr: nil,
@@ -418,7 +418,7 @@ func TestRedisCache_Increase(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Incr(gomock.Any(), args.key).Return(redis.NewIntResult(0, errors.New("some error")))
 			},
 			wantErr: errors.New("some error"),
@@ -451,13 +451,13 @@ func TestRedisCache_SetStruct(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", data: "test_value", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				dataString, err := json.Marshal(args.data)
 				require.NoError(t, err)
 				m.EXPECT().Set(ctx, args.key, dataString, args.expiration).Return(redis.NewStatusCmd(ctx, args.key, "OK"))
@@ -467,7 +467,7 @@ func TestRedisCache_SetStruct(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", data: "test_value", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				dataString, err := json.Marshal(args.data)
 				require.NoError(t, err)
 
@@ -480,7 +480,7 @@ func TestRedisCache_SetStruct(t *testing.T) {
 		{
 			name: "Should set with expiration",
 			args: args{key: "test_key", data: "test_value", expiration: 0},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				dataString, err := json.Marshal(args.data)
 				require.NoError(t, err)
 				m.EXPECT().Set(ctx, args.key, dataString, gomock.Any()).Return(redis.NewStatusCmd(ctx, args.key, "OK"))
@@ -515,13 +515,13 @@ func TestRedisCache_SetStructWithExpiration(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", data: "test_value", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				dataString, err := json.Marshal(args.data)
 				require.NoError(t, err)
 				m.EXPECT().Set(ctx, args.key, dataString, args.expiration).Return(redis.NewStatusCmd(ctx, args.key, "OK"))
@@ -531,7 +531,7 @@ func TestRedisCache_SetStructWithExpiration(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", data: "test_value", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				dataString, err := json.Marshal(args.data)
 				require.NoError(t, err)
 
@@ -544,7 +544,7 @@ func TestRedisCache_SetStructWithExpiration(t *testing.T) {
 		{
 			name: "Error marshalling",
 			args: args{key: "test_key", data: make(chan int), expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Set(gomock.Any(), args.key, gomock.Any(), gomock.Any()).Times(0)
 			},
 			wantErr: errors.New("json: unsupported type: chan int"),
@@ -582,13 +582,13 @@ func TestRedisCache_GetStruct(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", data: testStruct{Test: "test_value"}},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				dataString, err := json.Marshal(args.data)
 				require.NoError(t, err)
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult(string(dataString), nil))
@@ -598,7 +598,7 @@ func TestRedisCache_GetStruct(t *testing.T) {
 		{
 			name: "Cache miss",
 			args: args{key: "test_key", data: testStruct{Test: "test_value"}},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", redis.Nil))
 			},
 			wantErr: ErrCacheMiss,
@@ -606,7 +606,7 @@ func TestRedisCache_GetStruct(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", data: testStruct{Test: "test_value"}},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("", errors.New("some error")))
 			},
 			wantErr: errors.New("some error"),
@@ -614,7 +614,7 @@ func TestRedisCache_GetStruct(t *testing.T) {
 		{
 			name: "Invalid data",
 			args: args{key: "test_key", data: testStruct{Test: "test_value"}},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Get(gomock.Any(), args.key).Return(redis.NewStringResult("invalid_data", nil))
 			},
 			wantErr: errors.New("invalid character 'i' looking for beginning of value"),
@@ -647,14 +647,14 @@ func TestRedisCache_GetExpiration(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		want       time.Duration
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().TTL(gomock.Any(), args.key).Return(redis.NewDurationResult(10*time.Second, nil))
 			},
 			want:    10 * time.Second,
@@ -663,7 +663,7 @@ func TestRedisCache_GetExpiration(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().TTL(gomock.Any(), args.key).Return(redis.NewDurationResult(0, errors.New("some error")))
 			},
 			want:    0,
@@ -697,13 +697,13 @@ func TestRedisCache_SetExpiration(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{key: "test_key", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Expire(gomock.Any(), args.key, args.expiration).Return(redis.NewBoolResult(true, nil))
 			},
 			wantErr: nil,
@@ -711,7 +711,7 @@ func TestRedisCache_SetExpiration(t *testing.T) {
 		{
 			name: "Error",
 			args: args{key: "test_key", expiration: 10},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Expire(gomock.Any(), args.key, args.expiration).Return(redis.NewBoolResult(false, errors.New("some error")))
 			},
 			wantErr: errors.New("some error"),
@@ -742,13 +742,13 @@ func TestRedisCache_Delete(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		setupCache func(args args, m *infra.MockIRedisCache)
+		setupCache func(args args, m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
 			args: args{keys: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Del(ctx, args.keys).Return(redis.NewIntResult(1, nil))
 			},
 			wantErr: nil,
@@ -756,7 +756,7 @@ func TestRedisCache_Delete(t *testing.T) {
 		{
 			name: "Error",
 			args: args{keys: "test_key"},
-			setupCache: func(args args, m *infra.MockIRedisCache) {
+			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				m.EXPECT().Del(ctx, args.keys).Return(redis.NewIntResult(0, errors.New("some error")))
 			},
 			wantErr: errors.New("some error"),
@@ -783,12 +783,12 @@ func TestRedisCache_CleanAll(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		setupCache func(m *infra.MockIRedisCache)
+		setupCache func(m *mocks.MockIRedisCache)
 		wantErr    error
 	}{
 		{
 			name: "Success",
-			setupCache: func(m *infra.MockIRedisCache) {
+			setupCache: func(m *mocks.MockIRedisCache) {
 				m.EXPECT().Keys(ctx, "*").Return(redis.NewStringSliceResult([]string{"test_key"}, nil))
 				m.EXPECT().Del(ctx, "test_key").Return(redis.NewIntResult(1, nil))
 			},
@@ -796,21 +796,21 @@ func TestRedisCache_CleanAll(t *testing.T) {
 		},
 		{
 			name: "Success with no keys",
-			setupCache: func(m *infra.MockIRedisCache) {
+			setupCache: func(m *mocks.MockIRedisCache) {
 				m.EXPECT().Keys(ctx, "*").Return(redis.NewStringSliceResult([]string{}, nil))
 			},
 			wantErr: nil,
 		},
 		{
 			name: "Error getting keys",
-			setupCache: func(m *infra.MockIRedisCache) {
+			setupCache: func(m *mocks.MockIRedisCache) {
 				m.EXPECT().Keys(ctx, "*").Return(redis.NewStringSliceResult([]string{}, errors.New("some error")))
 			},
 			wantErr: errors.New("some error"),
 		},
 		{
 			name: "Error deleting keys",
-			setupCache: func(m *infra.MockIRedisCache) {
+			setupCache: func(m *mocks.MockIRedisCache) {
 				m.EXPECT().Keys(ctx, "*").Return(redis.NewStringSliceResult([]string{"test_key"}, nil))
 				m.EXPECT().Del(ctx, "test_key").Return(redis.NewIntResult(0, errors.New("some error")))
 			},
@@ -818,7 +818,7 @@ func TestRedisCache_CleanAll(t *testing.T) {
 		},
 		{
 			name: "Cache miss deleting keys",
-			setupCache: func(m *infra.MockIRedisCache) {
+			setupCache: func(m *mocks.MockIRedisCache) {
 				m.EXPECT().Keys(ctx, "*").Return(redis.NewStringSliceResult([]string{"test_key"}, nil))
 				m.EXPECT().Del(ctx, "test_key").Return(redis.NewIntResult(0, redis.Nil))
 			},
@@ -826,7 +826,7 @@ func TestRedisCache_CleanAll(t *testing.T) {
 		},
 		{
 			name: "Cache miss getting keys",
-			setupCache: func(m *infra.MockIRedisCache) {
+			setupCache: func(m *mocks.MockIRedisCache) {
 				m.EXPECT().Keys(ctx, "*").Return(redis.NewStringSliceResult([]string{"test_key"}, redis.Nil))
 			},
 			wantErr: ErrCacheMiss,
