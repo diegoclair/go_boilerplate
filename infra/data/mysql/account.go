@@ -10,10 +10,10 @@ import (
 )
 
 type accountRepo struct {
-	db dbConnection
+	db DBConn
 }
 
-func newAccountRepo(db dbConnection) contract.AccountRepo {
+func newAccountRepo(db DBConn) contract.AccountRepo {
 	return &accountRepo{
 		db: db,
 	}
@@ -62,7 +62,7 @@ func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, acco
 		VALUES (?, ?, ?, ?);
 	`
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
 	}
@@ -92,7 +92,7 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account account.Account
 		VALUES (?, ?, ?, ?);
 	`
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return createdID, mysqlutils.HandleMySQLError(err)
 	}
@@ -122,7 +122,7 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 		WHERE  	ta.cpf 	= ?
 	`
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return account, mysqlutils.HandleMySQLError(err)
 	}
@@ -166,7 +166,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 		params = append(params, skip)
 	}
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
@@ -200,7 +200,7 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 	`
 	params = append(params, accountUUID)
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return account, mysqlutils.HandleMySQLError(err)
 	}
@@ -272,7 +272,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 		params = append(params, skip)
 	}
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
@@ -316,7 +316,7 @@ func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64,
 	`
 	params = append(params, balance, accountID)
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
 	}

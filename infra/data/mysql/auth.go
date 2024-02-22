@@ -9,10 +9,10 @@ import (
 )
 
 type authRepo struct {
-	db dbConnection
+	db DBConn
 }
 
-func newAuthRepo(db dbConnection) contract.AuthRepo {
+func newAuthRepo(db DBConn) contract.AuthRepo {
 	return &authRepo{
 		db: db,
 	}
@@ -32,7 +32,7 @@ func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (err 
 		VALUES (?, ?, ?, ?, ?, ?, ?);
 	`
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
 	}
@@ -75,7 +75,7 @@ func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (se
 
 	`
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return session, mysqlutils.HandleMySQLError(err)
 	}

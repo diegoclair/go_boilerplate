@@ -90,7 +90,7 @@ func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrat
 	return conn, connErr
 }
 
-func repoInstances(dbConn dbConnection) *mysqlConn {
+func repoInstances(dbConn DBConn) *mysqlConn {
 	return &mysqlConn{
 		accountRepo: newAccountRepo(dbConn),
 		authRepo:    newAuthRepo(dbConn),

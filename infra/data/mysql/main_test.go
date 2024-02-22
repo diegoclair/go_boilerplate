@@ -12,25 +12,28 @@ import (
 	"github.com/diegoclair/go_utils/logger"
 )
 
-var testMysql contract.DataManager
+var (
+	testMysql contract.DataManager
+)
 
 func TestMain(m *testing.M) {
+	ctx := context.Background()
 
 	cfg, err := config.GetConfigEnvironment(config.ProfileTest)
 	if err != nil {
 		log.Fatal("cannot get config: ", err)
 	}
 
+	close := mysql.SetMysqlTestContainerConfig(ctx, cfg)
+	defer close()
+
 	rootDir, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("error getting root dir: %v", err)
 	}
+
 	migrationsDir := rootDir + "/../migrations/mysql"
 
-	cfg.DB.MySQL.DBName = cfg.DB.MySQL.DBName + "_test"
-	cfg.DB.MySQL.Host = "localhost"
-
-	ctx := context.Background()
 	mysql, err := mysql.Instance(ctx, cfg, logger.NewNoop(), migrationsDir)
 	if err != nil {
 		log.Fatalf("cannot connect to mysql: %v", err)
