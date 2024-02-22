@@ -7,19 +7,19 @@
     </em>
 </p>
 <p align="center">
-    <a href='https://coveralls.io/github/diegoclair/go_boilerplate?branch=main'>
-     <img src='https://coveralls.io/repos/github/diegoclair/go_boilerplate/badge.svg?branch=main' alt='Coverage Status' />
-    </a>
-    <a href='https://github.com/diegoclair/go_boilerplate/commits/main'>
-	 <img src="https://img.shields.io/github/last-commit/diegoclair/go_boilerplate?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
-    </a>
-	<a href="https://github.com/diegoclair/go_boilerplate/actions">
+   <a href='https://coveralls.io/github/diegoclair/go_boilerplate?branch=main'>
+	<img src='https://coveralls.io/repos/github/diegoclair/go_boilerplate/badge.svg?branch=main' alt='Coverage Status' />
+   </a>
+   <a href='https://github.com/diegoclair/go_boilerplate/commits/main'>
+	<img src="https://img.shields.io/github/last-commit/diegoclair/go_boilerplate?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
+   </a>
+   <a href="https://github.com/diegoclair/go_boilerplate/actions">
      <img src="https://github.com/diegoclair/go_boilerplate/actions/workflows/ci.yaml/badge.svg" alt="build status">
-    </a>
-    <a href="https://opensource.org/licenses/MIT">
+   </a>
+   <a href="https://opensource.org/licenses/MIT">
      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" />
-    </a>
-	<a href='https://goreportcard.com/badge/github.com/diegoclair/go_boilerplate'>
+   </a>
+  <a href='https://goreportcard.com/badge/github.com/diegoclair/go_boilerplate'>
      <img src='https://goreportcard.com/badge/github.com/diegoclair/go_boilerplate' alt='Go Report'/>
     </a>
 <p>
@@ -30,7 +30,7 @@
     <img src="https://skillicons.dev/icons?i=githubactions,mysql,go,docker" >
 </p>
   
-## Description ✈️
+## Description 
 This project is a boilerplate for creating API projects in Go, incorporating key principles of Domain-Driven Design and Clean Architecture. It reflects my expertise in Golang, drawn from previous projects, and is structured to facilitate maintainability and scalability.
 
 All layers of the codebase are tested to ensure reliability and robustness. The project is open to contributions and improvements. Feel free to fork the repository, submit pull requests, or open issues to discuss enhancements or report bugs.
@@ -42,7 +42,7 @@ All layers of the codebase are tested to ensure reliability and robustness. The 
 
 For the presentation layer, which I refer to as the transport layer, its purpose is to handle data transportation. It is responsible for receiving and responding to various types of requests, including API calls, gRPC, and messaging via RMQ, among others.
 
-##  ▶️ Getting Started 💻
+## 💻 Getting Started 
 
 ### Prerequisites ❗
 * Ensure Docker is installed on your machine.
@@ -52,7 +52,7 @@ chmod +x .docker/entrypoint.sh
 ```
 * An installation of Go 1.18 or later. For installation instructions, see [Installing Go](https://go.dev/doc/install).
 
-### Launching the Application  ▶️
+### ▶️ Launching the Application 
 To start the application, execute the command: 
 ```bash
 docker-compose up
