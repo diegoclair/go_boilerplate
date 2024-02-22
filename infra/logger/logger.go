@@ -21,6 +21,7 @@ func New(cfg *config.Config) logger.Logger {
 
 func addDefaultAttributesToLogger(ctx context.Context) []any {
 	args := []any{}
+
 	if sessionCode, ok := getSession(ctx); ok {
 		args = append(args, "session", sessionCode)
 	}
@@ -32,7 +33,7 @@ func addDefaultAttributesToLogger(ctx context.Context) []any {
 	return args
 }
 
-func getContextValue(ctx context.Context, key string) string {
+func getContextValue(ctx context.Context, key infra.Key) string {
 	if ctx == nil {
 		return ""
 	}
@@ -46,7 +47,7 @@ func getContextValue(ctx context.Context, key string) string {
 }
 
 func getSession(ctx context.Context) (string, bool) {
-	sessionCode := getContextValue(ctx, string(infra.SessionKey))
+	sessionCode := getContextValue(ctx, infra.SessionKey)
 	if sessionCode == "" {
 		return "", false
 	}
@@ -55,7 +56,7 @@ func getSession(ctx context.Context) (string, bool) {
 }
 
 func getAccountUUID(ctx context.Context) (string, bool) {
-	accountUUID := getContextValue(ctx, string(infra.AccountUUIDKey))
+	accountUUID := getContextValue(ctx, infra.AccountUUIDKey)
 	if accountUUID == "" {
 		return "", false
 	}
