@@ -10,5 +10,5 @@ import (
 
 // Instance returns a CacheManager instance
 func Instance(ctx context.Context, cfg *config.Config, log logger.Logger) (contract.CacheManager, error) {
-	return NewRedisCache(ctx, cfg, log)
+	return newRedisCache(ctx, cfg, log)
 }

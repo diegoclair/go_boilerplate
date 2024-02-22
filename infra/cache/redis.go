@@ -9,18 +9,28 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_utils/logger"
 
-	redis "gopkg.in/redis.v5"
+	"github.com/redis/go-redis/v9"
 )
 
-// RedisCache implements the CacheManager interface
-type RedisCache struct {
+type IRedisCache interface {
+	Get(ctx context.Context, key string) *redis.StringCmd
+	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd
+	TTL(ctx context.Context, key string) *redis.DurationCmd
+	Expire(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd
+	Incr(ctx context.Context, key string) *redis.IntCmd
+	Del(ctx context.Context, keys ...string) *redis.IntCmd
+	Keys(ctx context.Context, pattern string) *redis.StringSliceCmd
+}
+
+// redisCache implements the CacheManager interface
+type redisCache struct {
 	cfg   config.RedisConfig
-	redis *redis.Client
+	redis IRedisCache
 	log   logger.Logger
 }
 
-// NewRedisCache returns a RedisCache instance
-func NewRedisCache(ctx context.Context, cfg *config.Config, log logger.Logger) (*RedisCache, error) {
+// newRedisCache returns a RedisCache instance
+func newRedisCache(ctx context.Context, cfg *config.Config, log logger.Logger) (*redisCache, error) {
 	rCfg := cfg.Cache.Redis
 	client := redis.NewClient(&redis.Options{
 		Addr:     rCfg.Host + ":" + strconv.Itoa(rCfg.Port),
@@ -35,12 +45,12 @@ func NewRedisCache(ctx context.Context, cfg *config.Config, log logger.Logger) (
 		}
 	})
 
-	_, err := client.Ping().Result()
+	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		return nil, err
 	}
 
-	return &RedisCache{
+	return &redisCache{
 		cfg:   rCfg,
 		redis: client,
 		log:   log,
@@ -48,8 +58,8 @@ func NewRedisCache(ctx context.Context, cfg *config.Config, log logger.Logger) (
 }
 
 // GetItem returns an Item from cache
-func (r *RedisCache) GetItem(key string) (data []byte, err error) {
-	val, err := r.redis.Get(key).Bytes()
+func (r *redisCache) GetItem(ctx context.Context, key string) (data []byte, err error) {
+	val, err := r.redis.Get(ctx, key).Bytes()
 	if err == redis.Nil {
 		return val, ErrCacheMiss
 	} else if err != nil {
@@ -60,8 +70,8 @@ func (r *RedisCache) GetItem(key string) (data []byte, err error) {
 }
 
 // SetItem sets an item in cache
-func (r *RedisCache) SetItem(key string, data []byte) error {
-	err := r.SetItemWithExpiration(key, data, r.cfg.DefaultExpiration)
+func (r *redisCache) SetItem(ctx context.Context, key string, data []byte) error {
+	err := r.SetItemWithExpiration(ctx, key, data, r.cfg.DefaultExpiration)
 	if err != nil {
 		return err
 	}
@@ -70,8 +80,8 @@ func (r *RedisCache) SetItem(key string, data []byte) error {
 }
 
 // SetItemWithExpiration sets an item in cache
-func (r *RedisCache) SetItemWithExpiration(key string, data []byte, expiration time.Duration) error {
-	err := r.redis.Set(key, data, expiration).Err()
+func (r *redisCache) SetItemWithExpiration(ctx context.Context, key string, data []byte, expiration time.Duration) error {
+	err := r.redis.Set(ctx, key, data, expiration).Err()
 	if err != nil {
 		return err
 	}
@@ -80,8 +90,8 @@ func (r *RedisCache) SetItemWithExpiration(key string, data []byte, expiration t
 }
 
 // GetInt returns an int64 from cache
-func (r *RedisCache) GetInt(key string) (data int64, err error) {
-	val, err := r.GetItem(key)
+func (r *redisCache) GetInt(ctx context.Context, key string) (data int64, err error) {
+	val, err := r.GetItem(ctx, key)
 	if err == ErrCacheMiss {
 		return data, ErrCacheMiss
 	} else if err != nil {
@@ -92,8 +102,8 @@ func (r *RedisCache) GetInt(key string) (data int64, err error) {
 }
 
 // GetString returns an string from cache
-func (r *RedisCache) GetString(key string) (data string, err error) {
-	val, err := r.GetItem(key)
+func (r *redisCache) GetString(ctx context.Context, key string) (data string, err error) {
+	val, err := r.GetItem(ctx, key)
 	if err == ErrCacheMiss {
 		return data, ErrCacheMiss
 	} else if err != nil {
@@ -104,8 +114,8 @@ func (r *RedisCache) GetString(key string) (data string, err error) {
 }
 
 // SetString sets an item in cache
-func (r *RedisCache) SetString(key string, data string) error {
-	err := r.SetStringWithExpiration(key, data, r.cfg.DefaultExpiration)
+func (r *redisCache) SetString(ctx context.Context, key string, data string) error {
+	err := r.SetStringWithExpiration(ctx, key, data, r.cfg.DefaultExpiration)
 	if err != nil {
 		return err
 	}
@@ -114,8 +124,8 @@ func (r *RedisCache) SetString(key string, data string) error {
 }
 
 // SetStringWithExpiration sets an item in cache
-func (r *RedisCache) SetStringWithExpiration(key string, data string, expiration time.Duration) error {
-	err := r.SetItemWithExpiration(key, []byte(data), expiration)
+func (r *redisCache) SetStringWithExpiration(ctx context.Context, key string, data string, expiration time.Duration) error {
+	err := r.SetItemWithExpiration(ctx, key, []byte(data), expiration)
 	if err != nil {
 		return err
 	}
@@ -124,8 +134,8 @@ func (r *RedisCache) SetStringWithExpiration(key string, data string, expiration
 }
 
 // GetStruct returns an struct from cache
-func (r *RedisCache) GetStruct(key string, data interface{}) (err error) {
-	val, err := r.GetItem(key)
+func (r *redisCache) GetStruct(ctx context.Context, key string, data interface{}) (err error) {
+	val, err := r.GetItem(ctx, key)
 	if err == ErrCacheMiss {
 		return ErrCacheMiss
 	} else if err != nil {
@@ -141,11 +151,11 @@ func (r *RedisCache) GetStruct(key string, data interface{}) (err error) {
 }
 
 // SetStruct sets an item in cache
-func (r *RedisCache) SetStruct(key string, data interface{}, expiration time.Duration) error {
+func (r *redisCache) SetStruct(ctx context.Context, key string, data interface{}, expiration time.Duration) error {
 	if expiration == 0 {
 		expiration = r.cfg.DefaultExpiration
 	}
-	err := r.SetStructWithExpiration(key, data, expiration)
+	err := r.SetStructWithExpiration(ctx, key, data, expiration)
 	if err != nil {
 		return err
 	}
@@ -154,13 +164,13 @@ func (r *RedisCache) SetStruct(key string, data interface{}, expiration time.Dur
 }
 
 // SetStructWithExpiration sets an item in cache
-func (r *RedisCache) SetStructWithExpiration(key string, data interface{}, expiration time.Duration) error {
+func (r *redisCache) SetStructWithExpiration(ctx context.Context, key string, data interface{}, expiration time.Duration) error {
 	dataString, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 
-	err = r.SetItemWithExpiration(key, dataString, expiration)
+	err = r.SetItemWithExpiration(ctx, key, dataString, expiration)
 	if err != nil {
 		return err
 	}
@@ -169,8 +179,8 @@ func (r *RedisCache) SetStructWithExpiration(key string, data interface{}, expir
 }
 
 // GetExpiration returns the expiration time for a key
-func (r *RedisCache) GetExpiration(key string) (expiration time.Duration, err error) {
-	expiration, err = r.redis.TTL(key).Result()
+func (r *redisCache) GetExpiration(ctx context.Context, key string) (expiration time.Duration, err error) {
+	expiration, err = r.redis.TTL(ctx, key).Result()
 	if err != nil {
 		return expiration, err
 	}
@@ -179,8 +189,8 @@ func (r *RedisCache) GetExpiration(key string) (expiration time.Duration, err er
 }
 
 // SetExpiration sets the expiration time for a key
-func (r *RedisCache) SetExpiration(key string, expiration time.Duration) (err error) {
-	err = r.redis.Expire(key, expiration).Err()
+func (r *redisCache) SetExpiration(ctx context.Context, key string, expiration time.Duration) (err error) {
+	err = r.redis.Expire(ctx, key, expiration).Err()
 	if err != nil {
 		return err
 	}
@@ -189,8 +199,8 @@ func (r *RedisCache) SetExpiration(key string, expiration time.Duration) (err er
 }
 
 // Increase increases an int key, setting it to zero if the key doesn't exists
-func (r *RedisCache) Increase(key string) (err error) {
-	err = r.redis.Incr(key).Err()
+func (r *redisCache) Increase(ctx context.Context, key string) (err error) {
+	err = r.redis.Incr(ctx, key).Err()
 	if err != nil {
 		return err
 	}
@@ -199,8 +209,8 @@ func (r *RedisCache) Increase(key string) (err error) {
 }
 
 // Delete removes a list of keys from the cache
-func (r *RedisCache) Delete(keys ...string) (err error) {
-	err = r.redis.Del(keys...).Err()
+func (r *redisCache) Delete(ctx context.Context, keys ...string) (err error) {
+	err = r.redis.Del(ctx, keys...).Err()
 	if err != nil {
 		return err
 	}
@@ -209,8 +219,8 @@ func (r *RedisCache) Delete(keys ...string) (err error) {
 }
 
 // CleanAll clean everything with the prefix.
-func (r *RedisCache) CleanAll() (err error) {
-	keys, err := r.redis.Keys("*").Result()
+func (r *redisCache) CleanAll(ctx context.Context) (err error) {
+	keys, err := r.redis.Keys(ctx, "*").Result()
 	if err == redis.Nil {
 		return ErrCacheMiss
 	} else if err != nil {
@@ -218,7 +228,7 @@ func (r *RedisCache) CleanAll() (err error) {
 	}
 
 	if len(keys) > 0 {
-		err = r.redis.Del(keys...).Err()
+		err = r.redis.Del(ctx, keys...).Err()
 	}
 	if err == redis.Nil {
 		return ErrCacheMiss
