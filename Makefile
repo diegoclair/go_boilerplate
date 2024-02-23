@@ -1,9 +1,9 @@
-.PHONY: test
-test:
+.PHONY: tests
+tests:
 	go test -v -cover ./...
 
-.PHONY: mock
-mock:
+.PHONY: mocks
+mocks:
 # examples before:
 # mockgen -package mocks -source=domain/contract/repo.go -destination=mocks/repo.go
 # mockgen -package mocks -destination mocks/repo.go github.com/diegoclair/go_boilerplate/domain/contract DataManager,AccountRepo,AuthRepo

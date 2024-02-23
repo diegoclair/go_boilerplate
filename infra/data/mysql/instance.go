@@ -28,17 +28,27 @@ type mysqlConn struct {
 	authRepo    contract.AuthRepo
 }
 
+// helps test the Instance function
+type getMysql func(string) (*sql.DB, error)
+
+func getMysqlInstance(dataSourceName string) (*sql.DB, error) {
+	return sql.Open("mysql", dataSourceName)
+}
+
 // Instance returns an instance of a MySQLRepo
 func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrationsDir string) (contract.DataManager, error) {
-	onceDB.Do(func() {
+	return instance(ctx, cfg, log, migrationsDir, getMysqlInstance)
+}
 
+func instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrationsDir string, getMysql getMysql) (contract.DataManager, error) {
+	onceDB.Do(func() {
 		dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
 			cfg.DB.MySQL.Username, cfg.DB.MySQL.Password, cfg.DB.MySQL.Host, cfg.DB.MySQL.Port,
 		)
 
 		var db *sql.DB
 		log.Info(ctx, "Connecting to database...")
-		db, connErr = sql.Open("mysql", dataSourceName)
+		db, connErr = getMysql(dataSourceName)
 		if connErr != nil {
 			return
 		}
@@ -75,7 +85,7 @@ func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrat
 		log.Info(ctx, "Database successfully configured")
 
 		log.Info(ctx, "Running the migrations")
-		connErr = Migrate(db, migrationsDir)
+		connErr = migrate(db, migrationsDir)
 		if connErr != nil {
 			log.Errorf(ctx, "Migrate Error: %v", connErr)
 			return
@@ -90,7 +100,7 @@ func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrat
 	return conn, connErr
 }
 
-func repoInstances(dbConn DBConn) *mysqlConn {
+func repoInstances(dbConn dbConn) *mysqlConn {
 	return &mysqlConn{
 		accountRepo: newAccountRepo(dbConn),
 		authRepo:    newAuthRepo(dbConn),

@@ -10,10 +10,10 @@ import (
 	"github.com/GuiaBolso/darwin"
 )
 
-// Migrate applies database migrations to the provided SQL database.
+// migrate applies database migrations to the provided SQL database.
 // It reads SQL migration files from the specified directory and executes them in order.
 // The function returns an error if any migration fails to execute.
-func Migrate(db *sql.DB, migrationsDir string) error {
+func migrate(db *sql.DB, migrationsDir string) error {
 	driver := darwin.NewGenericDriver(db, darwin.MySQLDialect{})
 
 	files, err := os.ReadDir(migrationsDir)

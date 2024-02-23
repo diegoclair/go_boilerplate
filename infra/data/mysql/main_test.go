@@ -1,4 +1,4 @@
-package mysql_test
+package mysql
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_boilerplate/infra/data/mysql"
 	"github.com/diegoclair/go_utils/logger"
 )
 
@@ -24,7 +23,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot get config: ", err)
 	}
 
-	close := mysql.SetMysqlTestContainerConfig(ctx, cfg)
+	close := SetMysqlTestContainerConfig(ctx, cfg)
 	defer close()
 
 	rootDir, err := os.Getwd()
@@ -34,11 +33,12 @@ func TestMain(m *testing.M) {
 
 	migrationsDir := rootDir + "/../migrations/mysql"
 
-	mysql, err := mysql.Instance(ctx, cfg, logger.NewNoop(), migrationsDir)
+	mysql, err := Instance(ctx, cfg, logger.NewNoop(), migrationsDir)
 	if err != nil {
 		log.Fatalf("cannot connect to mysql: %v", err)
 	}
 
 	testMysql = mysql
+
 	os.Exit(m.Run())
 }

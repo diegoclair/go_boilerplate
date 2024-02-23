@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-type DBConn interface {
+type dbConn interface {
 	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 }
 
@@ -13,7 +13,7 @@ type scanner interface {
 	Scan(dest ...interface{}) error
 }
 
-func getTotalRecordsFromQuery(ctx context.Context, db DBConn, query string, args ...interface{}) (totalRecords int64, err error) {
+func getTotalRecordsFromQuery(ctx context.Context, db dbConn, query string, args ...interface{}) (totalRecords int64, err error) {
 	var queryCount = `
 		SELECT COUNT(*) FROM (
 	` + query + `) as count`
