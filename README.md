@@ -42,6 +42,11 @@ All layers of the codebase are tested to ensure reliability and robustness. The 
 
 For the presentation layer, which I refer to as the transport layer, its purpose is to handle data transportation. It is responsible for receiving and responding to various types of requests, including API calls, gRPC, and messaging via RMQ, among others.
 
+### Tests:
+For unit tests with MySQL and Redis, we are using real dependencies with [testcontainers](https://testcontainers.com/). 
+It’s like putting our functions through a real-world.  
+And we are also using mocks to test the errors scenarios, this way we can achieve 100% of cover. 💪 
+
 ## 💻 Getting Started 
 
 ### Prerequisites ❗
