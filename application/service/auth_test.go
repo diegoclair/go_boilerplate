@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
-	"github.com/diegoclair/go_boilerplate/domain/account"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/golang/mock/gomock"
 )
 
@@ -41,7 +41,7 @@ func Test_authService_Login(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
-					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(account.Account{
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
 						ID:       1,
 						UUID:     "uuid",
 						Name:     "name",
@@ -60,7 +60,7 @@ func Test_authService_Login(t *testing.T) {
 				password: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(account.Account{}, errors.New("some error")).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{}, errors.New("some error")).Times(1)
 			},
 			wantErr: true,
 		},
@@ -71,7 +71,7 @@ func Test_authService_Login(t *testing.T) {
 				password: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(account.Account{
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
 					ID:       1,
 					UUID:     "uuid",
 					Name:     "name",

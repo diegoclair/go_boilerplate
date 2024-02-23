@@ -7,7 +7,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/application/dto"
-	"github.com/diegoclair/go_boilerplate/domain/account"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_utils/resterrors"
 )
@@ -28,7 +28,7 @@ func newAuthService(svc *service) contract.AuthService {
 
 // TODO: create logout process
 
-func (s *authService) Login(ctx context.Context, cpf, secret string) (account account.Account, err error) {
+func (s *authService) Login(ctx context.Context, cpf, secret string) (account entity.Account, err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 

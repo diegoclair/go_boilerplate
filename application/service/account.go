@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
-	"github.com/diegoclair/go_boilerplate/domain/account"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/twinj/uuid"
@@ -20,7 +20,7 @@ func newAccountService(svc *service) contract.AccountService {
 	}
 }
 
-func (s *accountService) CreateAccount(ctx context.Context, account account.Account) (err error) {
+func (s *accountService) CreateAccount(ctx context.Context, account entity.Account) (err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -70,7 +70,7 @@ func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amo
 	return nil
 }
 
-func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (accounts []account.Account, totalRecords int64, err error) {
+func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -85,7 +85,7 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 	return accounts, totalRecords, nil
 }
 
-func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account account.Account, err error) {
+func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 	s.svc.log.Infof(ctx, "Process Started with accountUUID: %s", accountUUID)
 	defer s.svc.log.Infof(ctx, "Process Finished for accountUUID: %s", accountUUID)
 

@@ -10,8 +10,7 @@ import (
 
 	contract "github.com/diegoclair/go_boilerplate/application/contract"
 	dto "github.com/diegoclair/go_boilerplate/application/dto"
-	account "github.com/diegoclair/go_boilerplate/domain/account"
-	transfer "github.com/diegoclair/go_boilerplate/domain/transfer"
+	entity "github.com/diegoclair/go_boilerplate/domain/entity"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -170,7 +169,7 @@ func (mr *MockAccountRepoMockRecorder) AddTransfer(ctx, transferUUID, accountOri
 }
 
 // CreateAccount mocks base method.
-func (m *MockAccountRepo) CreateAccount(ctx context.Context, account account.Account) (int64, error) {
+func (m *MockAccountRepo) CreateAccount(ctx context.Context, account entity.Account) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", ctx, account)
 	ret0, _ := ret[0].(int64)
@@ -185,10 +184,10 @@ func (mr *MockAccountRepoMockRecorder) CreateAccount(ctx, account interface{}) *
 }
 
 // GetAccountByDocument mocks base method.
-func (m *MockAccountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (account.Account, error) {
+func (m *MockAccountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (entity.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccountByDocument", ctx, encryptedCPF)
-	ret0, _ := ret[0].(account.Account)
+	ret0, _ := ret[0].(entity.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -200,10 +199,10 @@ func (mr *MockAccountRepoMockRecorder) GetAccountByDocument(ctx, encryptedCPF in
 }
 
 // GetAccountByUUID mocks base method.
-func (m *MockAccountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account.Account, error) {
+func (m *MockAccountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (entity.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccountByUUID", ctx, accountUUID)
-	ret0, _ := ret[0].(account.Account)
+	ret0, _ := ret[0].(entity.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -215,10 +214,10 @@ func (mr *MockAccountRepoMockRecorder) GetAccountByUUID(ctx, accountUUID interfa
 }
 
 // GetAccounts mocks base method.
-func (m *MockAccountRepo) GetAccounts(ctx context.Context, take, skip int64) ([]account.Account, int64, error) {
+func (m *MockAccountRepo) GetAccounts(ctx context.Context, take, skip int64) ([]entity.Account, int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccounts", ctx, take, skip)
-	ret0, _ := ret[0].([]account.Account)
+	ret0, _ := ret[0].([]entity.Account)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -231,10 +230,10 @@ func (mr *MockAccountRepoMockRecorder) GetAccounts(ctx, take, skip interface{}) 
 }
 
 // GetTransfersByAccountID mocks base method.
-func (m *MockAccountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) ([]transfer.Transfer, int64, error) {
+func (m *MockAccountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) ([]entity.Transfer, int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransfersByAccountID", ctx, accountID, take, skip, origin)
-	ret0, _ := ret[0].([]transfer.Transfer)
+	ret0, _ := ret[0].([]entity.Transfer)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2

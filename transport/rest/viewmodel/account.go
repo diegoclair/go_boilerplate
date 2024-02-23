@@ -3,7 +3,7 @@ package viewmodel
 import (
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/domain/account"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils/validator"
 )
@@ -33,7 +33,7 @@ type AccountResponse struct {
 	CreatedAT time.Time `json:"create_at,omitempty"`
 }
 
-func (a *AccountResponse) FillFromEntity(account account.Account) {
+func (a *AccountResponse) FillFromEntity(account entity.Account) {
 	a.UUID = account.UUID
 	a.Name = account.Name
 	a.CPF = account.CPF

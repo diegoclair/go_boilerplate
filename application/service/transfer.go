@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
-	"github.com/diegoclair/go_boilerplate/domain/transfer"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/twinj/uuid"
@@ -21,7 +21,7 @@ func newTransferService(svc *service) contract.TransferService {
 	}
 }
 
-func (s *transferService) CreateTransfer(ctx context.Context, t transfer.Transfer) (err error) {
+func (s *transferService) CreateTransfer(ctx context.Context, t entity.Transfer) (err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
@@ -81,7 +81,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, t transfer.Transfe
 	})
 }
 
-func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (transfers []transfer.Transfer, totalRecords int64, err error) {
+func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (transfers []entity.Transfer, totalRecords int64, err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 

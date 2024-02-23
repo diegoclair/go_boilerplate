@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
-	"github.com/diegoclair/go_boilerplate/domain/account"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils/validator"
@@ -47,7 +47,7 @@ func (s *Handler) handleAddAccount(c echo.Context) error {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	account := account.Account{
+	account := entity.Account{
 		Name:     input.Name,
 		CPF:      input.CPF,
 		Password: input.Password,

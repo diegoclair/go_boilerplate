@@ -1,4 +1,4 @@
-package account
+package entity
 
 import (
 	"time"

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/domain/transfer"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
@@ -113,7 +113,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			buildMocks: func(ctx context.Context, transferMock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				transferMock.EXPECT().CreateTransfer(ctx,
-					transfer.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(nil).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -186,7 +186,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				mock.EXPECT().CreateTransfer(ctx,
-					transfer.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -256,7 +256,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 				sessionUUID: uuid.NewV4().String(),
 			},
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
-				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]transfer.Transfer{
+				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]entity.Transfer{
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 5.55, CreatedAt: time.Now()},
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 7.77, CreatedAt: time.Now()},
 				}, int64(0), nil).Times(1)

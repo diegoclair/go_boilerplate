@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
-	"github.com/diegoclair/go_boilerplate/domain/account"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
@@ -73,7 +73,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(account.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
 				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
 				mock.authService.EXPECT().CreateSession(ctx, gomock.Any()).DoAndReturn(
@@ -138,7 +138,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(account.Account{}, fmt.Errorf("error to login")).Times(1)
+				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{}, fmt.Errorf("error to login")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -155,7 +155,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(account.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("", nil, fmt.Errorf("error to create access token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -173,7 +173,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(account.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
 				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("", nil, fmt.Errorf("error to create refresh token")).Times(1)
 			},
@@ -192,7 +192,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(account.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
 				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
 				mock.authService.EXPECT().CreateSession(ctx, gomock.Any()).Return(fmt.Errorf("error to create session")).Times(1)

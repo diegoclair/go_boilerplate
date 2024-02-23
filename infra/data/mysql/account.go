@@ -4,8 +4,7 @@ import (
 	"context"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
-	"github.com/diegoclair/go_boilerplate/domain/account"
-	"github.com/diegoclair/go_boilerplate/domain/transfer"
+	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_utils/mysqlutils"
 )
 
@@ -32,7 +31,7 @@ const querySelectBase string = `
 		FROM tab_account 				ta
 		`
 
-func (r *accountRepo) parseAccount(row scanner) (account account.Account, err error) {
+func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err error) {
 
 	err = row.Scan(
 		&account.ID,
@@ -81,7 +80,7 @@ func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, acco
 	return nil
 }
 
-func (r *accountRepo) CreateAccount(ctx context.Context, account account.Account) (createdID int64, err error) {
+func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account) (createdID int64, err error) {
 	query := `
 		INSERT INTO tab_account (
 			account_uuid,
@@ -116,7 +115,7 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account account.Account
 	return createdID, nil
 }
 
-func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (account account.Account, err error) {
+func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error) {
 
 	query := querySelectBase + `
 		WHERE  	ta.cpf 	= ?
@@ -137,7 +136,7 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 	return account, nil
 }
 
-func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []account.Account, totalRecords int64, err error) {
+func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 
 	var params = []interface{}{}
 
@@ -178,7 +177,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
 
-	var account account.Account
+	var account entity.Account
 	for rows.Next() {
 		account, err = r.parseAccount(rows)
 		if err != nil {
@@ -191,7 +190,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 	return accounts, totalRecords, nil
 }
 
-func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account account.Account, err error) {
+func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
 	var params = []interface{}{}
 
@@ -215,7 +214,7 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 	return account, nil
 }
 
-func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) (transfers []transfer.Transfer, totalRecords int64, err error) {
+func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) (transfers []entity.Transfer, totalRecords int64, err error) {
 	var params = []interface{}{}
 
 	query := ` 
@@ -284,7 +283,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
 
-	transfer := transfer.Transfer{}
+	transfer := entity.Transfer{}
 	for rows.Next() {
 		err = rows.Scan(
 			&transfer.ID,
