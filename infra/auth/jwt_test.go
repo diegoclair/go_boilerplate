@@ -45,9 +45,8 @@ func TestJWTTokenMaker(t *testing.T) {
 func Test_jwtAuth_VerifyToken(t *testing.T) {
 
 	tests := []struct {
-		name    string
-		args    utilArgs
-		wantErr bool
+		name string
+		args utilArgs
 	}{
 		{
 			name: "Should pass without error",
@@ -56,8 +55,16 @@ func Test_jwtAuth_VerifyToken(t *testing.T) {
 			name: "Should return error for a expired token",
 			args: utilArgs{
 				expiredToken: true,
+				wantErr:      true,
 			},
-			wantErr: true,
+		},
+		{
+			name: "Should return error with an empty token",
+			args: utilArgs{
+				emptyToken:   true,
+				wantErr:      true,
+				wantErrValue: errInvalidToken,
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -70,15 +77,19 @@ func Test_jwtAuth_VerifyToken(t *testing.T) {
 			ctx := context.Background()
 
 			token, tokenPayload := createTestAccessToken(ctx, t, maker, tt.args)
+			if tt.args.emptyToken {
+				token = ""
+			}
 
 			gotPayload, err := maker.VerifyToken(ctx, token)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("jwtAuth.VerifyToken() error = %v, wantErr %v", err, tt.wantErr)
+			if (err != nil) != tt.args.wantErr {
+				t.Errorf("jwtAuth.VerifyToken() error = %v, wantErr %v", err, tt.args.wantErr)
 				return
 			}
-			if tt.wantErr {
+			if tt.args.wantErr {
 				return
 			}
+
 			require.Equal(t, tt.args.sessionUUID, gotPayload.SessionUUID)
 			require.Equal(t, tt.args.accountUUID, gotPayload.AccountUUID)
 			require.WithinDuration(t, tokenPayload.IssuedAt, gotPayload.IssuedAt, 1*time.Second)

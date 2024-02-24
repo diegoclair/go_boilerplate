@@ -11,6 +11,7 @@ import (
 )
 
 type utilArgs struct {
+	emptyToken           bool
 	accountUUID          string
 	sessionUUID          string
 	accessTokenDuration  time.Duration
