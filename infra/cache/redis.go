@@ -12,6 +12,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// IRedisCache is the interface for the RedisCache - it's used to help testing
 type IRedisCache interface {
 	Get(ctx context.Context, key string) *redis.StringCmd
 	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd
@@ -136,9 +137,7 @@ func (r *redisCache) SetStringWithExpiration(ctx context.Context, key string, da
 // GetStruct returns an struct from cache
 func (r *redisCache) GetStruct(ctx context.Context, key string, data interface{}) (err error) {
 	val, err := r.GetItem(ctx, key)
-	if err == ErrCacheMiss {
-		return ErrCacheMiss
-	} else if err != nil {
+	if err != nil {
 		return err
 	}
 
@@ -229,11 +228,11 @@ func (r *redisCache) CleanAll(ctx context.Context) (err error) {
 
 	if len(keys) > 0 {
 		err = r.redis.Del(ctx, keys...).Err()
-	}
-	if err == redis.Nil {
-		return ErrCacheMiss
-	} else if err != nil {
-		return err
+		if err == redis.Nil {
+			return ErrCacheMiss
+		} else if err != nil {
+			return err
+		}
 	}
 
 	return nil
