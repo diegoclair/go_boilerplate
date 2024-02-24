@@ -10,7 +10,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils/validator"
 	"github.com/twinj/uuid"
 
 	"github.com/labstack/echo/v4"
@@ -24,15 +23,13 @@ var (
 type Handler struct {
 	authService contract.AuthService
 	authToken   auth.AuthToken
-	validator   validator.Validator
 }
 
-func NewHandler(authService contract.AuthService, authToken auth.AuthToken, validator validator.Validator) *Handler {
+func NewHandler(authService contract.AuthService, authToken auth.AuthToken) *Handler {
 	once.Do(func() {
 		instance = &Handler{
 			authService: authService,
 			authToken:   authToken,
-			validator:   validator,
 		}
 	})
 
@@ -43,18 +40,12 @@ func (s *Handler) handleLogin(c echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.Login{}
-
 	err := c.Bind(&input)
 	if err != nil {
 		return routeutils.ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate(s.validator)
-	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
-	}
-
-	account, err := s.authService.Login(ctx, input.CPF, input.Password)
+	account, err := s.authService.Login(ctx, input.ToDto())
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -100,11 +91,6 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 	input := viewmodel.RefreshTokenRequest{}
 
 	err := c.Bind(&input)
-	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
-	}
-
-	err = input.Validate(s.validator)
 	if err != nil {
 		return routeutils.ResponseBadRequestError(c, err)
 	}

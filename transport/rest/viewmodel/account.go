@@ -3,26 +3,22 @@ package viewmodel
 import (
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/util/number"
-	"github.com/diegoclair/go_utils/validator"
 )
 
 type AddAccount struct {
-	Name     string `json:"name,omitempty" validate:"required,min=3"`
-	CPF      string `json:"cpf,omitempty" validate:"required,cpf"`
-	Password string `json:"password,omitempty" validate:"required,min=8"`
+	Name     string `json:"name,omitempty"`
+	CPF      string `json:"cpf,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
-func (a *AddAccount) Validate(validator validator.Validator) error {
-	a.CPF = number.CleanNumber(a.CPF)
-
-	err := validator.ValidateStruct(a)
-	if err != nil {
-		return err
+func (a *AddAccount) ToDto() dto.AccountInput {
+	return dto.AccountInput{
+		Name:     a.Name,
+		CPF:      a.CPF,
+		Password: a.Password,
 	}
-
-	return nil
 }
 
 type AccountResponse struct {
@@ -42,14 +38,12 @@ func (a *AccountResponse) FillFromEntity(account entity.Account) {
 }
 
 type AddBalance struct {
-	Amount float64 `json:"amount" validate:"required,gt=0"`
+	Amount float64 `json:"amount"`
 }
 
-func (a *AddBalance) Validate(validator validator.Validator) error {
-	err := validator.ValidateStruct(a)
-	if err != nil {
-		return err
+func (a *AddBalance) ToDto(accountUUID string) dto.AddBalanceInput {
+	return dto.AddBalanceInput{
+		AccountUUID: accountUUID,
+		Amount:      a.Amount,
 	}
-
-	return nil
 }

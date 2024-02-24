@@ -36,8 +36,8 @@ func Test_authService_Login(t *testing.T) {
 		{
 			name: "Should login without any errors",
 			args: args{
-				cpf:      "123",
-				password: "123",
+				cpf:      "01234567890",
+				password: "01234567890",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
@@ -46,29 +46,30 @@ func Test_authService_Login(t *testing.T) {
 						UUID:     "uuid",
 						Name:     "name",
 						CPF:      args.cpf,
-						Password: "123",
+						Password: args.password,
 					}, nil).Times(1),
 
-					mocks.mockCrypto.EXPECT().CheckPassword(args.password, "123").Return(nil).Times(1),
+					mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).Return(nil).Times(1),
 				)
 			},
 		},
 		{
 			name: "Should return error when there is some error to get account by document",
 			args: args{
-				cpf:      "123",
-				password: "123",
+				cpf:      "01234567890",
+				password: "01234567890",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{}, errors.New("some error")).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).
+					Return(entity.Account{}, errors.New("some error")).Times(1)
 			},
 			wantErr: true,
 		},
 		{
 			name: "Should return error when the password is wrong",
 			args: args{
-				cpf:      "123",
-				password: "123",
+				cpf:      "01234567890",
+				password: "01234567890",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
@@ -76,11 +77,16 @@ func Test_authService_Login(t *testing.T) {
 					UUID:     "uuid",
 					Name:     "name",
 					CPF:      args.cpf,
-					Password: "123",
+					Password: args.password,
 				}, nil).Times(1)
 
-				mocks.mockCrypto.EXPECT().CheckPassword(args.password, "123").Return(errors.New("some error")).Times(1)
+				mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).Return(errors.New("some error")).Times(1)
 			},
+			wantErr: true,
+		},
+		{
+			name:    "Should return error when the input is invalid",
+			args:    args{},
 			wantErr: true,
 		},
 	}
@@ -91,10 +97,18 @@ func Test_authService_Login(t *testing.T) {
 			allMocks, svc, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			tt.buildMock(ctx, allMocks, tt.args)
+			if tt.buildMock != nil {
+				tt.buildMock(ctx, allMocks, tt.args)
+			}
 
 			s := newAuthService(svc)
-			_, err := s.Login(ctx, tt.args.cpf, tt.args.password)
+
+			input := dto.LoginInput{
+				CPF:      tt.args.cpf,
+				Password: tt.args.password,
+			}
+
+			_, err := s.Login(ctx, input)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("authService.Login() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -117,8 +131,9 @@ func Test_authService_CreateSession(t *testing.T) {
 			name: "Should create session without any errors",
 			args: args{
 				session: dto.Session{
-					AccountID:   1,
-					SessionUUID: "uuid",
+					AccountID:    1,
+					SessionUUID:  "d152a340-9a87-4d32-85ad-19df4c9934cd",
+					RefreshToken: "token",
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
@@ -129,13 +144,19 @@ func Test_authService_CreateSession(t *testing.T) {
 			name: "Should return error when there is some error to create session",
 			args: args{
 				session: dto.Session{
-					AccountID:   1,
-					SessionUUID: "uuid",
+					AccountID:    1,
+					SessionUUID:  "d152a340-9a87-4d32-85ad-19df4c9934cd",
+					RefreshToken: "token",
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAuthRepo.EXPECT().CreateSession(ctx, args.session).Return(errors.New("some error")).Times(1)
 			},
+			wantErr: true,
+		},
+		{
+			name:    "Should return error when the input is invalid",
+			args:    args{},
 			wantErr: true,
 		},
 	}

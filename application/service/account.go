@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
@@ -20,9 +21,15 @@ func newAccountService(svc *service) contract.AccountService {
 	}
 }
 
-func (s *accountService) CreateAccount(ctx context.Context, account entity.Account) (err error) {
+func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInput) (err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
+
+	account, err := input.ToEntityValidate(s.svc.validator)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		return err
+	}
 
 	_, err = s.svc.dm.Account().GetAccountByDocument(ctx, account.CPF)
 	if err != nil && !mysqlutils.SQLNotFound(err.Error()) {
@@ -49,17 +56,23 @@ func (s *accountService) CreateAccount(ctx context.Context, account entity.Accou
 	return nil
 }
 
-func (s *accountService) AddBalance(ctx context.Context, accountUUID string, amount float64) (err error) {
+func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInput) (err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
+	err = input.Validate(s.svc.validator)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		return err
+	}
+
+	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, input.AccountUUID)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get account by uuid: %s", err.Error())
 		return err
 	}
 
-	account.AddBalance(amount)
+	account.AddBalance(input.Amount)
 
 	err = s.svc.dm.Account().UpdateAccountBalance(ctx, account.ID, account.Balance)
 	if err != nil {

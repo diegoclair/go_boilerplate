@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/diegoclair/go_utils/logger"
@@ -37,6 +38,10 @@ func (a *pasetoAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessio
 }
 
 func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*TokenPayload, error) {
+	if strings.TrimSpace(token) == "" {
+		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+	}
+
 	payload := &TokenPayload{}
 
 	err := a.paseto.Decrypt(token, a.symmetricKey, payload, nil)

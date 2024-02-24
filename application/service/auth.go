@@ -28,11 +28,17 @@ func newAuthService(svc *service) contract.AuthService {
 
 // TODO: create logout process
 
-func (s *authService) Login(ctx context.Context, cpf, secret string) (account entity.Account, err error) {
+func (s *authService) Login(ctx context.Context, input dto.LoginInput) (account entity.Account, err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	account, err = s.svc.dm.Account().GetAccountByDocument(ctx, cpf)
+	err = input.Validate(s.svc.validator)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		return account, err
+	}
+
+	account, err = s.svc.dm.Account().GetAccountByDocument(ctx, input.CPF)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error getting account by document: %s", err.Error())
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
@@ -46,7 +52,7 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 			slog.String("name", account.Name),
 		))
 
-	err = s.svc.crypto.CheckPassword(secret, account.Password)
+	err = s.svc.crypto.CheckPassword(input.Password, account.Password)
 	if err != nil {
 		s.svc.log.Error(ctx, "wrong password")
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
@@ -58,6 +64,12 @@ func (s *authService) Login(ctx context.Context, cpf, secret string) (account en
 func (s *authService) CreateSession(ctx context.Context, session dto.Session) (err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
+
+	err = session.Validate(s.svc.validator)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		return err
+	}
 
 	err = s.svc.dm.Auth().CreateSession(ctx, session)
 	if err != nil {

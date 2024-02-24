@@ -17,7 +17,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils/validator"
 	"github.com/diegoclair/goswag"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
@@ -36,10 +35,7 @@ func getServerTest(t *testing.T) (authMock mock, server goswag.Echo, ctrl *gomoc
 		authToken:   mocks.NewMockAuthToken(ctrl),
 	}
 
-	v, err := validator.NewValidator()
-	require.NoError(t, err)
-
-	accountHandler := NewHandler(authMock.authService, authMock.authToken, v)
+	accountHandler := NewHandler(authMock.authService, authMock.authToken)
 	accountRoute := NewRouter(accountHandler, RouteName)
 
 	server = goswag.NewEcho()
@@ -72,8 +68,12 @@ func TestHandler_handleLogin(t *testing.T) {
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				body := args.body.(viewmodel.Login)
+				input := dto.LoginInput{
+					CPF:      body.CPF,
+					Password: body.Password,
+				}
+				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
 				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
 				mock.authService.EXPECT().CreateSession(ctx, gomock.Any()).DoAndReturn(
@@ -103,32 +103,6 @@ func TestHandler_handleLogin(t *testing.T) {
 			},
 		},
 		{
-			name: "Should return error when cpf is invalid",
-			args: args{
-				body: viewmodel.Login{
-					CPF:      "0123456789",
-					Password: "12345678",
-				},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "The field 'CPF' should be a valid cpf")
-			},
-		},
-		{
-			name: "Should return error when password is invalid",
-			args: args{
-				body: viewmodel.Login{
-					CPF:      "01234567890",
-					Password: "1234567",
-				},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "The field 'Password' should have the minimun lenhgt or value: 8")
-			},
-		},
-		{
 			name: "Should return error when login fails",
 			args: args{
 				body: viewmodel.Login{
@@ -137,8 +111,12 @@ func TestHandler_handleLogin(t *testing.T) {
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{}, fmt.Errorf("error to login")).Times(1)
+				body := args.body.(viewmodel.Login)
+				input := dto.LoginInput{
+					CPF:      body.CPF,
+					Password: body.Password,
+				}
+				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{}, fmt.Errorf("error to login")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -154,8 +132,12 @@ func TestHandler_handleLogin(t *testing.T) {
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				body := args.body.(viewmodel.Login)
+				input := dto.LoginInput{
+					CPF:      body.CPF,
+					Password: body.Password,
+				}
+				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("", nil, fmt.Errorf("error to create access token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -172,8 +154,12 @@ func TestHandler_handleLogin(t *testing.T) {
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				body := args.body.(viewmodel.Login)
+				input := dto.LoginInput{
+					CPF:      body.CPF,
+					Password: body.Password,
+				}
+				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
 				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("", nil, fmt.Errorf("error to create refresh token")).Times(1)
 			},
@@ -191,8 +177,12 @@ func TestHandler_handleLogin(t *testing.T) {
 				},
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				input := args.body.(viewmodel.Login)
-				mock.authService.EXPECT().Login(ctx, input.CPF, input.Password).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				body := args.body.(viewmodel.Login)
+				input := dto.LoginInput{
+					CPF:      body.CPF,
+					Password: body.Password,
+				}
+				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
 				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
 				mock.authService.EXPECT().CreateSession(ctx, gomock.Any()).Return(fmt.Errorf("error to create session")).Times(1)
@@ -282,18 +272,6 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
 				require.Contains(t, resp.Body.String(), "Unmarshal type error")
-			},
-		},
-		{
-			name: "Should return error when refresh token is invalid",
-			args: args{
-				body: viewmodel.RefreshTokenRequest{
-					RefreshToken: "",
-				},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "The field 'RefreshToken' is required")
 			},
 		},
 		{

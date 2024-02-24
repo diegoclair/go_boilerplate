@@ -14,7 +14,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/transport/rest/serverMiddleware"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/validator"
 	"github.com/diegoclair/goswag"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4/middleware"
@@ -26,8 +25,8 @@ type Server struct {
 	cfg    *config.Config
 }
 
-func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, v validator.Validator) *Server {
-	server := NewRestServer(services, authToken, cfg, v)
+func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken) *Server {
+	server := NewRestServer(services, authToken, cfg)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -48,14 +47,14 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 	return server
 }
 
-func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, v validator.Validator) *Server {
+func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config) *Server {
 	router := goswag.NewEcho()
 	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	pingHandler := pingroute.NewHandler()
-	accountHandler := accountroute.NewHandler(services.AccountService, v)
-	authHandler := authroute.NewHandler(services.AuthService, authToken, v)
-	transferHandler := transferroute.NewHandler(services.TransferService, v)
+	accountHandler := accountroute.NewHandler(services.AccountService)
+	authHandler := authroute.NewHandler(services.AuthService, authToken)
+	transferHandler := transferroute.NewHandler(services.TransferService)
 
 	pingRoute := pingroute.NewRouter(pingHandler, pingroute.RouteName)
 	accountRoute := accountroute.NewRouter(accountHandler, accountroute.RouteName)

@@ -6,6 +6,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_utils/validator"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
@@ -47,10 +48,13 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 		mockCrypto:       crypto,
 	}
 
-	svc = newService(dm, cfg, cm, crypto, log)
+	v, err := validator.NewValidator()
+	require.NoError(t, err)
+
+	svc = newService(dm, cfg, cm, crypto, log, v)
 
 	// validate func New
-	s, err := New(dm, cfg, cm, crypto, log)
+	s, err := New(dm, cfg, cm, crypto, log, v)
 	require.NoError(t, err)
 	require.NotNil(t, s)
 

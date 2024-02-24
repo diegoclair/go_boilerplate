@@ -37,31 +37,31 @@ func (m *MockAccountService) EXPECT() *MockAccountServiceMockRecorder {
 }
 
 // AddBalance mocks base method.
-func (m *MockAccountService) AddBalance(ctx context.Context, accountUUID string, amount float64) error {
+func (m *MockAccountService) AddBalance(ctx context.Context, input dto.AddBalanceInput) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddBalance", ctx, accountUUID, amount)
+	ret := m.ctrl.Call(m, "AddBalance", ctx, input)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddBalance indicates an expected call of AddBalance.
-func (mr *MockAccountServiceMockRecorder) AddBalance(ctx, accountUUID, amount interface{}) *gomock.Call {
+func (mr *MockAccountServiceMockRecorder) AddBalance(ctx, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBalance", reflect.TypeOf((*MockAccountService)(nil).AddBalance), ctx, accountUUID, amount)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBalance", reflect.TypeOf((*MockAccountService)(nil).AddBalance), ctx, input)
 }
 
 // CreateAccount mocks base method.
-func (m *MockAccountService) CreateAccount(ctx context.Context, account entity.Account) error {
+func (m *MockAccountService) CreateAccount(ctx context.Context, input dto.AccountInput) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAccount", ctx, account)
+	ret := m.ctrl.Call(m, "CreateAccount", ctx, input)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateAccount indicates an expected call of CreateAccount.
-func (mr *MockAccountServiceMockRecorder) CreateAccount(ctx, account interface{}) *gomock.Call {
+func (mr *MockAccountServiceMockRecorder) CreateAccount(ctx, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockAccountService)(nil).CreateAccount), ctx, account)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockAccountService)(nil).CreateAccount), ctx, input)
 }
 
 // GetAccountByUUID mocks base method.
@@ -148,18 +148,18 @@ func (mr *MockAuthServiceMockRecorder) GetSessionByUUID(ctx, sessionUUID interfa
 }
 
 // Login mocks base method.
-func (m *MockAuthService) Login(ctx context.Context, cpf, secret string) (entity.Account, error) {
+func (m *MockAuthService) Login(ctx context.Context, input dto.LoginInput) (entity.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Login", ctx, cpf, secret)
+	ret := m.ctrl.Call(m, "Login", ctx, input)
 	ret0, _ := ret[0].(entity.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Login indicates an expected call of Login.
-func (mr *MockAuthServiceMockRecorder) Login(ctx, cpf, secret interface{}) *gomock.Call {
+func (mr *MockAuthServiceMockRecorder) Login(ctx, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockAuthService)(nil).Login), ctx, cpf, secret)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockAuthService)(nil).Login), ctx, input)
 }
 
 // MockTransferService is a mock of TransferService interface.
@@ -186,7 +186,7 @@ func (m *MockTransferService) EXPECT() *MockTransferServiceMockRecorder {
 }
 
 // CreateTransfer mocks base method.
-func (m *MockTransferService) CreateTransfer(ctx context.Context, transfer entity.Transfer) error {
+func (m *MockTransferService) CreateTransfer(ctx context.Context, transfer dto.TransferInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTransfer", ctx, transfer)
 	ret0, _ := ret[0].(error)

@@ -53,17 +53,17 @@ func main() {
 
 	c := crypto.NewCrypto()
 
-	apps, err := application.New(data, cfg, cache, c, log)
-	if err != nil {
-		log.Fatalf(ctx, "error to get domain services: %v", err)
-	}
-
 	v, err := validator.NewValidator()
 	if err != nil {
 		log.Fatalf(ctx, "error to get validator: %v", err)
 	}
 
-	server := rest.StartRestServer(ctx, cfg, apps, log, authToken, v)
+	apps, err := application.New(data, cfg, cache, c, log, v)
+	if err != nil {
+		log.Fatalf(ctx, "error to get domain services: %v", err)
+	}
+
+	server := rest.StartRestServer(ctx, cfg, apps, log, authToken)
 
 	gracefulShutdown(server, log)
 }

@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_utils/resterrors"
@@ -21,9 +23,15 @@ func newTransferService(svc *service) contract.TransferService {
 	}
 }
 
-func (s *transferService) CreateTransfer(ctx context.Context, t entity.Transfer) (err error) {
+func (s *transferService) CreateTransfer(ctx context.Context, input dto.TransferInput) (err error) {
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
+
+	transfer, err := input.ToEntityValidate(s.svc.validator)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		return err
+	}
 
 	loggedAccountUUID, ok := ctx.Value(infra.AccountUUIDKey).(string)
 	if !ok {
@@ -38,11 +46,14 @@ func (s *transferService) CreateTransfer(ctx context.Context, t entity.Transfer)
 		return err
 	}
 
-	if !fromAccount.HasSufficientFunds(t.Amount) {
+	if !fromAccount.HasSufficientFunds(transfer.Amount) {
 		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
 	}
 
-	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, t.AccountDestinationUUID)
+	fmt.Println("AccountLOGgED", loggedAccountUUID)
+	fmt.Println("AccountOriginUUID", transfer.AccountDestinationUUID)
+
+	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
 		return err
@@ -52,17 +63,17 @@ func (s *transferService) CreateTransfer(ctx context.Context, t entity.Transfer)
 		return resterrors.NewConflictError("You can't transfer to yourself")
 	}
 
-	t.TransferUUID = uuid.NewV4().String()
+	transfer.TransferUUID = uuid.NewV4().String()
 
 	return s.svc.dm.WithTransaction(ctx, func(tx contract.DataManager) error {
 
-		err = tx.Account().AddTransfer(ctx, t.TransferUUID, fromAccount.ID, destAccount.ID, t.Amount)
+		err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
 		if err != nil {
 			s.svc.log.Errorf(ctx, "error to add transfer: %s", err.Error())
 			return err
 		}
 
-		fromAccount.SubtractBalance(t.Amount)
+		fromAccount.SubtractBalance(transfer.Amount)
 
 		err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, fromAccount.Balance)
 		if err != nil {
@@ -70,7 +81,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, t entity.Transfer)
 			return err
 		}
 
-		destAccount.AddBalance(t.Amount)
+		destAccount.AddBalance(transfer.Amount)
 
 		err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destAccount.Balance)
 		if err != nil {

@@ -3,21 +3,17 @@ package viewmodel
 import (
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_utils/validator"
 )
 
 type TransferReq struct {
-	AccountDestinationUUID string  `json:"account_destination_id,omitempty" validate:"required"`
-	Amount                 float64 `json:"amount,omitempty" validate:"required"`
+	AccountDestinationUUID string  `json:"account_destination_id,omitempty"`
+	Amount                 float64 `json:"amount,omitempty"`
 }
 
-func (t *TransferReq) Validate(v validator.Validator) error {
-	return v.ValidateStruct(t)
-}
-
-func (t *TransferReq) ToEntity() entity.Transfer {
-	return entity.Transfer{
+func (t *TransferReq) ToDto() dto.TransferInput {
+	return dto.TransferInput{
 		AccountDestinationUUID: t.AccountDestinationUUID,
 		Amount:                 t.Amount,
 	}

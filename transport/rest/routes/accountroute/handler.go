@@ -4,10 +4,8 @@ import (
 	"sync"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
-	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils/validator"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,14 +17,12 @@ var (
 
 type Handler struct {
 	accountService contract.AccountService
-	validator      validator.Validator
 }
 
-func NewHandler(accountService contract.AccountService, validator validator.Validator) *Handler {
+func NewHandler(accountService contract.AccountService) *Handler {
 	once.Do(func() {
 		instance = &Handler{
 			accountService: accountService,
-			validator:      validator,
 		}
 	})
 
@@ -42,18 +38,7 @@ func (s *Handler) handleAddAccount(c echo.Context) error {
 		return routeutils.ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate(s.validator)
-	if err != nil {
-		return routeutils.HandleAPIError(c, err)
-	}
-
-	account := entity.Account{
-		Name:     input.Name,
-		CPF:      input.CPF,
-		Password: input.Password,
-	}
-
-	err = s.accountService.CreateAccount(ctx, account)
+	err = s.accountService.CreateAccount(ctx, input.ToDto())
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -70,17 +55,12 @@ func (s *Handler) handleAddBalance(c echo.Context) error {
 		return routeutils.ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate(s.validator)
-	if err != nil {
-		return routeutils.HandleAPIError(c, err)
-	}
-
 	accountUUID, err := routeutils.GetAndValidateParam(c, "account_uuid", "account_uuid is required")
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	err = s.accountService.AddBalance(ctx, accountUUID, input.Amount)
+	err = s.accountService.AddBalance(ctx, input.ToDto(accountUUID))
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}

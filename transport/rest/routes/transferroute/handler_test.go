@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
@@ -20,7 +21,6 @@ import (
 	servermiddleware "github.com/diegoclair/go_boilerplate/transport/rest/serverMiddleware"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/validator"
 	"github.com/diegoclair/goswag"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
@@ -53,10 +53,7 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 	transferMock = mocks.NewMockTransferService(ctrl)
 	tokenMaker = getTokenMaker(t)
 
-	v, err := validator.NewValidator()
-	require.NoError(t, err)
-
-	transferHandler := NewHandler(transferMock, v)
+	transferHandler := NewHandler(transferMock)
 	transferRoute := NewRouter(transferHandler, "transfers")
 
 	server = goswag.NewEcho()
@@ -113,7 +110,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			buildMocks: func(ctx context.Context, transferMock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				transferMock.EXPECT().CreateTransfer(ctx,
-					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					dto.TransferInput{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(nil).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -137,40 +134,6 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			},
 		},
 		{
-			name: "Should return error when missing account destination uuid",
-			args: args{
-				body: viewmodel.TransferReq{
-					Amount: 5.55,
-				},
-				accountUUID: uuid.NewV4().String(),
-				sessionUUID: uuid.NewV4().String(),
-			},
-			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "The field 'AccountDestinationUUID' is required")
-			},
-		},
-		{
-			name: "Should return error when missing amount",
-			args: args{
-				body: viewmodel.TransferReq{
-					AccountDestinationUUID: "random",
-				},
-				accountUUID: uuid.NewV4().String(),
-				sessionUUID: uuid.NewV4().String(),
-			},
-			setupAuth: func(t *testing.T, req *http.Request, args args, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, args.accountUUID, args.sessionUUID)
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "The field 'Amount' is required")
-			},
-		},
-		{
 			name: "Should return error id we have some error on create transfer",
 			args: args{
 				body: viewmodel.TransferReq{
@@ -186,7 +149,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				mock.EXPECT().CreateTransfer(ctx,
-					entity.Transfer{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
+					dto.TransferInput{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {

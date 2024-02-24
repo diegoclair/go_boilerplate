@@ -36,6 +36,10 @@ func (a *jwtAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUU
 }
 
 func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *TokenPayload, err error) {
+	if strings.TrimSpace(token) == "" {
+		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+	}
+
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {

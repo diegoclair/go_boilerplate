@@ -12,11 +12,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils/validator"
 	"github.com/diegoclair/goswag"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
@@ -33,10 +33,7 @@ func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *go
 		accountService: mocks.NewMockAccountService(ctrl),
 	}
 
-	v, err := validator.NewValidator()
-	require.NoError(t, err)
-
-	accountHandler := NewHandler(accountMock.accountService, v)
+	accountHandler := NewHandler(accountMock.accountService)
 	accountRoute := NewRouter(accountHandler, RouteName)
 
 	server = goswag.NewEcho()
@@ -71,7 +68,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(nil)
+				mock.accountService.EXPECT().CreateAccount(ctx, dto.AccountInput{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -89,53 +86,6 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 		},
 		{
-			name: "Should validate Login required fields",
-			args: args{
-				body: viewmodel.AddAccount{},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "Invalid input data")
-				require.Contains(t, resp.Body.String(), "The field 'CPF' is required")
-				require.Contains(t, resp.Body.String(), "The field 'Password' is required")
-			},
-		},
-		{
-			name: "Should validate required fields",
-			args: args{
-				body: viewmodel.AddAccount{
-					CPF:      "01234567890",
-					Password: "secret@123",
-				},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "Invalid input data")
-				require.Contains(t, resp.Body.String(), "The field 'Name' is required")
-			},
-		},
-		{
-			name: "Should not be possible create an account with invalid cpf",
-			args: args{
-				body: viewmodel.AddAccount{
-					Name:     "Teste name",
-					CPF:      "12345612345",
-					Password: "Secret@123",
-				},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "The field 'CPF' should be a valid cpf")
-			},
-		},
-		{
-			name: "Should return error with the body is empty",
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "Invalid input data")
-			},
-		},
-		{
 			name: "Should return error if we have any error with service",
 			args: args{
 				body: viewmodel.AddAccount{
@@ -146,7 +96,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, entity.Account{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(errors.New("some error"))
+				mock.accountService.EXPECT().CreateAccount(ctx, dto.AccountInput{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -382,8 +332,12 @@ func TestHandler_handleAddBalance(t *testing.T) {
 				accountUUID: "random",
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				accountUUID := "random"
-				mock.accountService.EXPECT().AddBalance(ctx, accountUUID, args.body.(viewmodel.AddBalance).Amount).Times(1).Return(nil)
+				input := dto.AddBalanceInput{
+					AccountUUID: "random",
+					Amount:      args.body.(viewmodel.AddBalance).Amount,
+				}
+
+				mock.accountService.EXPECT().AddBalance(ctx, input).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -398,17 +352,6 @@ func TestHandler_handleAddBalance(t *testing.T) {
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
 				require.Contains(t, resp.Body.String(), "Unmarshal type error")
-			},
-		},
-		{
-			name: "Should validate required fields",
-			args: args{
-				body: viewmodel.AddBalance{},
-			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-				require.Contains(t, resp.Body.String(), "Invalid input data")
-				require.Contains(t, resp.Body.String(), "The field 'Amount' is required")
 			},
 		},
 		{
@@ -432,7 +375,11 @@ func TestHandler_handleAddBalance(t *testing.T) {
 				accountUUID: "random",
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				mock.accountService.EXPECT().AddBalance(ctx, "random", args.body.(viewmodel.AddBalance).Amount).Times(1).Return(errors.New("some error"))
+				input := dto.AddBalanceInput{
+					AccountUUID: "random",
+					Amount:      args.body.(viewmodel.AddBalance).Amount,
+				}
+				mock.accountService.EXPECT().AddBalance(ctx, input).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)

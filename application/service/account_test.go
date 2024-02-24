@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +26,7 @@ func Test_newAccountService(t *testing.T) {
 
 func Test_accountService_CreateAccount(t *testing.T) {
 	type args struct {
-		account entity.Account
+		account dto.AccountInput
 	}
 	tests := []struct {
 		name      string
@@ -35,10 +36,10 @@ func Test_accountService_CreateAccount(t *testing.T) {
 	}{
 		{
 			name: "Should create account without any errors",
-			args: args{account: entity.Account{
+			args: args{account: dto.AccountInput{
 				Name:     "name",
-				CPF:      "123",
-				Password: "123",
+				CPF:      "01234567890",
+				Password: "01234567890",
 			}},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
@@ -56,9 +57,10 @@ func Test_accountService_CreateAccount(t *testing.T) {
 		},
 		{
 			name: "Should return error with there is some error to get account by document",
-			args: args{account: entity.Account{
-				Name: "name",
-				CPF:  "123",
+			args: args{account: dto.AccountInput{
+				Name:     "name",
+				CPF:      "01234567890",
+				Password: "01234567890",
 			}},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, errors.New("some error")).Times(1)
@@ -67,9 +69,10 @@ func Test_accountService_CreateAccount(t *testing.T) {
 		},
 		{
 			name: "Should return error with there is some error to create account",
-			args: args{account: entity.Account{
-				Name: "name",
-				CPF:  "123",
+			args: args{account: dto.AccountInput{
+				Name:     "name",
+				CPF:      "01234567890",
+				Password: "01234567890",
 			}},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
@@ -82,9 +85,10 @@ func Test_accountService_CreateAccount(t *testing.T) {
 		},
 		{
 			name: "Should return error with there is some error to hash password",
-			args: args{account: entity.Account{
-				Name: "name",
-				CPF:  "123",
+			args: args{account: dto.AccountInput{
+				Name:     "name",
+				CPF:      "01234567890",
+				Password: "01234567890",
 			}},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				gomock.InOrder(
@@ -96,13 +100,19 @@ func Test_accountService_CreateAccount(t *testing.T) {
 		},
 		{
 			name: "Should return error cpf already in use",
-			args: args{account: entity.Account{
-				Name: "name",
-				CPF:  "123",
+			args: args{account: dto.AccountInput{
+				Name:     "name",
+				CPF:      "01234567890",
+				Password: "01234567890",
 			}},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, nil).Times(1)
 			},
+			wantErr: true,
+		},
+		{
+			name:    "Should return error with invalid input",
+			args:    args{account: dto.AccountInput{}},
 			wantErr: true,
 		},
 	}
@@ -128,7 +138,6 @@ func Test_accountService_CreateAccount(t *testing.T) {
 }
 
 func Test_accountService_AddBalance(t *testing.T) {
-
 	type args struct {
 		accountUUID string
 		amount      float64
@@ -141,7 +150,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 	}{
 		{
 			name: "Should add balance without any errors",
-			args: args{accountUUID: "account123", amount: 7.32},
+			args: args{accountUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd", amount: 7.32},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 50}
 				gomock.InOrder(
@@ -152,7 +161,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 		},
 		{
 			name: "Should add balance validating floating point",
-			args: args{accountUUID: "account123", amount: 0.1},
+			args: args{accountUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd", amount: 0.1},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 0.2}
 				gomock.InOrder(
@@ -163,7 +172,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 		},
 		{
 			name: "Should return error with there is some error to get account by uuid",
-			args: args{accountUUID: "account123", amount: 7.32},
+			args: args{accountUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd", amount: 7.32},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{}
 				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, assert.AnError).Times(1)
@@ -172,7 +181,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 		},
 		{
 			name: "Should return error with there is some error to update account balance",
-			args: args{accountUUID: "account123", amount: 7.32},
+			args: args{accountUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd", amount: 7.32},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 50}
 				gomock.InOrder(
@@ -180,6 +189,11 @@ func Test_accountService_AddBalance(t *testing.T) {
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, result.ID, result.Balance+args.amount).Return(assert.AnError).Times(1),
 				)
 			},
+			wantErr: true,
+		},
+		{
+			name:    "Should return error with invalid input",
+			args:    args{accountUUID: "", amount: 0},
 			wantErr: true,
 		},
 	}
@@ -197,7 +211,13 @@ func Test_accountService_AddBalance(t *testing.T) {
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, allMocks, tt.args)
 			}
-			if err := s.AddBalance(ctx, tt.args.accountUUID, tt.args.amount); (err != nil) != tt.wantErr {
+
+			input := dto.AddBalanceInput{
+				AccountUUID: tt.args.accountUUID,
+				Amount:      tt.args.amount,
+			}
+
+			if err := s.AddBalance(ctx, input); (err != nil) != tt.wantErr {
 				t.Errorf("AddBalance() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

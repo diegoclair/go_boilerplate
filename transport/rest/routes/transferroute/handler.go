@@ -6,7 +6,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils/validator"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,14 +17,12 @@ var (
 
 type Handler struct {
 	transferService contract.TransferService
-	structValidator validator.Validator
 }
 
-func NewHandler(transferService contract.TransferService, structValidator validator.Validator) *Handler {
+func NewHandler(transferService contract.TransferService) *Handler {
 	once.Do(func() {
 		instance = &Handler{
 			transferService: transferService,
-			structValidator: structValidator,
 		}
 	})
 
@@ -40,14 +37,9 @@ func (s *Handler) handleAddTransfer(c echo.Context) error {
 		return routeutils.ResponseBadRequestError(c, err)
 	}
 
-	err = input.Validate(s.structValidator)
-	if err != nil {
-		return routeutils.HandleAPIError(c, err)
-	}
-
 	appContext := routeutils.GetContext(c)
 
-	err = s.transferService.CreateTransfer(appContext, input.ToEntity())
+	err = s.transferService.CreateTransfer(appContext, input.ToDto())
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
