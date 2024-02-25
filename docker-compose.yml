@@ -5,7 +5,7 @@ services:
   app:
     container_name: go-boilerplate-app
     build: .
-    command: .docker/entrypoint.sh
+    command: sh -c "/wait && ./myapp rest"
     ports:
       - 5000:5000
     environment:

@@ -51,10 +51,6 @@ And we are also using mocks to test the errors scenarios, this way we can achiev
 
 ### Prerequisites ❗
 * Ensure Docker is installed on your machine.
-* Modify the entrypoint file permissions with the command: 
-```bash
-chmod +x .docker/entrypoint.sh
-```
 * An installation of Go 1.18 or later. For installation instructions, see [Installing Go](https://go.dev/doc/install).
 
 ### ▶️ Launching the Application 
