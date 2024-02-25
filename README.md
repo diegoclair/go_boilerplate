@@ -68,6 +68,14 @@ Once you see the message `your server started on [::]:5000`, the application is 
 For detailed API endpoint documentation, navigate to the `/docs` directory where you will find the Swagger documentation.  
 These swagger docs was generated using [goswag](https://github.com/diegoclair/goswag)
 
+## Running tests
+```bash
+make tests
+```
+## Generating docs
+```bash
+make docs
+```
 
 ##  Contributing
 
