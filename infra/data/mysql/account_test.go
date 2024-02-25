@@ -119,8 +119,6 @@ func TestGetAccountByDocument(t *testing.T) {
 
 func TestGetAccountByDocumentErrorsWithMock(t *testing.T) {
 	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	tests := []struct {
 		name       string
@@ -209,8 +207,6 @@ func TestGetAccounts(t *testing.T) {
 
 func TestGetAccountsErrorsWithMock(t *testing.T) {
 	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	tests := []struct {
 		name       string
@@ -315,8 +311,6 @@ func TestGetAccountByUUID(t *testing.T) {
 
 func TestGetAccountByUUIDErrorsWithMock(t *testing.T) {
 	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	tests := []struct {
 		name       string
@@ -376,8 +370,6 @@ func TestAddTransfer(t *testing.T) {
 
 func TestAddTransferErrorsWithMock(t *testing.T) {
 	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	tests := []struct {
 		name       string
@@ -434,8 +426,6 @@ func TestUpdateBalance(t *testing.T) {
 
 func TestUpdateBalanceErrorsWithMock(t *testing.T) {
 	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	tests := []struct {
 		name       string
@@ -513,8 +503,6 @@ func TestGetTransfersByAccountID(t *testing.T) {
 
 func TestGetTransfersByAccountIDErrorsWithMock(t *testing.T) {
 	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	tests := []struct {
 		name       string
