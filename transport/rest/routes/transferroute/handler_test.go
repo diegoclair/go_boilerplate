@@ -72,7 +72,8 @@ func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, serve
 }
 
 func addAuthorization(ctx context.Context, t *testing.T, req *http.Request, tokenMaker auth.AuthToken, accountUUID, sessionUUID string) {
-	token, _, err := tokenMaker.CreateAccessToken(ctx, accountUUID, sessionUUID)
+
+	token, _, err := tokenMaker.CreateAccessToken(ctx, auth.TokenPayloadInput{AccountUUID: accountUUID, SessionUUID: sessionUUID})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	req.Header.Set(infra.TokenKey.String(), token)

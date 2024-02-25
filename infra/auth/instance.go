@@ -10,9 +10,14 @@ import (
 	"github.com/diegoclair/go_utils/logger"
 )
 
+type TokenPayloadInput struct {
+	AccountUUID string
+	SessionUUID string
+}
+
 type AuthToken interface {
-	CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error)
-	CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error)
+	CreateAccessToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error)
+	CreateRefreshToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error)
 	VerifyToken(ctx context.Context, token string) (*TokenPayload, error)
 }
 

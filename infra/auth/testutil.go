@@ -64,14 +64,14 @@ func copyConfig(cfg *config.Config) *config.Config {
 
 func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
 	var err error
-	token, tokenPayload, err = maker.CreateAccessToken(ctx, args.accountUUID, args.sessionUUID)
+	token, tokenPayload, err = maker.CreateAccessToken(ctx, TokenPayloadInput{AccountUUID: args.accountUUID, SessionUUID: args.sessionUUID})
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
 
 func createTestRefreshToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
 	var err error
-	token, tokenPayload, err = maker.CreateRefreshToken(ctx, args.accountUUID, args.sessionUUID)
+	token, tokenPayload, err = maker.CreateRefreshToken(ctx, TokenPayloadInput{AccountUUID: args.accountUUID, SessionUUID: args.sessionUUID})
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }

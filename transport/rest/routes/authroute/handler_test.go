@@ -74,8 +74,8 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: body.Password,
 				}
 				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
-				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
-				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
+				mock.authToken.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
+				mock.authToken.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
 				mock.authService.EXPECT().CreateSession(ctx, gomock.Any()).DoAndReturn(
 					func(ctx context.Context, req dto.Session) error {
 						require.NotEmpty(t, req.SessionUUID)
@@ -138,7 +138,7 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: body.Password,
 				}
 				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
-				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("", nil, fmt.Errorf("error to create access token")).Times(1)
+				mock.authToken.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("", nil, fmt.Errorf("error to create access token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -160,8 +160,8 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: body.Password,
 				}
 				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
-				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
-				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("", nil, fmt.Errorf("error to create refresh token")).Times(1)
+				mock.authToken.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
+				mock.authToken.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("", nil, fmt.Errorf("error to create refresh token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -183,8 +183,8 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: body.Password,
 				}
 				mock.authService.EXPECT().Login(ctx, input).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
-				mock.authToken.EXPECT().CreateAccessToken(ctx, "uuid", gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
-				mock.authToken.EXPECT().CreateRefreshToken(ctx, "uuid", gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
+				mock.authToken.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
+				mock.authToken.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
 				mock.authService.EXPECT().CreateSession(ctx, gomock.Any()).Return(fmt.Errorf("error to create session")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -257,7 +257,11 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 						RefreshToken:          "r123",
 					}, nil).Times(1)
 
-				mock.authToken.EXPECT().CreateAccessToken(ctx, "aUuid", "sUuid").
+				req := auth.TokenPayloadInput{
+					AccountUUID: "aUuid",
+					SessionUUID: "sUuid",
+				}
+				mock.authToken.EXPECT().CreateAccessToken(ctx, req).
 					Return("a123", &auth.TokenPayload{}, nil).Times(1)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -404,7 +408,12 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 						RefreshToken:          "r123",
 					}, nil).Times(1)
 
-				mock.authToken.EXPECT().CreateAccessToken(ctx, "aUuid", "sUuid").
+				req := auth.TokenPayloadInput{
+					AccountUUID: "aUuid",
+					SessionUUID: "sUuid",
+				}
+
+				mock.authToken.EXPECT().CreateAccessToken(ctx, req).
 					Return("", nil, fmt.Errorf("error to create access token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {

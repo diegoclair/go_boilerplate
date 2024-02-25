@@ -27,12 +27,12 @@ func newJwtAuth(jwtPrivateKey string, log logger.Logger) (AuthToken, error) {
 	}, nil
 }
 
-func (a *jwtAuth) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
-	return a.createToken(ctx, accountUUID, sessionUUID, accessTokenDurationTime)
+func (a *jwtAuth) CreateAccessToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error) {
+	return a.createToken(ctx, input, accessTokenDurationTime)
 }
 
-func (a *jwtAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
-	return a.createToken(ctx, accountUUID, sessionUUID, refreshTokenDurationTime)
+func (a *jwtAuth) CreateRefreshToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error) {
+	return a.createToken(ctx, input, refreshTokenDurationTime)
 }
 
 func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *TokenPayload, err error) {
@@ -67,9 +67,9 @@ func (a *jwtAuth) VerifyToken(ctx context.Context, token string) (payload *Token
 	return payload, nil
 }
 
-func (a *jwtAuth) createToken(ctx context.Context, accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
+func (a *jwtAuth) createToken(ctx context.Context, input TokenPayloadInput, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
 	key := []byte(a.jwtPrivateKey)
-	payload = newPayload(accountUUID, sessionUUID, duration)
+	payload = newPayload(input, duration)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	tokenString, err = token.SignedString(key)

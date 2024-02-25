@@ -51,12 +51,16 @@ func (s *Handler) handleLogin(c echo.Context) error {
 	}
 
 	sessionUUID := uuid.NewV4().String()
-	token, tokenPayload, err := s.authToken.CreateAccessToken(ctx, account.UUID, sessionUUID)
+	req := auth.TokenPayloadInput{
+		AccountUUID: account.UUID,
+		SessionUUID: sessionUUID,
+	}
+	token, tokenPayload, err := s.authToken.CreateAccessToken(ctx, req)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(ctx, account.UUID, sessionUUID)
+	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(ctx, req)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -117,7 +121,11 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
 	}
 
-	accessToken, accessPayload, err := s.authToken.CreateAccessToken(ctx, refreshPayload.AccountUUID, refreshPayload.SessionUUID)
+	req := auth.TokenPayloadInput{
+		AccountUUID: refreshPayload.AccountUUID,
+		SessionUUID: refreshPayload.SessionUUID,
+	}
+	accessToken, accessPayload, err := s.authToken.CreateAccessToken(ctx, req)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}

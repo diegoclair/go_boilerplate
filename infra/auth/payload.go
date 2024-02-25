@@ -13,10 +13,10 @@ type TokenPayload struct {
 	ExpiredAt    time.Time
 }
 
-func newPayload(accountUUID, sessionUUID string, duration time.Duration) *TokenPayload {
+func newPayload(input TokenPayloadInput, duration time.Duration) *TokenPayload {
 	return &TokenPayload{
-		SessionUUID: sessionUUID,
-		AccountUUID: accountUUID,
+		SessionUUID: input.SessionUUID,
+		AccountUUID: input.AccountUUID,
 		IssuedAt:    time.Now(),
 		ExpiredAt:   time.Now().Add(duration),
 	}

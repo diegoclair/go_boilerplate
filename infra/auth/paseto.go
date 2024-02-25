@@ -29,12 +29,12 @@ func newPasetoAuth(symmetricKey string, log logger.Logger) (AuthToken, error) {
 	}, nil
 }
 
-func (a *pasetoAuth) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
-	return a.createToken(ctx, accountUUID, sessionUUID, accessTokenDurationTime)
+func (a *pasetoAuth) CreateAccessToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error) {
+	return a.createToken(ctx, input, accessTokenDurationTime)
 }
 
-func (a *pasetoAuth) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (tokenString string, payload *TokenPayload, err error) {
-	return a.createToken(ctx, accountUUID, sessionUUID, refreshTokenDurationTime)
+func (a *pasetoAuth) CreateRefreshToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error) {
+	return a.createToken(ctx, input, refreshTokenDurationTime)
 }
 
 func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*TokenPayload, error) {
@@ -59,8 +59,8 @@ func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*TokenPaylo
 	return payload, payload.Valid()
 }
 
-func (a *pasetoAuth) createToken(ctx context.Context, accountUUID, sessionUUID string, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
-	payload = newPayload(accountUUID, sessionUUID, duration)
+func (a *pasetoAuth) createToken(ctx context.Context, input TokenPayloadInput, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
+	payload = newPayload(input, duration)
 
 	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)
 	if err != nil {

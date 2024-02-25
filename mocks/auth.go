@@ -36,9 +36,9 @@ func (m *MockAuthToken) EXPECT() *MockAuthTokenMockRecorder {
 }
 
 // CreateAccessToken mocks base method.
-func (m *MockAuthToken) CreateAccessToken(ctx context.Context, accountUUID, sessionUUID string) (string, *auth.TokenPayload, error) {
+func (m *MockAuthToken) CreateAccessToken(ctx context.Context, input auth.TokenPayloadInput) (string, *auth.TokenPayload, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAccessToken", ctx, accountUUID, sessionUUID)
+	ret := m.ctrl.Call(m, "CreateAccessToken", ctx, input)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(*auth.TokenPayload)
 	ret2, _ := ret[2].(error)
@@ -46,15 +46,15 @@ func (m *MockAuthToken) CreateAccessToken(ctx context.Context, accountUUID, sess
 }
 
 // CreateAccessToken indicates an expected call of CreateAccessToken.
-func (mr *MockAuthTokenMockRecorder) CreateAccessToken(ctx, accountUUID, sessionUUID interface{}) *gomock.Call {
+func (mr *MockAuthTokenMockRecorder) CreateAccessToken(ctx, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccessToken", reflect.TypeOf((*MockAuthToken)(nil).CreateAccessToken), ctx, accountUUID, sessionUUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccessToken", reflect.TypeOf((*MockAuthToken)(nil).CreateAccessToken), ctx, input)
 }
 
 // CreateRefreshToken mocks base method.
-func (m *MockAuthToken) CreateRefreshToken(ctx context.Context, accountUUID, sessionUUID string) (string, *auth.TokenPayload, error) {
+func (m *MockAuthToken) CreateRefreshToken(ctx context.Context, input auth.TokenPayloadInput) (string, *auth.TokenPayload, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateRefreshToken", ctx, accountUUID, sessionUUID)
+	ret := m.ctrl.Call(m, "CreateRefreshToken", ctx, input)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(*auth.TokenPayload)
 	ret2, _ := ret[2].(error)
@@ -62,9 +62,9 @@ func (m *MockAuthToken) CreateRefreshToken(ctx context.Context, accountUUID, ses
 }
 
 // CreateRefreshToken indicates an expected call of CreateRefreshToken.
-func (mr *MockAuthTokenMockRecorder) CreateRefreshToken(ctx, accountUUID, sessionUUID interface{}) *gomock.Call {
+func (mr *MockAuthTokenMockRecorder) CreateRefreshToken(ctx, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRefreshToken", reflect.TypeOf((*MockAuthToken)(nil).CreateRefreshToken), ctx, accountUUID, sessionUUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRefreshToken", reflect.TypeOf((*MockAuthToken)(nil).CreateRefreshToken), ctx, input)
 }
 
 // VerifyToken mocks base method.
