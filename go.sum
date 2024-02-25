@@ -78,8 +78,8 @@ github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/r
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
 github.com/diegoclair/go_utils v1.0.1 h1:Rfg3/gVapv+EtjjmLoTOueimCfSeRrVKTBwkHCjHm1k=
 github.com/diegoclair/go_utils v1.0.1/go.mod h1:S6UstwCUwsnePNuaFI/RtWaXl1jA6T8CvoFEN9FOUKI=
-github.com/diegoclair/goswag v1.0.4 h1:6qiYUt+pUL+8cq8eAX/6hr3TtJ4aK9ZrjlSsNM3WRos=
-github.com/diegoclair/goswag v1.0.4/go.mod h1:1UCALDkM8ix9C/fkS5kGAcDgJoryZNSawaDeFHd1uqI=
+github.com/diegoclair/goswag v1.0.5 h1:HoeM9uPKkwZBNiREQoWVcKaOXj5leDL6SApQDzEh1xE=
+github.com/diegoclair/goswag v1.0.5/go.mod h1:1UCALDkM8ix9C/fkS5kGAcDgJoryZNSawaDeFHd1uqI=
 github.com/distribution/reference v0.5.0 h1:/FUIFXtfc/x2gpa5/VGfiGLuOIdYa1t65IKK2OFGvA0=
 github.com/distribution/reference v0.5.0/go.mod h1:BbU0aIcezP1/5jX/8MP0YiH4SdvB5Y4f/wlDRiLyi3E=
 github.com/docker/docker v25.0.2+incompatible h1:/OaKeauroa10K4Nqavw4zlhcDq/WBcPMc5DbjOGgozY=

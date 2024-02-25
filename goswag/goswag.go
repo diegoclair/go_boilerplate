@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	_ "github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 )
 
 //	@Summary		Add a new transfer
