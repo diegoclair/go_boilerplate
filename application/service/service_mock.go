@@ -51,10 +51,16 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
-	svc = newService(dm, cfg, cm, crypto, log, v)
+	svc = &service{}
+	WithDataManager(dm)(svc)
+	WithConfig(cfg)(svc)
+	WithCacheManager(cm)(svc)
+	WithLogger(log)(svc)
+	WithCrypto(crypto)(svc)
+	WithValidator(v)(svc)
 
 	// validate func New
-	s, err := New(dm, cfg, cm, crypto, log, v)
+	s, err := New(WithDataManager(dm))
 	require.NoError(t, err)
 	require.NotNil(t, s)
 

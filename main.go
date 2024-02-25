@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	application "github.com/diegoclair/go_boilerplate/application/service"
+	"github.com/diegoclair/go_boilerplate/application/service"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/cache"
 	"github.com/diegoclair/go_boilerplate/infra/config"
@@ -58,12 +58,19 @@ func main() {
 		log.Fatalf(ctx, "error to get validator: %v", err)
 	}
 
-	apps, err := application.New(data, cfg, cache, c, log, v)
+	services, err := service.New(
+		service.WithDataManager(data),
+		service.WithConfig(cfg),
+		service.WithCacheManager(cache),
+		service.WithLogger(log),
+		service.WithCrypto(c),
+		service.WithValidator(v),
+	)
 	if err != nil {
 		log.Fatalf(ctx, "error to get domain services: %v", err)
 	}
 
-	server := rest.StartRestServer(ctx, cfg, apps, log, authToken)
+	server := rest.StartRestServer(ctx, cfg, services, log, authToken)
 
 	gracefulShutdown(server, log)
 }

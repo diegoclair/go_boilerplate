@@ -13,10 +13,15 @@ type Services struct {
 	TransferService contract.TransferService
 }
 
-// New to get instance of all services
-func New(dm contract.DataManager, cfg *config.Config, cache contract.CacheManager, crypto contract.Crypto, log logger.Logger, v validator.Validator) (*Services, error) {
+type ServiceOptions func(*service)
 
-	svc := newService(dm, cfg, cache, crypto, log, v)
+// New to get instance of all services
+func New(svcOptions ...ServiceOptions) (*Services, error) {
+
+	svc := &service{}
+	for _, opt := range svcOptions {
+		opt(svc)
+	}
 
 	return &Services{
 		AccountService:  newAccountService(svc),
@@ -34,15 +39,38 @@ type service struct {
 	validator validator.Validator
 }
 
-// newService has instances that will be used by the specific services
-func newService(dm contract.DataManager, cfg *config.Config, cache contract.CacheManager, crypto contract.Crypto, log logger.Logger, validator validator.Validator) *service {
-	svc := new(service)
-	svc.dm = dm
-	svc.cfg = cfg
-	svc.cache = cache
-	svc.log = log
-	svc.crypto = crypto
-	svc.validator = validator
+func WithDataManager(dm contract.DataManager) ServiceOptions {
+	return func(s *service) {
+		s.dm = dm
+	}
+}
 
-	return svc
+func WithConfig(cfg *config.Config) ServiceOptions {
+	return func(s *service) {
+		s.cfg = cfg
+	}
+}
+
+func WithCacheManager(cache contract.CacheManager) ServiceOptions {
+	return func(s *service) {
+		s.cache = cache
+	}
+}
+
+func WithLogger(log logger.Logger) ServiceOptions {
+	return func(s *service) {
+		s.log = log
+	}
+}
+
+func WithCrypto(crypto contract.Crypto) ServiceOptions {
+	return func(s *service) {
+		s.crypto = crypto
+	}
+}
+
+func WithValidator(v validator.Validator) ServiceOptions {
+	return func(s *service) {
+		s.validator = v
+	}
 }
