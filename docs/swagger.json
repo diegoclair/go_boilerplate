@@ -320,7 +320,9 @@
             ],
             "properties": {
                 "cpf": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 11
                 },
                 "name": {
                     "type": "string",
@@ -351,7 +353,9 @@
             ],
             "properties": {
                 "cpf": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 11
                 },
                 "password": {
                     "type": "string",

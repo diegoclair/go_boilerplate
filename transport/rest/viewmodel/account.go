@@ -7,10 +7,12 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 )
 
+// validate tags are necessary to generate swagger correctly
+
 type AddAccount struct {
-	Name     string `json:"name,omitempty"`
-	CPF      string `json:"cpf,omitempty"`
-	Password string `json:"password,omitempty"`
+	Name     string `json:"name,omitempty" validate:"required,min=3"`
+	CPF      string `json:"cpf,omitempty" validate:"required,min=11,max=11"`
+	Password string `json:"password,omitempty" validate:"required,min=8"`
 }
 
 func (a *AddAccount) ToDto() dto.AccountInput {
@@ -38,7 +40,7 @@ func (a *AccountResponse) FillFromEntity(account entity.Account) {
 }
 
 type AddBalance struct {
-	Amount float64 `json:"amount"`
+	Amount float64 `json:"amount" validate:"required,gt=0"`
 }
 
 func (a *AddBalance) ToDto(accountUUID string) dto.AddBalanceInput {

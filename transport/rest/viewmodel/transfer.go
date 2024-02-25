@@ -7,9 +7,11 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 )
 
+// validate tags are necessary to generate swagger correctly
+
 type TransferReq struct {
-	AccountDestinationUUID string  `json:"account_destination_id,omitempty"`
-	Amount                 float64 `json:"amount,omitempty"`
+	AccountDestinationUUID string  `json:"account_destination_id" validate:"required,uuid"`
+	Amount                 float64 `json:"amount" validate:"required,gt=0"`
 }
 
 func (t *TransferReq) ToDto() dto.TransferInput {

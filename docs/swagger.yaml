@@ -20,6 +20,8 @@ definitions:
   viewmodel.AddAccount:
     properties:
       cpf:
+        maxLength: 11
+        minLength: 11
         type: string
       name:
         minLength: 3
@@ -42,6 +44,8 @@ definitions:
   viewmodel.Login:
     properties:
       cpf:
+        maxLength: 11
+        minLength: 11
         type: string
       password:
         minLength: 8

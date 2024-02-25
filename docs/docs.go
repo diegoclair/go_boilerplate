@@ -324,7 +324,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "cpf": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 11
                 },
                 "name": {
                     "type": "string",
@@ -355,7 +357,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "cpf": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 11
                 },
                 "password": {
                     "type": "string",

@@ -6,9 +6,11 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/dto"
 )
 
+// validate tags are necessary to generate swagger correctly
+
 type Login struct {
-	CPF      string `json:"cpf,omitempty"`
-	Password string `json:"password,omitempty"`
+	CPF      string `json:"cpf" validate:"required,min=11,max=11"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 func (l *Login) ToDto() dto.LoginInput {
