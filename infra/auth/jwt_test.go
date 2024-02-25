@@ -18,8 +18,10 @@ func TestJWTTokenMaker(t *testing.T) {
 		{
 			name: "Should create token without error",
 			args: utilArgs{
-				accountUUID:          "account-123",
-				sessionUUID:          "session-123",
+				payload: TokenPayloadInput{
+					AccountUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd",
+					SessionUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd",
+				},
 				accessTokenDuration:  time.Second,
 				refreshTokenDuration: time.Second * 2,
 			},
@@ -90,8 +92,8 @@ func Test_jwtAuth_VerifyToken(t *testing.T) {
 				return
 			}
 
-			require.Equal(t, tt.args.sessionUUID, gotPayload.SessionUUID)
-			require.Equal(t, tt.args.accountUUID, gotPayload.AccountUUID)
+			require.Equal(t, tt.args.payload.SessionUUID, gotPayload.SessionUUID)
+			require.Equal(t, tt.args.payload.AccountUUID, gotPayload.AccountUUID)
 			require.WithinDuration(t, tokenPayload.IssuedAt, gotPayload.IssuedAt, 1*time.Second)
 			require.WithinDuration(t, tokenPayload.ExpiredAt, gotPayload.ExpiredAt, 1*time.Second)
 		})

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSession_ToEntityValidate(t *testing.T) {
+func TestSession_Validate(t *testing.T) {
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 

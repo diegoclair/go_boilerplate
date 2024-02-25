@@ -12,8 +12,7 @@ import (
 
 type utilArgs struct {
 	emptyToken           bool
-	accountUUID          string
-	sessionUUID          string
+	payload              TokenPayloadInput
 	accessTokenDuration  time.Duration
 	refreshTokenDuration time.Duration
 	tokenType            string
@@ -64,14 +63,14 @@ func copyConfig(cfg *config.Config) *config.Config {
 
 func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
 	var err error
-	token, tokenPayload, err = maker.CreateAccessToken(ctx, TokenPayloadInput{AccountUUID: args.accountUUID, SessionUUID: args.sessionUUID})
+	token, tokenPayload, err = maker.CreateAccessToken(ctx, args.payload)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
 
 func createTestRefreshToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
 	var err error
-	token, tokenPayload, err = maker.CreateRefreshToken(ctx, TokenPayloadInput{AccountUUID: args.accountUUID, SessionUUID: args.sessionUUID})
+	token, tokenPayload, err = maker.CreateRefreshToken(ctx, args.payload)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
@@ -82,8 +81,8 @@ func validateTokenCreation(t *testing.T, args utilArgs, token string, tokenPaylo
 	require.NotNil(t, tokenPayload)
 	require.NotEmpty(t, tokenPayload)
 
-	require.Equal(t, args.accountUUID, tokenPayload.AccountUUID)
-	require.Equal(t, args.sessionUUID, tokenPayload.SessionUUID)
+	require.Equal(t, args.payload.AccountUUID, tokenPayload.AccountUUID)
+	require.Equal(t, args.payload.SessionUUID, tokenPayload.SessionUUID)
 	require.NotZero(t, tokenPayload.IssuedAt)
 	require.NotZero(t, tokenPayload.ExpiredAt)
 }
@@ -95,14 +94,12 @@ func validateTokenMaker(t *testing.T, args utilArgs) {
 	require.NotNil(t, cfg)
 
 	maker, err := NewAuthToken(cfg.App.Auth, logger.NewNoop())
-	if args.wantErr != (err != nil) {
-		t.Errorf("NewAuthToken() error = %v, wantErr %v", err, args.wantErr)
-	}
-	require.Equal(t, args.wantErrValue, err)
-
 	if args.wantErr {
+		require.Equal(t, args.wantErrValue, err)
 		return
 	}
+	require.NoError(t, err)
+
 	createTestAccessToken(ctx, t, maker, args)
 	createTestRefreshToken(ctx, t, maker, args)
 }
