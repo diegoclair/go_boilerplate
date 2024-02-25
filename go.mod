@@ -22,7 +22,6 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/testcontainers/testcontainers-go v0.28.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.28.0
-	github.com/testcontainers/testcontainers-go/modules/redis v0.28.0
 	github.com/twinj/uuid v1.0.0
 	golang.org/x/crypto v0.18.0
 )
