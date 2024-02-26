@@ -1,6 +1,7 @@
 package pingroute
 
 import (
+	"net/http"
 	"sync"
 
 	"github.com/labstack/echo/v4"
@@ -30,5 +31,5 @@ func (s *Handler) handlePing(c echo.Context) error {
 		Message: "pong",
 	}
 
-	return c.JSON(200, response)
+	return c.JSON(http.StatusOK, response)
 }
