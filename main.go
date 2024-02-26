@@ -37,25 +37,29 @@ func main() {
 
 	authToken, err := auth.NewAuthToken(cfg.App.Auth, log)
 	if err != nil {
-		log.Fatalf(ctx, "Error getting NewAuthToken: %v", err)
+		log.Errorf(ctx, "Error getting NewAuthToken: %v", err)
+		return
 	}
 
 	data, err := data.Connect(ctx, cfg, log)
 	if err != nil {
-		log.Fatalf(ctx, "Error to connect dataManager repositories: %v", err)
+		log.Errorf(ctx, "Error to connect dataManager repositories: %v", err)
+		return
 	}
 
 	log.Infof(ctx, "Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
 	cache, err := cache.Instance(ctx, cfg, log)
 	if err != nil {
-		log.Fatalf(ctx, "Error connecting to cache server: %v", err)
+		log.Errorf(ctx, "Error connecting to cache server: %v", err)
+		return
 	}
 
 	c := crypto.NewCrypto()
 
 	v, err := validator.NewValidator()
 	if err != nil {
-		log.Fatalf(ctx, "error to get validator: %v", err)
+		log.Errorf(ctx, "error to get validator: %v", err)
+		return
 	}
 
 	services, err := service.New(
@@ -67,7 +71,8 @@ func main() {
 		service.WithValidator(v),
 	)
 	if err != nil {
-		log.Fatalf(ctx, "error to get domain services: %v", err)
+		log.Errorf(ctx, "error to get domain services: %v", err)
+		return
 	}
 
 	server := rest.StartRestServer(ctx, cfg, services, log, authToken)
