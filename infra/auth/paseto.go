@@ -56,7 +56,7 @@ func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*TokenPaylo
 		return nil, resterrors.NewUnauthorizedError(err.Error())
 	}
 
-	return payload, payload.Valid()
+	return payload, nil
 }
 
 func (a *pasetoAuth) createToken(ctx context.Context, input TokenPayloadInput, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
