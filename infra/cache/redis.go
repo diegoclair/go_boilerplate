@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 
@@ -61,7 +62,7 @@ func newRedisCache(ctx context.Context, cfg *config.Config, log logger.Logger) (
 // GetItem returns an Item from cache
 func (r *redisCache) GetItem(ctx context.Context, key string) (data []byte, err error) {
 	val, err := r.redis.Get(ctx, key).Bytes()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return val, ErrCacheMiss
 	} else if err != nil {
 		return val, err
@@ -93,7 +94,7 @@ func (r *redisCache) SetItemWithExpiration(ctx context.Context, key string, data
 // GetInt returns an int64 from cache
 func (r *redisCache) GetInt(ctx context.Context, key string) (data int64, err error) {
 	val, err := r.GetItem(ctx, key)
-	if err == ErrCacheMiss {
+	if errors.Is(err, ErrCacheMiss) {
 		return data, ErrCacheMiss
 	} else if err != nil {
 		return data, err
@@ -105,7 +106,7 @@ func (r *redisCache) GetInt(ctx context.Context, key string) (data int64, err er
 // GetString returns an string from cache
 func (r *redisCache) GetString(ctx context.Context, key string) (data string, err error) {
 	val, err := r.GetItem(ctx, key)
-	if err == ErrCacheMiss {
+	if errors.Is(err, ErrCacheMiss) {
 		return data, ErrCacheMiss
 	} else if err != nil {
 		return data, err
@@ -220,7 +221,7 @@ func (r *redisCache) Delete(ctx context.Context, keys ...string) (err error) {
 // CleanAll clean everything with the prefix.
 func (r *redisCache) CleanAll(ctx context.Context) (err error) {
 	keys, err := r.redis.Keys(ctx, "*").Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return ErrCacheMiss
 	} else if err != nil {
 		return err
@@ -228,7 +229,7 @@ func (r *redisCache) CleanAll(ctx context.Context) (err error) {
 
 	if len(keys) > 0 {
 		err = r.redis.Del(ctx, keys...).Err()
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return ErrCacheMiss
 		} else if err != nil {
 			return err
