@@ -45,7 +45,7 @@ services:
       - ./.docker/volumes/dbdata:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=licitanow_db
+      - MYSQL_DATABASE=go_boilerplate_db
       - MYSQL_USER=user
       - MYSQL_PASSWORD=root
     networks:
