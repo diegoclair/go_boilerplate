@@ -1,12 +1,12 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 	"strings"
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/labstack/gommon/log"
 	"github.com/spf13/viper"
 )
 
@@ -56,7 +56,7 @@ func GetConfigEnvironment(profile Profile) (*Config, error) {
 
 		configError = viper.ReadInConfig()
 		if configError != nil {
-			log.Error("Error to read configs: ", configError)
+			slog.Error("Error to read configs: ", configError)
 			return
 		}
 
@@ -76,7 +76,7 @@ func GetConfigEnvironment(profile Profile) (*Config, error) {
 		config = &Config{}
 		configError = viper.Unmarshal(config)
 		if configError != nil {
-			log.Error("Error to unmarshal configs: ", configError)
+			slog.Error("Error to unmarshal configs: ", configError)
 			return
 		}
 
@@ -85,7 +85,7 @@ func GetConfigEnvironment(profile Profile) (*Config, error) {
 			if in.Op == fsnotify.Write {
 				err := viper.Unmarshal(config)
 				if err != nil {
-					log.Error("Error to unmarshal new config changes: ", err)
+					slog.Error("Error to unmarshal new config changes: ", err)
 					return
 				}
 			}
