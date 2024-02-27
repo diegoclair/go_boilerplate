@@ -13,7 +13,6 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo/v4 v4.11.4
-	github.com/labstack/gommon v0.4.2
 	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
 	github.com/o1egl/paseto v1.0.0
 	github.com/redis/go-redis/v9 v9.5.1
@@ -79,6 +78,7 @@ require (
 	github.com/klassmann/cpfcnpj v0.0.0-20200907140233-a595c5fd8de1 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
