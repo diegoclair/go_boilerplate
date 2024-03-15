@@ -51,7 +51,7 @@ And we are also using mocks to test the errors scenarios, this way we can achiev
 
 ### Prerequisites ❗
 * Ensure Docker is installed on your machine.
-* An installation of Go 1.18 or later. For installation instructions, see [Installing Go](https://go.dev/doc/install).
+* An installation of Go 1.21.0 or later. For installation instructions, see [Installing Go](https://go.dev/doc/install).
 
 ### ▶️ Launching the Application 
 To start the application, execute the command: 
