@@ -38,7 +38,7 @@ func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (err 
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(
+	_, err = stmt.ExecContext(ctx,
 		session.SessionUUID,
 		session.AccountID,
 		session.RefreshToken,
@@ -81,7 +81,7 @@ func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (se
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(sessionUUID)
+	row := stmt.QueryRowContext(ctx, sessionUUID)
 
 	err = row.Scan(
 		&session.SessionID,

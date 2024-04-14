@@ -67,7 +67,7 @@ func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, acco
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(
+	_, err = stmt.ExecContext(ctx,
 		transferUUID,
 		accountOriginID,
 		accountDestinationID,
@@ -97,7 +97,7 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account)
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(
+	result, err := stmt.ExecContext(ctx,
 		account.UUID,
 		account.Name,
 		account.CPF,
@@ -126,7 +126,7 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 		return account, mysqlutils.HandleMySQLError(err)
 	}
 	defer stmt.Close()
-	row := stmt.QueryRow(encryptedCPF)
+	row := stmt.QueryRowContext(ctx, encryptedCPF)
 
 	account, err = r.parseAccount(row)
 	if err != nil {
@@ -172,7 +172,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 
 	defer stmt.Close()
 
-	rows, err := stmt.Query(params...)
+	rows, err := stmt.QueryContext(ctx, params...)
 	if err != nil {
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
@@ -205,7 +205,7 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(params...)
+	row := stmt.QueryRowContext(ctx, params...)
 	account, err = r.parseAccount(row)
 	if err != nil {
 		return account, mysqlutils.HandleMySQLError(err)
@@ -278,7 +278,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 
 	defer stmt.Close()
 
-	rows, err := stmt.Query(params...)
+	rows, err := stmt.QueryContext(ctx, params...)
 	if err != nil {
 		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
@@ -321,7 +321,7 @@ func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64,
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(params...)
+	_, err = stmt.ExecContext(ctx, params...)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
 	}

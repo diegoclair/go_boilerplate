@@ -25,7 +25,7 @@ func getTotalRecordsFromQuery(ctx context.Context, db dbConn, query string, args
 
 	defer stmt.Close()
 
-	row := stmt.QueryRow(args...)
+	row := stmt.QueryRowContext(ctx, args...)
 
 	err = row.Scan(&totalRecords)
 	if err != nil {
