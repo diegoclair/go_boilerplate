@@ -22,10 +22,10 @@ import (
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/goswag"
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
+	"go.uber.org/mock/gomock"
 )
 
 var (

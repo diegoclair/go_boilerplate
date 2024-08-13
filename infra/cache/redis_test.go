@@ -10,9 +10,9 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/golang/mock/gomock"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func getRedisCacheMock(ctrl *gomock.Controller) (*redisCache, *mocks.MockIRedisCache) {

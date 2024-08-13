@@ -9,10 +9,10 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_boilerplate/util/random"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
+	"go.uber.org/mock/gomock"
 )
 
 func createRandomAccount(t *testing.T) entity.Account {
