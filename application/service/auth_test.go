@@ -47,11 +47,30 @@ func Test_authService_Login(t *testing.T) {
 						Name:     "name",
 						CPF:      args.cpf,
 						Password: args.password,
+						Active:   true,
 					}, nil).Times(1),
 
 					mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).Return(nil).Times(1),
 				)
 			},
+		},
+		{
+			name: "Should return error when the account is not active",
+			args: args{
+				cpf:      "01234567890",
+				password: "01234567890",
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
+					ID:       1,
+					UUID:     "uuid",
+					Name:     "name",
+					CPF:      args.cpf,
+					Password: args.password,
+					Active:   false,
+				}, nil).Times(1)
+			},
+			wantErr: true,
 		},
 		{
 			name: "Should return error when there is some error to get account by document",
@@ -78,6 +97,7 @@ func Test_authService_Login(t *testing.T) {
 					Name:     "name",
 					CPF:      args.cpf,
 					Password: args.password,
+					Active:   true,
 				}, nil).Times(1)
 
 				mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).Return(errors.New("some error")).Times(1)
