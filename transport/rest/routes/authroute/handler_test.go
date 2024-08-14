@@ -35,8 +35,8 @@ func getServerTest(t *testing.T) (authMock mock, server goswag.Echo, ctrl *gomoc
 		authToken:   mocks.NewMockAuthToken(ctrl),
 	}
 
-	accountHandler := NewHandler(authMock.authService, authMock.authToken)
-	accountRoute := NewRouter(accountHandler, RouteName)
+	authHandler := NewHandler(authMock.authService, authMock.authToken)
+	authRoute := NewRouter(authHandler, RouteName)
 
 	server = goswag.NewEcho()
 	appGroup := server.Group("/")
@@ -44,7 +44,7 @@ func getServerTest(t *testing.T) (authMock mock, server goswag.Echo, ctrl *gomoc
 		AppGroup: appGroup,
 	}
 
-	accountRoute.RegisterRoutes(g)
+	authRoute.RegisterRoutes(g)
 	return
 }
 
