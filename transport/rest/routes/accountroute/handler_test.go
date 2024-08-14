@@ -68,7 +68,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, dto.AccountInput{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(nil)
+				mock.accountService.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -96,7 +96,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, dto.AccountInput{Name: body.Name, CPF: body.CPF, Password: body.Password}).Times(1).Return(errors.New("some error"))
+				mock.accountService.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -332,12 +332,9 @@ func TestHandler_handleAddBalance(t *testing.T) {
 				accountUUID: "random",
 			},
 			buildMocks: func(ctx context.Context, mock mock, args args) {
-				input := dto.AddBalanceInput{
-					AccountUUID: "random",
-					Amount:      args.body.(viewmodel.AddBalance).Amount,
-				}
+				body := args.body.(viewmodel.AddBalance)
 
-				mock.accountService.EXPECT().AddBalance(ctx, input).Times(1).Return(nil)
+				mock.accountService.EXPECT().AddBalance(ctx, body.ToDto(args.accountUUID)).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
