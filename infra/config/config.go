@@ -56,7 +56,7 @@ func GetConfigEnvironment(profile Profile) (*Config, error) {
 
 		configError = viper.ReadInConfig()
 		if configError != nil {
-			slog.Error("Error to read configs: ", configError)
+			slog.Error("Error to read configs: ", slog.String("error", configError.Error()))
 			return
 		}
 
@@ -76,7 +76,7 @@ func GetConfigEnvironment(profile Profile) (*Config, error) {
 		config = &Config{}
 		configError = viper.Unmarshal(config)
 		if configError != nil {
-			slog.Error("Error to unmarshal configs: ", configError)
+			slog.Error("Error to unmarshal configs: ", slog.String("error", configError.Error()))
 			return
 		}
 
@@ -85,7 +85,7 @@ func GetConfigEnvironment(profile Profile) (*Config, error) {
 			if in.Op == fsnotify.Write {
 				err := viper.Unmarshal(config)
 				if err != nil {
-					slog.Error("Error to unmarshal new config changes: ", err)
+					slog.Error("Error to unmarshal new config changes: ", slog.String("error", err.Error()))
 					return
 				}
 			}
