@@ -6,7 +6,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_utils/resterrors"
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 func AuthMiddlewarePrivateRoute(authToken auth.AuthToken) echo.MiddlewareFunc {

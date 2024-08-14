@@ -6,7 +6,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils/resterrors"
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 // BuildPaginatedResult is a function that builds a paginated result based on the given parameters.
