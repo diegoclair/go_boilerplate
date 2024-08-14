@@ -32,7 +32,7 @@ func (s *authService) Login(ctx context.Context, input dto.LoginInput) (account 
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	err = input.Validate(s.svc.validator)
+	err = input.Validate(ctx, s.svc.validator)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
 		return account, err
@@ -65,7 +65,7 @@ func (s *authService) CreateSession(ctx context.Context, session dto.Session) (e
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	err = session.Validate(s.svc.validator)
+	err = session.Validate(ctx, s.svc.validator)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
 		return err

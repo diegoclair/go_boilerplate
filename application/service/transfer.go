@@ -27,7 +27,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	transfer, err := input.ToEntityValidate(s.svc.validator)
+	transfer, err := input.ToEntityValidate(ctx, s.svc.validator)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
 		return err

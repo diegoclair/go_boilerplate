@@ -5,6 +5,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils/validator"
+	"golang.org/x/net/context"
 )
 
 type Session struct {
@@ -18,13 +19,8 @@ type Session struct {
 	RefreshTokenExpiredAt time.Time
 }
 
-func (s *Session) Validate(v validator.Validator) error {
-	err := v.ValidateStruct(s)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (s *Session) Validate(ctx context.Context, v validator.Validator) error {
+	return v.ValidateStruct(ctx, s)
 }
 
 type LoginInput struct {
@@ -33,13 +29,7 @@ type LoginInput struct {
 }
 
 // Validate validate the input
-func (l *LoginInput) Validate(v validator.Validator) error {
+func (l *LoginInput) Validate(ctx context.Context, v validator.Validator) error {
 	l.CPF = number.CleanNumber(l.CPF)
-
-	err := v.ValidateStruct(l)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return v.ValidateStruct(ctx, l)
 }

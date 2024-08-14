@@ -25,7 +25,7 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	account, err := input.ToEntityValidate(s.svc.validator)
+	account, err := input.ToEntityValidate(ctx, s.svc.validator)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
 		return err
@@ -60,7 +60,7 @@ func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInp
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	err = input.Validate(s.svc.validator)
+	err = input.Validate(ctx, s.svc.validator)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error or invalid input: %s", err.Error())
 		return err

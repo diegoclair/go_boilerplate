@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"context"
+
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/number"
 	"github.com/diegoclair/go_utils/validator"
@@ -13,10 +15,10 @@ type AccountInput struct {
 }
 
 // ToEntityValidate validate the input and return the entity
-func (a *AccountInput) ToEntityValidate(validator validator.Validator) (account entity.Account, err error) {
+func (a *AccountInput) ToEntityValidate(ctx context.Context, validator validator.Validator) (account entity.Account, err error) {
 	a.CPF = number.CleanNumber(a.CPF)
 
-	err = validator.ValidateStruct(a)
+	err = validator.ValidateStruct(ctx, a)
 	if err != nil {
 		return account, err
 	}
@@ -36,11 +38,6 @@ type AddBalanceInput struct {
 }
 
 // Validate validate the input
-func (a *AddBalanceInput) Validate(validator validator.Validator) error {
-	err := validator.ValidateStruct(a)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (a *AddBalanceInput) Validate(ctx context.Context, validator validator.Validator) error {
+	return validator.ValidateStruct(ctx, a)
 }

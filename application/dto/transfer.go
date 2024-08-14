@@ -3,6 +3,7 @@ package dto
 import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_utils/validator"
+	"golang.org/x/net/context"
 )
 
 type TransferInput struct {
@@ -11,8 +12,8 @@ type TransferInput struct {
 }
 
 // ToEntityValidate validate the input and return the entity
-func (t *TransferInput) ToEntityValidate(v validator.Validator) (transfer entity.Transfer, err error) {
-	err = v.ValidateStruct(t)
+func (t *TransferInput) ToEntityValidate(ctx context.Context, v validator.Validator) (transfer entity.Transfer, err error) {
+	err = v.ValidateStruct(ctx, t)
 	if err != nil {
 		return transfer, err
 	}

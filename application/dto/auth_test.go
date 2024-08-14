@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"context"
 	"testing"
 
 	"github.com/diegoclair/go_utils/validator"
@@ -8,6 +9,7 @@ import (
 )
 
 func TestSession_Validate(t *testing.T) {
+	ctx := context.Background()
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
@@ -52,7 +54,7 @@ func TestSession_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err = tt.fields.Validate(v)
+			err = tt.fields.Validate(ctx, v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Session.Validate() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -62,6 +64,7 @@ func TestSession_Validate(t *testing.T) {
 }
 
 func TestLoginInput_Validate(t *testing.T) {
+	ctx := context.Background()
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
@@ -111,7 +114,7 @@ func TestLoginInput_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err = tt.fields.Validate(v)
+			err = tt.fields.Validate(ctx, v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LoginInput.Validate() error = %v, wantErr %v", err, tt.wantErr)
 				return

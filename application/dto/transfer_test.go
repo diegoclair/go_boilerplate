@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"context"
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
@@ -10,6 +11,7 @@ import (
 )
 
 func TestTransferInput_ToEntityValidate(t *testing.T) {
+	ctx := context.Background()
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
@@ -63,7 +65,7 @@ func TestTransferInput_ToEntityValidate(t *testing.T) {
 				Amount:                 tt.fields.Amount,
 			}
 
-			gotTransfer, err := tInput.ToEntityValidate(v)
+			gotTransfer, err := tInput.ToEntityValidate(ctx, v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("TransferInput.ToEntityValidate() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"context"
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/entity"
@@ -10,6 +11,7 @@ import (
 )
 
 func TestAccountInput_ToEntityValidate(t *testing.T) {
+	ctx := context.Background()
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
@@ -109,7 +111,7 @@ func TestAccountInput_ToEntityValidate(t *testing.T) {
 				Password: tt.fields.Password,
 			}
 
-			gotEntity, err := aInput.ToEntityValidate(v)
+			gotEntity, err := aInput.ToEntityValidate(ctx, v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("AccountInput.ToEntityValidate() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -120,6 +122,7 @@ func TestAccountInput_ToEntityValidate(t *testing.T) {
 }
 
 func TestAddBalanceInput_Validate(t *testing.T) {
+	ctx := context.Background()
 	v, err := validator.NewValidator()
 	require.NoError(t, err)
 
@@ -164,7 +167,7 @@ func TestAddBalanceInput_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err = tt.fields.Validate(v)
+			err = tt.fields.Validate(ctx, v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("AddBalanceInput.Validate() error = %v, wantErr %v", err, tt.wantErr)
 				return
