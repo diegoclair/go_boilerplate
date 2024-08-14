@@ -26,7 +26,8 @@ const querySelectBase string = `
 			ta.cpf,
 			ta.balance,
 			ta.secret,
-			ta.created_at
+			ta.created_at,
+			ta.active
 		
 		FROM tab_account 				ta
 		`
@@ -41,6 +42,7 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 		&account.Balance,
 		&account.Password,
 		&account.CreatedAT,
+		&account.Active,
 	)
 
 	if err != nil {

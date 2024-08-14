@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	wrongLogin string = "Document or password are wrong"
+	wrongLogin            string = "Document or password are wrong"
+	errDeactivatedAccount string = "Account is deactivated"
 )
 
 type authService struct {
@@ -45,6 +46,11 @@ func (s *authService) Login(ctx context.Context, input dto.LoginInput) (account 
 	}
 
 	ctx = context.WithValue(ctx, infra.AccountUUIDKey, account.UUID) // set account uuid in context to be used in logs
+
+	if !account.Active {
+		s.svc.log.Error(ctx, "account is not active")
+		return account, resterrors.NewUnauthorizedError(errDeactivatedAccount)
+	}
 
 	s.svc.log.Infow(ctx, "account information used to login",
 		slog.Group("accountInfo",

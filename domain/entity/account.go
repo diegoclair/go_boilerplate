@@ -14,6 +14,7 @@ type Account struct {
 	Balance   float64
 	Password  string
 	CreatedAT time.Time
+	Active    bool
 }
 
 func (a *Account) AddBalance(amount float64) {
