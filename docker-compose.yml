@@ -20,7 +20,7 @@ services:
       - app-network
 
   cache:
-    container_name: cache-redis
+    container_name: go-boilerplate-cache-redis
     image: redis:7.2-alpine
     restart: unless-stopped
     ports:
