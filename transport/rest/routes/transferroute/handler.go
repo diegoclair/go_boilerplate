@@ -64,7 +64,7 @@ func (s *Handler) handleGetTransfers(c echo.Context) error {
 		response = append(response, resp)
 	}
 
-	responsePaginated := routeutils.BuildPaginatedResult(response, skip, take, totalRecords)
+	responsePaginated := viewmodel.BuildPaginatedResponse(response, skip, take, totalRecords)
 
 	return routeutils.ResponseAPIOk(c, responsePaginated)
 }

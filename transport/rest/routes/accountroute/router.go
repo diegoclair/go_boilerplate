@@ -49,7 +49,7 @@ func (r *UserRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 		Returns([]models.ReturnType{
 			{
 				StatusCode: http.StatusOK,
-				Body:       viewmodel.PaginatedResult[[]viewmodel.AccountResponse]{},
+				Body:       viewmodel.PaginatedResponse[[]viewmodel.AccountResponse]{},
 			},
 		}).
 		QueryParam("page", "number of page you want", goswag.StringType, false).

@@ -1,29 +1,11 @@
 package routeutils
 
 import (
-	"math"
 	"net/http"
 
-	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/diegoclair/go_utils/resterrors"
 	echo "github.com/labstack/echo/v4"
 )
-
-// BuildPaginatedResult is a function that builds a paginated result based on the given parameters.
-// It takes a list of type T, the number of records to skip, the number of records to take,
-// and the total number of records available.
-// It returns a PaginatedResult of type T, which contains the paginated list and pagination information.
-func BuildPaginatedResult[T any](list T, skip int64, take int64, totalRecords int64) viewmodel.PaginatedResult[T] {
-	return viewmodel.PaginatedResult[T]{
-		List: list,
-		Pagination: viewmodel.ReturnPagination{
-			CurrentPage:    (skip / take) + 1,
-			RecordsPerPage: take,
-			TotalRecords:   totalRecords,
-			TotalPages:     int64(math.Ceil(float64(totalRecords) / float64(take))),
-		},
-	}
-}
 
 const ErrorMessageServiceUnavailable = "Service temporarily unavailable"
 

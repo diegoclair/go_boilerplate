@@ -40,7 +40,7 @@ func (r *TransferRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 		Returns([]models.ReturnType{
 			{
 				StatusCode: http.StatusOK,
-				Body:       viewmodel.PaginatedResult[[]viewmodel.TransferResp]{},
+				Body:       viewmodel.PaginatedResponse[[]viewmodel.TransferResp]{},
 			},
 		})
 }
