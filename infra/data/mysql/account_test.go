@@ -27,7 +27,7 @@ func createRandomAccount(t *testing.T) entity.Account {
 		err error
 	)
 
-	args.Password, err = c.HashPassword(random.RandomSecret())
+	args.Password, err = c.HashPassword(random.RandomPassword())
 	require.NoError(t, err)
 
 	createID, err := testMysql.Account().CreateAccount(context.Background(), args)
@@ -172,8 +172,10 @@ func TestGetAccounts(t *testing.T) {
 	createRandomAccount(t)
 	createRandomAccount(t)
 
+	ctx := context.Background()
+
 	// assert first account created
-	accounts, totalRecords, err := testMysql.Account().GetAccounts(context.Background(), 10, 0)
+	accounts, totalRecords, err := testMysql.Account().GetAccounts(ctx, 10, 0)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
 
@@ -189,7 +191,7 @@ func TestGetAccounts(t *testing.T) {
 	require.NotZero(t, accounts[0].CreatedAT)
 
 	// assert second account created
-	accounts, totalRecords, err = testMysql.Account().GetAccounts(context.Background(), 10, 1)
+	accounts, totalRecords, err = testMysql.Account().GetAccounts(ctx, 10, 1)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
 
@@ -302,7 +304,7 @@ func TestGetAccountsErrorsWithMock(t *testing.T) {
 func TestGetAccountByUUID(t *testing.T) {
 	account := createRandomAccount(t)
 
-	account2, err := testMysql.Account().GetAccountByDocument(context.Background(), account.CPF)
+	account2, err := testMysql.Account().GetAccountByUUID(context.Background(), account.UUID)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
 

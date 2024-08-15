@@ -56,7 +56,7 @@ func TestRandomSecret(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := RandomSecret()
+			got := RandomPassword()
 			if len(got) != tt.wantLength {
 				t.Errorf("RandomSecret() length = %v, want %v", len(got), tt.wantLength)
 			}

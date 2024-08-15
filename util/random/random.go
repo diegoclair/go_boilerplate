@@ -25,7 +25,7 @@ func RandomName() string {
 	return RandomString(6)
 }
 
-func RandomSecret() string {
+func RandomPassword() string {
 	return RandomString(8)
 }
 
