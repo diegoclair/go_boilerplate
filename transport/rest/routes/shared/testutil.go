@@ -25,10 +25,10 @@ import (
 )
 
 type SvcMocks struct {
-	AccountMock   *mocks.MockAccountService
-	AuthMock      *mocks.MockAuthService
-	AuthTokenMock *mocks.MockAuthToken
-	TransferMock  *mocks.MockTransferService
+	AccountSvcMock  *mocks.MockAccountService
+	AuthSvcMock     *mocks.MockAuthService
+	AuthTokenMock   *mocks.MockAuthToken
+	TransferSvcMock *mocks.MockTransferService
 }
 
 func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.Controller) {
@@ -36,10 +36,10 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 
 	ctrl = gomock.NewController(t)
 	m = SvcMocks{
-		AccountMock:   mocks.NewMockAccountService(ctrl),
-		AuthMock:      mocks.NewMockAuthService(ctrl),
-		AuthTokenMock: mocks.NewMockAuthToken(ctrl),
-		TransferMock:  mocks.NewMockTransferService(ctrl),
+		AccountSvcMock:  mocks.NewMockAccountService(ctrl),
+		AuthSvcMock:     mocks.NewMockAuthService(ctrl),
+		AuthTokenMock:   mocks.NewMockAuthToken(ctrl),
+		TransferSvcMock: mocks.NewMockTransferService(ctrl),
 	}
 
 	server = goswag.NewEcho()
@@ -53,11 +53,11 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 		PrivateGroup: privateGroup,
 	}
 
-	accountHandler := accountroute.NewHandler(m.AccountMock)
+	accountHandler := accountroute.NewHandler(m.AccountSvcMock)
 	accountRoute := accountroute.NewRouter(accountHandler, accountroute.RouteName)
-	authHandler := authroute.NewHandler(m.AuthMock, m.AuthTokenMock)
+	authHandler := authroute.NewHandler(m.AuthSvcMock, m.AuthTokenMock)
 	authRoute := authroute.NewRouter(authHandler, authroute.RouteName)
-	transferHandler := transferroute.NewHandler(m.TransferMock)
+	transferHandler := transferroute.NewHandler(m.TransferSvcMock)
 	transferRoute := transferroute.NewRouter(transferHandler, transferroute.RouteName)
 
 	accountRoute.RegisterRoutes(g)
