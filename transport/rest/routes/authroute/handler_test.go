@@ -15,7 +15,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/authroute"
-	"github.com/diegoclair/go_boilerplate/transport/rest/routes/shared"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routes/test"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	echo "github.com/labstack/echo/v4"
@@ -31,7 +31,7 @@ func TestHandler_handleLogin(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, m shared.SvcMocks, args args)
+		buildMocks    func(ctx context.Context, m test.SvcMocks, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -42,7 +42,7 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: "12345678",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
 				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
@@ -82,7 +82,7 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: "12345678",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
 				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{}, fmt.Errorf("error to login")).Times(1)
@@ -100,7 +100,7 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: "12345678",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
 				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
@@ -119,7 +119,7 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: "12345678",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
 				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
@@ -139,7 +139,7 @@ func TestHandler_handleLogin(t *testing.T) {
 					Password: "12345678",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
 				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
@@ -157,7 +157,7 @@ func TestHandler_handleLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			authroute.Once = sync.Once{}
-			authMock, server, ctrl := shared.GetServerTest(t)
+			authMock, server, ctrl := test.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -193,7 +193,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, m shared.SvcMocks, args args)
+		buildMocks    func(ctx context.Context, m test.SvcMocks, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -203,7 +203,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					RefreshToken: "r123",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				input := args.body.(viewmodel.RefreshTokenRequest)
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, input.RefreshToken).
 					Return(&auth.TokenPayload{
@@ -245,7 +245,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					RefreshToken: "r123",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).Return(nil, fmt.Errorf("error to verify token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -260,7 +260,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					RefreshToken: "r123",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
 					Return(&auth.TokenPayload{
 						SessionUUID: "sUuid",
@@ -282,7 +282,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					RefreshToken: "r123",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
 					Return(&auth.TokenPayload{
 						SessionUUID: "sUuid",
@@ -306,7 +306,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					RefreshToken: "r123",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
 					Return(&auth.TokenPayload{
 						SessionUUID: "sUuid",
@@ -330,7 +330,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					RefreshToken: "r123",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
 					Return(&auth.TokenPayload{
 						SessionUUID: "sUuid",
@@ -355,7 +355,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					RefreshToken: "r123",
 				},
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
 					Return(&auth.TokenPayload{
 						SessionUUID: "sUuid",
@@ -386,7 +386,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			authroute.Once = sync.Once{}
-			authMock, server, ctrl := shared.GetServerTest(t)
+			authMock, server, ctrl := test.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()

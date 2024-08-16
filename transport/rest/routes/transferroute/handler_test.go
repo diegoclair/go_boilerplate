@@ -13,7 +13,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/transport/rest/routes/shared"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routes/test"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/transferroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	echo "github.com/labstack/echo/v4"
@@ -30,7 +30,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 		name          string
 		args          args
 		setupAuth     func(ctx context.Context, t *testing.T, req *http.Request)
-		buildMocks    func(ctx context.Context, m shared.SvcMocks, args args)
+		buildMocks    func(ctx context.Context, m test.SvcMocks, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -42,9 +42,9 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 				},
 			},
 			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
-				shared.AddAuthorization(ctx, t, req)
+				test.AddAuthorization(ctx, t, req)
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				m.TransferSvcMock.EXPECT().CreateTransfer(ctx,
 					dto.TransferInput{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
@@ -61,7 +61,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 				body: "invalid body",
 			},
 			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
-				shared.AddAuthorization(ctx, t, req)
+				test.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
@@ -77,9 +77,9 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 				},
 			},
 			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
-				shared.AddAuthorization(ctx, t, req)
+				test.AddAuthorization(ctx, t, req)
 			},
-			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.TransferReq)
 				m.TransferSvcMock.EXPECT().CreateTransfer(ctx,
 					dto.TransferInput{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
@@ -97,7 +97,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			transferroute.Once = sync.Once{}
-			m, server, ctrl := shared.GetServerTest(t)
+			m, server, ctrl := test.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -110,7 +110,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			require.NoError(t, err)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			ctx := shared.GetTestContext(t, req, recorder)
+			ctx := test.GetTestContext(t, req, recorder)
 
 			if tt.setupAuth != nil {
 				tt.setupAuth(ctx, t, req)
@@ -131,21 +131,21 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 func TestHandler_handleGetTransfers(t *testing.T) {
 	tests := []struct {
 		name          string
-		buildMocks    func(ctx context.Context, m shared.SvcMocks)
+		buildMocks    func(ctx context.Context, m test.SvcMocks)
 		setupAuth     func(ctx context.Context, t *testing.T, req *http.Request)
 		checkResponse func(t *testing.T, resp *httptest.ResponseRecorder)
 		sleep         bool
 	}{
 		{
 			name: "Should pass with success",
-			buildMocks: func(ctx context.Context, m shared.SvcMocks) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks) {
 				m.TransferSvcMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]entity.Transfer{
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 5.55, CreatedAt: time.Now()},
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 7.77, CreatedAt: time.Now()},
 				}, int64(0), nil).Times(1)
 			},
 			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
-				shared.AddAuthorization(ctx, t, req)
+				test.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, resp.Code)
@@ -157,7 +157,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		{
 			name: "Should return expired token error",
 			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
-				shared.AddAuthorization(ctx, t, req)
+				test.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, resp.Code)
@@ -167,11 +167,11 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		},
 		{
 			name: "Should return error if service get transfer returns error",
-			buildMocks: func(ctx context.Context, m shared.SvcMocks) {
+			buildMocks: func(ctx context.Context, m test.SvcMocks) {
 				m.TransferSvcMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return(nil, int64(0), fmt.Errorf("error to get transfers")).Times(1)
 			},
 			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
-				shared.AddAuthorization(ctx, t, req)
+				test.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -184,7 +184,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			transferroute.Once = sync.Once{}
-			m, server, ctrl := shared.GetServerTest(t)
+			m, server, ctrl := test.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -193,7 +193,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
-			ctx := shared.GetTestContext(t, req, recorder)
+			ctx := test.GetTestContext(t, req, recorder)
 
 			if tt.setupAuth != nil {
 				tt.setupAuth(ctx, t, req)
