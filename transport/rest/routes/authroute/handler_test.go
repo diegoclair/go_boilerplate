@@ -385,7 +385,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			authroute.Once = sync.Once{}
-			authMock, server, ctrl := test.GetServerTest(t)
+			m, server, ctrl := test.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
@@ -400,7 +400,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			ctx := test.GetTestContext(t, req, recorder, false)
 
 			if tt.buildMocks != nil {
-				tt.buildMocks(ctx, authMock, tt.args)
+				tt.buildMocks(ctx, m, tt.args)
 			}
 
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
