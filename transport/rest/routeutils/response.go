@@ -13,7 +13,12 @@ func ResponseNoContent(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func ResponseCreated(c echo.Context) error {
+// ResponseCreated returns a 201 Created response and a json body if data is provided
+func ResponseCreated(c echo.Context, data ...interface{}) error {
+	if len(data) > 0 {
+		return c.JSON(http.StatusCreated, data[0])
+	}
+
 	return c.NoContent(http.StatusCreated)
 }
 
