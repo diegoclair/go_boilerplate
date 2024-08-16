@@ -16,7 +16,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/test"
-	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -169,9 +168,9 @@ func TestHandler_handleLogin(t *testing.T) {
 			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 			require.NoError(t, err)
 
+			ctx := test.GetTestContext(t, req, recorder, false)
+
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, authMock, tt.args)
 			}
 
@@ -398,9 +397,9 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 			require.NoError(t, err)
 
+			ctx := test.GetTestContext(t, req, recorder, false)
+
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, authMock, tt.args)
 			}
 

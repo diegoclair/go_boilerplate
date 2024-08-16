@@ -96,9 +96,9 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 			require.NoError(t, err)
 
+			ctx := test.GetTestContext(t, req, recorder, false)
+
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 
@@ -190,9 +190,9 @@ func TestHandler_GetAccounts(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			ctx := test.GetTestContext(t, req, recorder, false)
+
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 
@@ -272,9 +272,9 @@ func TestHandler_GetAccountByID(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			ctx := test.GetTestContext(t, req, recorder, false)
+
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 
@@ -376,9 +376,9 @@ func TestHandler_handleAddBalance(t *testing.T) {
 			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 			require.NoError(t, err)
 
+			ctx := test.GetTestContext(t, req, recorder, false)
+
 			if tt.buildMocks != nil {
-				e := echo.New()
-				ctx := routeutils.GetContext(e.NewContext(req, recorder))
 				tt.buildMocks(ctx, accountMock, tt.args)
 			}
 

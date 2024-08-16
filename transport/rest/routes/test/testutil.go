@@ -103,11 +103,13 @@ func AddAuthorization(ctx context.Context, t *testing.T, req *http.Request) {
 	req.Header.Set(infra.TokenKey.String(), token)
 }
 
-func GetTestContext(t *testing.T, req *http.Request, w http.ResponseWriter) context.Context {
+func GetTestContext(t *testing.T, req *http.Request, w http.ResponseWriter, authEndpoint bool) context.Context {
 	t.Helper()
 
 	c := echo.New().NewContext(req, w)
-	c.Set(infra.AccountUUIDKey.String(), accountUUID)
-	c.Set(infra.SessionKey.String(), sessionUUID)
+	if authEndpoint {
+		c.Set(infra.AccountUUIDKey.String(), accountUUID)
+		c.Set(infra.SessionKey.String(), sessionUUID)
+	}
 	return routeutils.GetContext(c)
 }

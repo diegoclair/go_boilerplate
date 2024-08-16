@@ -110,7 +110,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			require.NoError(t, err)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			ctx := test.GetTestContext(t, req, recorder)
+			ctx := test.GetTestContext(t, req, recorder, true)
 
 			if tt.setupAuth != nil {
 				tt.setupAuth(ctx, t, req)
@@ -193,7 +193,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
-			ctx := test.GetTestContext(t, req, recorder)
+			ctx := test.GetTestContext(t, req, recorder, true)
 
 			if tt.setupAuth != nil {
 				tt.setupAuth(ctx, t, req)
