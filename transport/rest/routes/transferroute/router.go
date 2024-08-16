@@ -11,7 +11,7 @@ import (
 const RouteName = "transfers"
 
 const (
-	rootRoute = ""
+	RootRoute = ""
 )
 
 type TransferRouter struct {
@@ -29,12 +29,12 @@ func NewRouter(ctrl *Handler, routeName string) *TransferRouter {
 func (r *TransferRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 	router := g.PrivateGroup.Group(r.routeName)
 
-	router.POST(rootRoute, r.ctrl.handleAddTransfer).
+	router.POST(RootRoute, r.ctrl.handleAddTransfer).
 		Summary("Add a new transfer").
 		Read(viewmodel.TransferReq{}).
 		Returns([]models.ReturnType{{StatusCode: http.StatusCreated}})
 
-	router.GET(rootRoute, r.ctrl.handleGetTransfers).
+	router.GET(RootRoute, r.ctrl.handleGetTransfers).
 		Summary("Get all transfers").
 		Description("Get all transfers with paginated response").
 		Returns([]models.ReturnType{

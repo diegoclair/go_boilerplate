@@ -1,4 +1,4 @@
-package accountroute
+package accountroute_test
 
 import (
 	"bytes"
@@ -14,37 +14,13 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routes/accountroute"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routes/shared"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/goswag"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
-
-type mock struct {
-	accountService *mocks.MockAccountService
-}
-
-func getServerTest(t *testing.T) (accountMock mock, server goswag.Echo, ctrl *gomock.Controller) {
-	ctrl = gomock.NewController(t)
-	accountMock = mock{
-		accountService: mocks.NewMockAccountService(ctrl),
-	}
-
-	accountHandler := NewHandler(accountMock.accountService)
-	accountRoute := NewRouter(accountHandler, RouteName)
-
-	server = goswag.NewEcho()
-	appGroup := server.Group("/")
-	g := &routeutils.EchoGroups{
-		AppGroup: appGroup,
-	}
-
-	accountRoute.RegisterRoutes(g)
-	return
-}
 
 func TestHandler_handleAddAccount(t *testing.T) {
 	type args struct {
@@ -54,7 +30,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, mock mock, args args)
+		buildMocks    func(ctx context.Context, m shared.SvcMocks, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -66,9 +42,9 @@ func TestHandler_handleAddAccount(t *testing.T) {
 					Password: "secret@123",
 				},
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
+			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(nil)
+				m.AccountMock.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -94,9 +70,9 @@ func TestHandler_handleAddAccount(t *testing.T) {
 					Password: "Secret@123",
 				},
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
+			buildMocks: func(ctx context.Context, mock shared.SvcMocks, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.accountService.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(errors.New("some error"))
+				mock.AccountMock.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -107,12 +83,12 @@ func TestHandler_handleAddAccount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			once = sync.Once{}
-			accountMock, server, ctrl := getServerTest(t)
+			accountroute.Once = sync.Once{}
+			accountMock, server, ctrl := shared.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/accounts%s", rootRoute)
+			url := fmt.Sprintf("/accounts%s", accountroute.RootRoute)
 
 			body, err := json.Marshal(tt.args.body)
 			require.NoError(t, err)
@@ -157,19 +133,19 @@ func TestHandler_GetAccounts(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, mocks mock, args args)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mock, args args)
+		buildMocks    func(ctx context.Context, mock shared.SvcMocks, args args)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock shared.SvcMocks, args args)
 	}{
 		{
 			name: "Should complete request with no error",
 			args: args{
 				accountsToBuild: 2,
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
+			buildMocks: func(ctx context.Context, mock shared.SvcMocks, args args) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
+				mock.AccountMock.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock shared.SvcMocks, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
 				take, skip := routeutils.GetTakeSkipFromPageQuantity(int64(args.page), int64(args.quantity))
@@ -192,11 +168,11 @@ func TestHandler_GetAccounts(t *testing.T) {
 			args: args{
 				accountsToBuild: 0,
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
+			buildMocks: func(ctx context.Context, mock shared.SvcMocks, args args) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				mock.accountService.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
+				mock.AccountMock.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock shared.SvcMocks, args args) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
 				require.Contains(t, resp.Body.String(), "some service error")
 			},
@@ -204,12 +180,12 @@ func TestHandler_GetAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			once = sync.Once{}
-			accountMock, server, ctrl := getServerTest(t)
+			accountroute.Once = sync.Once{}
+			accountMock, server, ctrl := shared.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s%s", RouteName, rootRoute)
+			url := fmt.Sprintf("/%s%s", accountroute.RouteName, accountroute.RootRoute)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -237,19 +213,19 @@ func TestHandler_GetAccountByID(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, mocks mock, args args)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock mock, args args)
+		buildMocks    func(ctx context.Context, mock shared.SvcMocks, args args)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder, mock shared.SvcMocks, args args)
 	}{
 		{
 			name: "Should complete request with no error",
 			args: args{
 				accountUUID: "random",
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
+			buildMocks: func(ctx context.Context, mock shared.SvcMocks, args args) {
 				account := buildAccountByID(1)
-				mock.accountService.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(account, nil)
+				mock.AccountMock.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(account, nil)
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock shared.SvcMocks, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
 				account := buildAccountByID(1)
 
@@ -266,10 +242,10 @@ func TestHandler_GetAccountByID(t *testing.T) {
 			args: args{
 				accountUUID: "random",
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
-				mock.accountService.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, fmt.Errorf("some service error"))
+			buildMocks: func(ctx context.Context, mock shared.SvcMocks, args args) {
+				mock.AccountMock.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, fmt.Errorf("some service error"))
 			},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock shared.SvcMocks, args args) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
 				require.Contains(t, resp.Body.String(), "some service error")
 			},
@@ -277,7 +253,7 @@ func TestHandler_GetAccountByID(t *testing.T) {
 		{
 			name: "Should return error if we have an invalid uuid",
 			args: args{accountUUID: " "},
-			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock mock, args args) {
+			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock shared.SvcMocks, args args) {
 				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 				require.Contains(t, resp.Body.String(), "Invalid account_uuid")
 			},
@@ -286,12 +262,12 @@ func TestHandler_GetAccountByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			once = sync.Once{}
-			accountMock, server, ctrl := getServerTest(t)
+			accountroute.Once = sync.Once{}
+			accountMock, server, ctrl := shared.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s/%s/", RouteName, tt.args.accountUUID)
+			url := fmt.Sprintf("/%s/%s/", accountroute.RouteName, tt.args.accountUUID)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -320,7 +296,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		buildMocks    func(ctx context.Context, mock mock, args args)
+		buildMocks    func(ctx context.Context, mock shared.SvcMocks, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -331,10 +307,10 @@ func TestHandler_handleAddBalance(t *testing.T) {
 				},
 				accountUUID: "random",
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
+			buildMocks: func(ctx context.Context, mock shared.SvcMocks, args args) {
 				body := args.body.(viewmodel.AddBalance)
 
-				mock.accountService.EXPECT().AddBalance(ctx, body.ToDto(args.accountUUID)).Times(1).Return(nil)
+				mock.AccountMock.EXPECT().AddBalance(ctx, body.ToDto(args.accountUUID)).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -371,12 +347,12 @@ func TestHandler_handleAddBalance(t *testing.T) {
 				},
 				accountUUID: "random",
 			},
-			buildMocks: func(ctx context.Context, mock mock, args args) {
+			buildMocks: func(ctx context.Context, mock shared.SvcMocks, args args) {
 				input := dto.AddBalanceInput{
 					AccountUUID: "random",
 					Amount:      args.body.(viewmodel.AddBalance).Amount,
 				}
-				mock.accountService.EXPECT().AddBalance(ctx, input).Times(1).Return(errors.New("some error"))
+				mock.AccountMock.EXPECT().AddBalance(ctx, input).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -387,12 +363,12 @@ func TestHandler_handleAddBalance(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			once = sync.Once{}
-			accountMock, server, ctrl := getServerTest(t)
+			accountroute.Once = sync.Once{}
+			accountMock, server, ctrl := shared.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s/%s/balance", RouteName, tt.args.accountUUID)
+			url := fmt.Sprintf("/%s/%s/balance", accountroute.RouteName, tt.args.accountUUID)
 
 			body, err := json.Marshal(tt.args.body)
 			require.NoError(t, err)

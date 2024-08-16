@@ -1,4 +1,4 @@
-package transferroute
+package transferroute_test
 
 import (
 	"bytes"
@@ -13,76 +13,15 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
-	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_boilerplate/mocks"
-	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
-	servermiddleware "github.com/diegoclair/go_boilerplate/transport/rest/serverMiddleware"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routes/shared"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routes/transferroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/goswag"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
-	"go.uber.org/mock/gomock"
 )
-
-var (
-	tokenMaker auth.AuthToken
-	onceToken  sync.Once
-)
-
-func getTokenMaker(t *testing.T) auth.AuthToken {
-	onceToken.Do(func() {
-		cfg, err := config.GetConfigEnvironment(config.ProfileTest)
-		require.NoError(t, err)
-
-		cfg.App.Auth.AccessTokenDuration = 2 * time.Second
-		cfg.App.Auth.RefreshTokenDuration = 2 * time.Second
-
-		tokenMaker, err = auth.NewAuthToken(cfg.App.Auth, logger.NewNoop())
-		require.NoError(t, err)
-	})
-	return tokenMaker
-}
-
-func getServerTest(t *testing.T) (transferMock *mocks.MockTransferService, server goswag.Echo, ctrl *gomock.Controller) {
-	ctrl = gomock.NewController(t)
-
-	transferMock = mocks.NewMockTransferService(ctrl)
-	tokenMaker = getTokenMaker(t)
-
-	transferHandler := NewHandler(transferMock)
-	transferRoute := NewRouter(transferHandler, "transfers")
-
-	server = goswag.NewEcho()
-	appGroup := server.Group("/")
-	privateGroup := appGroup.Group("",
-		servermiddleware.AuthMiddlewarePrivateRoute(tokenMaker),
-	)
-
-	g := &routeutils.EchoGroups{
-		AppGroup:     appGroup,
-		PrivateGroup: privateGroup,
-	}
-
-	transferRoute.RegisterRoutes(g)
-	return
-}
-
-func addAuthorization(ctx context.Context, t *testing.T, req *http.Request, tokenMaker auth.AuthToken, accountUUID, sessionUUID string) {
-	token, _, err := tokenMaker.CreateAccessToken(ctx, auth.TokenPayloadInput{AccountUUID: accountUUID, SessionUUID: sessionUUID})
-	require.NoError(t, err)
-	require.NotEmpty(t, token)
-	req.Header.Set(infra.TokenKey.String(), token)
-}
 
 func TestHandler_handleAddTransfer(t *testing.T) {
-	ctx := context.Background()
-	accountUUID := uuid.NewV4().String()
-	sessionUUID := uuid.NewV4().String()
-
 	type args struct {
 		body any
 	}
@@ -90,8 +29,8 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		setupAuth     func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken)
-		buildMocks    func(ctx context.Context, transferMock *mocks.MockTransferService, args args)
+		setupAuth     func(ctx context.Context, t *testing.T, req *http.Request)
+		buildMocks    func(ctx context.Context, m shared.SvcMocks, args args)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -102,12 +41,12 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 					Amount:                 5.55,
 				},
 			},
-			setupAuth: func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, accountUUID, sessionUUID)
+			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
+				shared.AddAuthorization(ctx, t, req)
 			},
-			buildMocks: func(ctx context.Context, transferMock *mocks.MockTransferService, args args) {
+			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
 				body := args.body.(viewmodel.TransferReq)
-				transferMock.EXPECT().CreateTransfer(ctx,
+				m.TransferMock.EXPECT().CreateTransfer(ctx,
 					dto.TransferInput{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(nil).MinTimes(1)
 			},
@@ -121,8 +60,8 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			args: args{
 				body: "invalid body",
 			},
-			setupAuth: func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, accountUUID, sessionUUID)
+			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
+				shared.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
@@ -137,12 +76,12 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 					Amount:                 8.88,
 				},
 			},
-			setupAuth: func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, accountUUID, sessionUUID)
+			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
+				shared.AddAuthorization(ctx, t, req)
 			},
-			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService, args args) {
+			buildMocks: func(ctx context.Context, m shared.SvcMocks, args args) {
 				body := args.body.(viewmodel.TransferReq)
-				mock.EXPECT().CreateTransfer(ctx,
+				m.TransferMock.EXPECT().CreateTransfer(ctx,
 					dto.TransferInput{AccountDestinationUUID: body.AccountDestinationUUID, Amount: body.Amount}).
 					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
@@ -157,12 +96,12 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			once = sync.Once{}
-			transferMock, server, ctrl := getServerTest(t)
+			transferroute.Once = sync.Once{}
+			m, server, ctrl := shared.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/transfers%s", rootRoute)
+			url := fmt.Sprintf("/transfers%s", transferroute.RootRoute)
 
 			body, err := json.Marshal(tt.args.body)
 			require.NoError(t, err)
@@ -171,16 +110,14 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			require.NoError(t, err)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
+			ctx := shared.GetTestContext(t, req, recorder)
+
 			if tt.setupAuth != nil {
-				tt.setupAuth(t, req, tokenMaker)
+				tt.setupAuth(ctx, t, req)
 			}
 
 			if tt.buildMocks != nil {
-				c := echo.New().NewContext(req, recorder)
-				c.Set(infra.AccountUUIDKey.String(), accountUUID)
-				c.Set(infra.SessionKey.String(), sessionUUID)
-				ctx := routeutils.GetContext(c)
-				tt.buildMocks(ctx, transferMock, tt.args)
+				tt.buildMocks(ctx, m, tt.args)
 			}
 
 			server.Echo().ServeHTTP(recorder, req)
@@ -192,27 +129,23 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 }
 
 func TestHandler_handleGetTransfers(t *testing.T) {
-	ctx := context.Background()
-	accountUUID := uuid.NewV4().String()
-	sessionUUID := uuid.NewV4().String()
-
 	tests := []struct {
 		name          string
-		buildMocks    func(ctx context.Context, mock *mocks.MockTransferService)
-		setupAuth     func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken)
+		buildMocks    func(ctx context.Context, m shared.SvcMocks)
+		setupAuth     func(ctx context.Context, t *testing.T, req *http.Request)
 		checkResponse func(t *testing.T, resp *httptest.ResponseRecorder)
 		sleep         bool
 	}{
 		{
 			name: "Should pass with success",
-			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
-				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]entity.Transfer{
+			buildMocks: func(ctx context.Context, m shared.SvcMocks) {
+				m.TransferMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]entity.Transfer{
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 5.55, CreatedAt: time.Now()},
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 7.77, CreatedAt: time.Now()},
 				}, int64(0), nil).Times(1)
 			},
-			setupAuth: func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, accountUUID, sessionUUID)
+			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
+				shared.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, resp.Code)
@@ -223,8 +156,8 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		},
 		{
 			name: "Should return expired token error",
-			setupAuth: func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, accountUUID, sessionUUID)
+			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
+				shared.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, resp.Code)
@@ -234,11 +167,11 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		},
 		{
 			name: "Should return error if service get transfer returns error",
-			buildMocks: func(ctx context.Context, mock *mocks.MockTransferService) {
-				mock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return(nil, int64(0), fmt.Errorf("error to get transfers")).Times(1)
+			buildMocks: func(ctx context.Context, m shared.SvcMocks) {
+				m.TransferMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return(nil, int64(0), fmt.Errorf("error to get transfers")).Times(1)
 			},
-			setupAuth: func(t *testing.T, req *http.Request, tokenMaker auth.AuthToken) {
-				addAuthorization(ctx, t, req, tokenMaker, accountUUID, sessionUUID)
+			setupAuth: func(ctx context.Context, t *testing.T, req *http.Request) {
+				shared.AddAuthorization(ctx, t, req)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -250,27 +183,24 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			once = sync.Once{}
-			transferMock, server, ctrl := getServerTest(t)
+			transferroute.Once = sync.Once{}
+			m, server, ctrl := shared.GetServerTest(t)
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/transfers%s", rootRoute)
+			url := fmt.Sprintf("/transfers%s", transferroute.RootRoute)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			ctx := shared.GetTestContext(t, req, recorder)
+
 			if tt.setupAuth != nil {
-				tt.setupAuth(t, req, tokenMaker)
+				tt.setupAuth(ctx, t, req)
 			}
 
 			if tt.buildMocks != nil {
-				c := echo.New().NewContext(req, recorder)
-				c.Set(infra.AccountUUIDKey.String(), accountUUID)
-				c.Set(infra.SessionKey.String(), sessionUUID)
-				ctx := routeutils.GetContext(c)
-
-				tt.buildMocks(ctx, transferMock)
+				tt.buildMocks(ctx, m)
 			}
 
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)

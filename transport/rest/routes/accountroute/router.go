@@ -12,9 +12,9 @@ import (
 const RouteName = "accounts"
 
 const (
-	rootRoute          = ""
-	accountByID        = "/:account_uuid/"
-	accountBalanceByID = "/:account_uuid/balance"
+	RootRoute          = ""
+	AccountByID        = "/:account_uuid/"
+	AccountBalanceByID = "/:account_uuid/balance"
 )
 
 type UserRouter struct {
@@ -32,18 +32,18 @@ func NewRouter(ctrl *Handler, routeName string) *UserRouter {
 func (r *UserRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 	router := g.AppGroup.Group(r.routeName)
 
-	router.POST(rootRoute, r.ctrl.handleAddAccount).
+	router.POST(RootRoute, r.ctrl.handleAddAccount).
 		Summary("Add a new account").
 		Read(viewmodel.AddAccount{}).
 		Returns([]models.ReturnType{{StatusCode: http.StatusCreated}})
 
-	router.POST(accountBalanceByID, r.ctrl.handleAddBalance).
+	router.POST(AccountBalanceByID, r.ctrl.handleAddBalance).
 		Summary("Add balance to an account").
 		Description("Add balance to an account by account_uuid").
 		Read(viewmodel.AddBalance{}).
 		Returns([]models.ReturnType{{StatusCode: http.StatusCreated}})
 
-	router.GET(rootRoute, r.ctrl.handleGetAccounts).
+	router.GET(RootRoute, r.ctrl.handleGetAccounts).
 		Summary("Get all accounts").
 		Description("Get all accounts with paginated response").
 		Returns([]models.ReturnType{
@@ -55,7 +55,7 @@ func (r *UserRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 		QueryParam("page", "number of page you want", goswag.StringType, false).
 		QueryParam("quantity", "quantity of items per page", goswag.StringType, false)
 
-	router.GET(accountByID, r.ctrl.handleGetAccountByID).
+	router.GET(AccountByID, r.ctrl.handleGetAccountByID).
 		Summary("Get account by ID").
 		Description("Get account by it UUID value").
 		Returns([]models.ReturnType{

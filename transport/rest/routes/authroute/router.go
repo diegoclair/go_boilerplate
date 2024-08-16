@@ -11,7 +11,7 @@ import (
 const RouteName = "auth"
 
 const (
-	loginRoute = "/login"
+	LoginRoute = "/login"
 )
 
 type AccountRouter struct {
@@ -29,7 +29,7 @@ func NewRouter(ctrl *Handler, routeName string) *AccountRouter {
 func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 	router := g.AppGroup.Group(r.routeName)
 
-	router.POST(loginRoute, r.ctrl.handleLogin).
+	router.POST(LoginRoute, r.ctrl.handleLogin).
 		Summary("Login").
 		Read(viewmodel.Login{}).
 		Returns([]models.ReturnType{

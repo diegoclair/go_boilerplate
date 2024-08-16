@@ -17,7 +17,7 @@ import (
 
 var (
 	instance *Handler
-	once     sync.Once
+	Once     sync.Once
 )
 
 type Handler struct {
@@ -26,7 +26,7 @@ type Handler struct {
 }
 
 func NewHandler(authService contract.AuthService, authToken auth.AuthToken) *Handler {
-	once.Do(func() {
+	Once.Do(func() {
 		instance = &Handler{
 			authService: authService,
 			authToken:   authToken,

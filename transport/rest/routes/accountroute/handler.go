@@ -12,7 +12,7 @@ import (
 
 var (
 	instance *Handler
-	once     sync.Once
+	Once     sync.Once
 )
 
 type Handler struct {
@@ -20,7 +20,7 @@ type Handler struct {
 }
 
 func NewHandler(accountService contract.AccountService) *Handler {
-	once.Do(func() {
+	Once.Do(func() {
 		instance = &Handler{
 			accountService: accountService,
 		}
