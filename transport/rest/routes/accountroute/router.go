@@ -17,19 +17,19 @@ const (
 	AccountBalanceByID = "/:account_uuid/balance"
 )
 
-type UserRouter struct {
+type AccountRouter struct {
 	ctrl      *Handler
 	routeName string
 }
 
-func NewRouter(ctrl *Handler, routeName string) *UserRouter {
-	return &UserRouter{
+func NewRouter(ctrl *Handler, routeName string) *AccountRouter {
+	return &AccountRouter{
 		ctrl:      ctrl,
 		routeName: routeName,
 	}
 }
 
-func (r *UserRouter) RegisterRoutes(g *routeutils.EchoGroups) {
+func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 	router := g.AppGroup.Group(r.routeName)
 
 	router.POST(RootRoute, r.ctrl.handleAddAccount).
