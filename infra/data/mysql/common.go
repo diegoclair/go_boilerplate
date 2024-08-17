@@ -10,10 +10,10 @@ type dbConn interface {
 }
 
 type scanner interface {
-	Scan(dest ...interface{}) error
+	Scan(dest ...any) error
 }
 
-func getTotalRecordsFromQuery(ctx context.Context, db dbConn, query string, args ...interface{}) (totalRecords int64, err error) {
+func getTotalRecordsFromQuery(ctx context.Context, db dbConn, query string, args ...any) (totalRecords int64, err error) {
 	var queryCount = `
 		SELECT COUNT(*) FROM (
 	` + query + `) as count`
