@@ -8,26 +8,24 @@ import (
 	"github.com/diegoclair/goswag/models"
 )
 
-const RouteName = "auth"
+const GroupRouteName = "auth"
 
 const (
 	LoginRoute = "/login"
 )
 
 type AccountRouter struct {
-	ctrl      *Handler
-	routeName string
+	ctrl *Handler
 }
 
-func NewRouter(ctrl *Handler, routeName string) *AccountRouter {
+func NewRouter(ctrl *Handler) *AccountRouter {
 	return &AccountRouter{
-		ctrl:      ctrl,
-		routeName: routeName,
+		ctrl: ctrl,
 	}
 }
 
 func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
-	router := g.AppGroup.Group(r.routeName)
+	router := g.AppGroup.Group(GroupRouteName)
 
 	router.POST(LoginRoute, r.ctrl.handleLogin).
 		Summary("Login").

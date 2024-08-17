@@ -160,7 +160,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s%s", authroute.RouteName, authroute.LoginRoute)
+			url := fmt.Sprintf("/%s%s", authroute.GroupRouteName, authroute.LoginRoute)
 
 			body, err := json.Marshal(tt.args.body)
 			require.NoError(t, err)
@@ -389,7 +389,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s/refresh-token", authroute.RouteName)
+			url := fmt.Sprintf("/%s/refresh-token", authroute.GroupRouteName)
 
 			body, err := json.Marshal(tt.args.body)
 			require.NoError(t, err)

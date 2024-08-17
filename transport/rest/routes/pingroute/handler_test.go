@@ -29,7 +29,7 @@ func TestHandler_handlePing(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s%s", RouteName, rootRoute)
+			url := fmt.Sprintf("/%s%s", GroupRouteName, rootRoute)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestHandler_handlePing(t *testing.T) {
 				AppGroup: appGroup,
 			}
 
-			pingroute := NewRouter(NewHandler(), RouteName)
+			pingroute := NewRouter(NewHandler())
 			pingroute.RegisterRoutes(g)
 
 			server.Echo().ServeHTTP(recorder, req)

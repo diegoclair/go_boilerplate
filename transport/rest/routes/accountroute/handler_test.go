@@ -185,7 +185,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s%s", accountroute.RouteName, accountroute.RootRoute)
+			url := fmt.Sprintf("/%s%s", accountroute.GroupRouteName, accountroute.RootRoute)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -267,7 +267,7 @@ func TestHandler_GetAccountByID(t *testing.T) {
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s/%s/", accountroute.RouteName, tt.args.accountUUID)
+			url := fmt.Sprintf("/%s/%s/", accountroute.GroupRouteName, tt.args.accountUUID)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -368,7 +368,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 			defer ctrl.Finish()
 
 			recorder := httptest.NewRecorder()
-			url := fmt.Sprintf("/%s/%s/balance", accountroute.RouteName, tt.args.accountUUID)
+			url := fmt.Sprintf("/%s/%s/balance", accountroute.GroupRouteName, tt.args.accountUUID)
 
 			body, err := json.Marshal(tt.args.body)
 			require.NoError(t, err)

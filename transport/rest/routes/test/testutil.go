@@ -54,11 +54,11 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 	}
 
 	accountHandler := accountroute.NewHandler(m.AccountSvcMock)
-	accountRoute := accountroute.NewRouter(accountHandler, accountroute.RouteName)
+	accountRoute := accountroute.NewRouter(accountHandler)
 	authHandler := authroute.NewHandler(m.AuthSvcMock, m.AuthTokenMock)
-	authRoute := authroute.NewRouter(authHandler, authroute.RouteName)
+	authRoute := authroute.NewRouter(authHandler)
 	transferHandler := transferroute.NewHandler(m.TransferSvcMock)
-	transferRoute := transferroute.NewRouter(transferHandler, transferroute.RouteName)
+	transferRoute := transferroute.NewRouter(transferHandler)
 
 	accountRoute.RegisterRoutes(g)
 	authRoute.RegisterRoutes(g)

@@ -7,26 +7,24 @@ import (
 	"github.com/diegoclair/goswag/models"
 )
 
-const RouteName = "ping"
+const GroupRouteName = "ping"
 
 const (
 	rootRoute = "/"
 )
 
 type PingRouter struct {
-	ctrl      *Handler
-	routeName string
+	ctrl *Handler
 }
 
-func NewRouter(ctrl *Handler, routeName string) *PingRouter {
+func NewRouter(ctrl *Handler) *PingRouter {
 	return &PingRouter{
-		ctrl:      ctrl,
-		routeName: routeName,
+		ctrl: ctrl,
 	}
 }
 
 func (r *PingRouter) RegisterRoutes(g *routeutils.EchoGroups) {
-	router := g.AppGroup.Group(r.routeName)
+	router := g.AppGroup.Group(GroupRouteName)
 
 	router.GET(rootRoute, r.ctrl.handlePing).
 		Summary("Ping the server").

@@ -8,26 +8,24 @@ import (
 	"github.com/diegoclair/goswag/models"
 )
 
-const RouteName = "transfers"
+const GroupRouteName = "transfers"
 
 const (
 	RootRoute = ""
 )
 
 type TransferRouter struct {
-	ctrl      *Handler
-	routeName string
+	ctrl *Handler
 }
 
-func NewRouter(ctrl *Handler, routeName string) *TransferRouter {
+func NewRouter(ctrl *Handler) *TransferRouter {
 	return &TransferRouter{
-		ctrl:      ctrl,
-		routeName: routeName,
+		ctrl: ctrl,
 	}
 }
 
 func (r *TransferRouter) RegisterRoutes(g *routeutils.EchoGroups) {
-	router := g.PrivateGroup.Group(r.routeName)
+	router := g.PrivateGroup.Group(GroupRouteName)
 
 	router.POST(RootRoute, r.ctrl.handleAddTransfer).
 		Summary("Add a new transfer").
