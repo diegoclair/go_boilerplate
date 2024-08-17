@@ -140,7 +140,7 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 
 func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 
-	var params = []interface{}{}
+	var params = []any{}
 
 	query := querySelectBase
 
@@ -194,7 +194,7 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 
 func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 
-	var params = []interface{}{}
+	var params = []any{}
 
 	query := querySelectBase + `
 		WHERE ta.account_uuid = ?
@@ -217,7 +217,7 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 }
 
 func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) (transfers []entity.Transfer, totalRecords int64, err error) {
-	var params = []interface{}{}
+	var params = []any{}
 
 	query := ` 
 		SELECT 
@@ -307,7 +307,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 
 func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64, balance float64) (err error) {
 
-	var params = []interface{}{}
+	var params = []any{}
 	query := `
 		UPDATE 	tab_account
 		
