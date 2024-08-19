@@ -157,7 +157,7 @@ func Test_authService_CreateSession(t *testing.T) {
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAuthRepo.EXPECT().CreateSession(ctx, args.session).Return(nil).Times(1)
+				mocks.mockAuthRepo.EXPECT().CreateSession(ctx, args.session).Return(int64(0), nil).Times(1)
 			},
 		},
 		{
@@ -170,7 +170,7 @@ func Test_authService_CreateSession(t *testing.T) {
 				},
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAuthRepo.EXPECT().CreateSession(ctx, args.session).Return(errors.New("some error")).Times(1)
+				mocks.mockAuthRepo.EXPECT().CreateSession(ctx, args.session).Return(int64(0), errors.New("some error")).Times(1)
 			},
 			wantErr: true,
 		},

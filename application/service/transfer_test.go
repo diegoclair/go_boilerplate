@@ -65,7 +65,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						},
 					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
-						Return(nil).Times(1),
+						Return(int64(0), nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), 5.50).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), 30.50).
@@ -143,7 +143,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						},
 					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
-						Return(nil).Times(1),
+						Return(int64(0), nil).Times(1),
 					//if we remove the number.RoundFloat of destination balance, here we would have 0.19999999999999998 instead of 0.2
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), 0.2).
 						Return(nil).Times(1),
@@ -248,7 +248,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						},
 					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
-						Return(assert.AnError).Times(1),
+						Return(int64(0), assert.AnError).Times(1),
 				)
 			},
 			wantErr: true,
@@ -275,7 +275,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						},
 					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
-						Return(nil).Times(1),
+						Return(int64(0), nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), number.RoundFloat(respAccountFrom.Balance-args.transfer.Amount, 2)).
 						Return(assert.AnError).Times(1),
 				)
@@ -305,7 +305,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 						},
 					).Times(1),
 					mocks.mockAccountRepo.EXPECT().AddTransfer(ctx, gomock.Not(""), int64(1), int64(2), args.transfer.Amount).
-						Return(nil).Times(1),
+						Return(int64(0), nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(1), number.RoundFloat(respAccountFrom.Balance-args.transfer.Amount, 2)).
 						Return(nil).Times(1),
 					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, int64(2), number.RoundFloat(respAccountDest.Balance+args.transfer.Amount, 2)).
