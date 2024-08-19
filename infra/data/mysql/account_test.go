@@ -2,17 +2,15 @@ package mysql
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_boilerplate/util/random"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
-	"go.uber.org/mock/gomock"
 )
 
 func createRandomAccount(t *testing.T) entity.Account {
@@ -57,54 +55,10 @@ func TestCreateAccount(t *testing.T) {
 }
 
 func TestCreateAccountErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	tests := []struct {
-		name       string
-		setupMocks func(dbMock sqlmock.Sqlmock)
-	}{
-		{
-			name: "Should return error when the prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the exec query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectExec().WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the last insert id fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectExec().
-					WillReturnResult(sqlmock.NewErrorResult(assert.AnError))
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			db, dbMock, err := sqlmock.New()
-			require.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupMocks != nil {
-				tt.setupMocks(dbMock)
-			}
-
-			repo := &accountRepo{
-				db: db,
-			}
-
-			_, err = repo.CreateAccount(ctx, entity.Account{})
-			require.Error(t, err)
-		})
-	}
+	testForInsertErrorsWithMock(t, func(db *sql.DB) error {
+		_, err := newAccountRepo(db).CreateAccount(context.Background(), entity.Account{})
+		return err
+	})
 }
 
 func TestGetAccountByDocument(t *testing.T) {
@@ -118,54 +72,7 @@ func TestGetAccountByDocument(t *testing.T) {
 }
 
 func TestGetAccountByDocumentErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
 
-	tests := []struct {
-		name       string
-		setupMocks func(dbMock sqlmock.Sqlmock)
-	}{
-		{
-			name: "Should return error when the prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the scan fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"id", "uuid", "name", "cpf", "balance", "password", "created_at"}).
-						AddRow(1, "uuid", "name", "cpf", 0, "password", "error"), // invalid string as time.Time
-				)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			db, dbMock, err := sqlmock.New()
-			require.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupMocks != nil {
-				tt.setupMocks(dbMock)
-			}
-
-			repo := &accountRepo{
-				db: db,
-			}
-
-			_, err = repo.GetAccountByDocument(ctx, "cpf")
-			require.Error(t, err)
-		})
-	}
 }
 
 func TestGetAccounts(t *testing.T) {
@@ -208,97 +115,10 @@ func TestGetAccounts(t *testing.T) {
 }
 
 func TestGetAccountsErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-
-	tests := []struct {
-		name       string
-		setupMocks func(dbMock sqlmock.Sqlmock)
-		wantErr    bool
-	}{
-		{
-			name: "Should not return error when the count returns 0",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(0),
-				)
-			},
-		},
-		{
-			name: "Should return error when the count prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the count query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the scan fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"id", "uuid", "name", "cpf", "balance", "password", "created_at"}).AddRow(1, "uuid", "name", "cpf", 0, "password", "2021-01-01 00:00:00"),
-				)
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			db, dbMock, err := sqlmock.New()
-			require.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupMocks != nil {
-				tt.setupMocks(dbMock)
-			}
-
-			repo := &accountRepo{
-				db: db,
-			}
-
-			_, _, err = repo.GetAccounts(ctx, 0, 0)
-			if tt.wantErr {
-				require.Error(t, err)
-				return
-			}
-
-			require.NoError(t, err)
-
-		})
-	}
+	testForPaginatedSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
+		_, _, err := newAccountRepo(db).GetAccounts(context.Background(), 10, 0)
+		return err
+	})
 }
 
 func TestGetAccountByUUID(t *testing.T) {
@@ -312,53 +132,10 @@ func TestGetAccountByUUID(t *testing.T) {
 }
 
 func TestGetAccountByUUIDErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-
-	tests := []struct {
-		name       string
-		setupMocks func(dbMock sqlmock.Sqlmock)
-	}{
-		{
-			name: "Should return error when the prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the scan fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"id", "uuid", "name", "cpf", "balance", "password", "created_at"}).AddRow(1, "uuid", "name", "cpf", 0, "password", "2021-01-01 00:00:00"),
-				)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			db, dbMock, err := sqlmock.New()
-			require.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupMocks != nil {
-				tt.setupMocks(dbMock)
-			}
-
-			repo := &accountRepo{
-				db: db,
-			}
-
-			_, err = repo.GetAccountByUUID(ctx, "uuid")
-			require.Error(t, err)
-		})
-	}
+	testForSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
+		_, err := newAccountRepo(db).GetAccountByUUID(context.Background(), "uuid")
+		return err
+	})
 }
 
 func TestAddTransfer(t *testing.T) {
@@ -366,50 +143,16 @@ func TestAddTransfer(t *testing.T) {
 	account2 := createRandomAccount(t)
 
 	transferUUID := uuid.NewV4().String()
-	err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
+	transferID, err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
+	require.NotZero(t, transferID)
 }
 
 func TestAddTransferErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-
-	tests := []struct {
-		name       string
-		setupMocks func(dbMock sqlmock.Sqlmock)
-	}{
-		{
-			name: "Should return error when the prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the exec query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectExec().WillReturnError(assert.AnError)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			db, dbMock, err := sqlmock.New()
-			require.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupMocks != nil {
-				tt.setupMocks(dbMock)
-			}
-
-			repo := &accountRepo{
-				db: db,
-			}
-
-			err = repo.AddTransfer(ctx, "uuid", 1, 2, 50)
-			require.Error(t, err)
-		})
-	}
+	testForInsertErrorsWithMock(t, func(db *sql.DB) error {
+		_, err := newAccountRepo(db).AddTransfer(context.Background(), "uuid", 1, 2, 50)
+		return err
+	})
 }
 
 func TestUpdateBalance(t *testing.T) {
@@ -427,45 +170,9 @@ func TestUpdateBalance(t *testing.T) {
 }
 
 func TestUpdateBalanceErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-
-	tests := []struct {
-		name       string
-		setupMocks func(dbMock sqlmock.Sqlmock)
-	}{
-		{
-			name: "Should return error when the prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the exec query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectExec().WillReturnError(assert.AnError)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			db, dbMock, err := sqlmock.New()
-			require.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupMocks != nil {
-				tt.setupMocks(dbMock)
-			}
-
-			repo := &accountRepo{
-				db: db,
-			}
-
-			err = repo.UpdateAccountBalance(ctx, 1, 50)
-			require.Error(t, err)
-		})
-	}
+	testForUpdateDeleteErrorsWithMock(t, func(db *sql.DB) error {
+		return newAccountRepo(db).UpdateAccountBalance(context.Background(), 1, 12)
+	})
 }
 
 func TestGetTransfersByAccountID(t *testing.T) {
@@ -475,12 +182,12 @@ func TestGetTransfersByAccountID(t *testing.T) {
 	account3 := createRandomAccount(t)
 
 	transferUUID := uuid.NewV4().String()
-	err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
+	_, err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
 
 	transferUUID = uuid.NewV4().String()
 
-	err = testMysql.Account().AddTransfer(context.Background(), transferUUID, account3.ID, account2.ID, 50)
+	_, err = testMysql.Account().AddTransfer(context.Background(), transferUUID, account3.ID, account2.ID, 50)
 	require.NoError(t, err)
 
 	transfersMade, totalRecordMade, err := testMysql.Account().GetTransfersByAccountID(ctx, account.ID, 0, 0, true)
@@ -504,94 +211,8 @@ func TestGetTransfersByAccountID(t *testing.T) {
 }
 
 func TestGetTransfersByAccountIDErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-
-	tests := []struct {
-		name       string
-		setupMocks func(dbMock sqlmock.Sqlmock)
-		wantErr    bool
-	}{
-		{
-			name: "Should not return error when the count returns 0",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(0),
-				)
-			},
-		},
-		{
-			name: "Should return error when the count prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the count query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the scan fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"id", "uuid", "account_origin_id", "account_destination_id", "amount", "created_at"}).AddRow(1, "uuid", 1, 2, 50, "2021-01-01 00:00:00"),
-				)
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			db, dbMock, err := sqlmock.New()
-			require.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupMocks != nil {
-				tt.setupMocks(dbMock)
-			}
-
-			repo := &accountRepo{
-				db: db,
-			}
-
-			_, _, err = repo.GetTransfersByAccountID(ctx, 1, 0, 0, true)
-			if tt.wantErr {
-				require.Error(t, err)
-				return
-			}
-
-			require.NoError(t, err)
-		})
-	}
+	testForPaginatedSelectErrorsWithMock(t, "transfer_id", func(db *sql.DB) error {
+		_, _, err := newAccountRepo(db).GetTransfersByAccountID(context.Background(), 1, 0, 0, true)
+		return err
+	})
 }

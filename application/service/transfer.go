@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/diegoclair/go_boilerplate/application/contract"
 	"github.com/diegoclair/go_boilerplate/application/dto"
@@ -50,9 +49,6 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
 	}
 
-	fmt.Println("AccountLOGgED", loggedAccountUUID)
-	fmt.Println("AccountOriginUUID", transfer.AccountDestinationUUID)
-
 	destAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
@@ -67,7 +63,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 
 	return s.svc.dm.WithTransaction(ctx, func(tx contract.DataManager) error {
 
-		err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
+		_, err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
 		if err != nil {
 			s.svc.log.Errorf(ctx, "error to add transfer: %s", err.Error())
 			return err

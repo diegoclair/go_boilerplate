@@ -14,7 +14,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	v9 "github.com/redis/go-redis/v9"
+	redis "github.com/redis/go-redis/v9"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -42,14 +42,14 @@ func (m *MockIRedisCache) EXPECT() *MockIRedisCacheMockRecorder {
 }
 
 // Del mocks base method.
-func (m *MockIRedisCache) Del(ctx context.Context, keys ...string) *v9.IntCmd {
+func (m *MockIRedisCache) Del(ctx context.Context, keys ...string) *redis.IntCmd {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range keys {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "Del", varargs...)
-	ret0, _ := ret[0].(*v9.IntCmd)
+	ret0, _ := ret[0].(*redis.IntCmd)
 	return ret0
 }
 
@@ -61,10 +61,10 @@ func (mr *MockIRedisCacheMockRecorder) Del(ctx any, keys ...any) *gomock.Call {
 }
 
 // Expire mocks base method.
-func (m *MockIRedisCache) Expire(ctx context.Context, key string, expiration time.Duration) *v9.BoolCmd {
+func (m *MockIRedisCache) Expire(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Expire", ctx, key, expiration)
-	ret0, _ := ret[0].(*v9.BoolCmd)
+	ret0, _ := ret[0].(*redis.BoolCmd)
 	return ret0
 }
 
@@ -75,10 +75,10 @@ func (mr *MockIRedisCacheMockRecorder) Expire(ctx, key, expiration any) *gomock.
 }
 
 // Get mocks base method.
-func (m *MockIRedisCache) Get(ctx context.Context, key string) *v9.StringCmd {
+func (m *MockIRedisCache) Get(ctx context.Context, key string) *redis.StringCmd {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, key)
-	ret0, _ := ret[0].(*v9.StringCmd)
+	ret0, _ := ret[0].(*redis.StringCmd)
 	return ret0
 }
 
@@ -89,10 +89,10 @@ func (mr *MockIRedisCacheMockRecorder) Get(ctx, key any) *gomock.Call {
 }
 
 // Incr mocks base method.
-func (m *MockIRedisCache) Incr(ctx context.Context, key string) *v9.IntCmd {
+func (m *MockIRedisCache) Incr(ctx context.Context, key string) *redis.IntCmd {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Incr", ctx, key)
-	ret0, _ := ret[0].(*v9.IntCmd)
+	ret0, _ := ret[0].(*redis.IntCmd)
 	return ret0
 }
 
@@ -103,10 +103,10 @@ func (mr *MockIRedisCacheMockRecorder) Incr(ctx, key any) *gomock.Call {
 }
 
 // Keys mocks base method.
-func (m *MockIRedisCache) Keys(ctx context.Context, pattern string) *v9.StringSliceCmd {
+func (m *MockIRedisCache) Keys(ctx context.Context, pattern string) *redis.StringSliceCmd {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Keys", ctx, pattern)
-	ret0, _ := ret[0].(*v9.StringSliceCmd)
+	ret0, _ := ret[0].(*redis.StringSliceCmd)
 	return ret0
 }
 
@@ -117,10 +117,10 @@ func (mr *MockIRedisCacheMockRecorder) Keys(ctx, pattern any) *gomock.Call {
 }
 
 // Set mocks base method.
-func (m *MockIRedisCache) Set(ctx context.Context, key string, value any, expiration time.Duration) *v9.StatusCmd {
+func (m *MockIRedisCache) Set(ctx context.Context, key string, value any, expiration time.Duration) *redis.StatusCmd {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", ctx, key, value, expiration)
-	ret0, _ := ret[0].(*v9.StatusCmd)
+	ret0, _ := ret[0].(*redis.StatusCmd)
 	return ret0
 }
 
@@ -131,10 +131,10 @@ func (mr *MockIRedisCacheMockRecorder) Set(ctx, key, value, expiration any) *gom
 }
 
 // TTL mocks base method.
-func (m *MockIRedisCache) TTL(ctx context.Context, key string) *v9.DurationCmd {
+func (m *MockIRedisCache) TTL(ctx context.Context, key string) *redis.DurationCmd {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TTL", ctx, key)
-	ret0, _ := ret[0].(*v9.DurationCmd)
+	ret0, _ := ret[0].(*redis.DurationCmd)
 	return ret0
 }
 

@@ -108,11 +108,12 @@ func (m *MockAuthRepo) EXPECT() *MockAuthRepoMockRecorder {
 }
 
 // CreateSession mocks base method.
-func (m *MockAuthRepo) CreateSession(ctx context.Context, session dto.Session) error {
+func (m *MockAuthRepo) CreateSession(ctx context.Context, session dto.Session) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSession", ctx, session)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateSession indicates an expected call of CreateSession.
@@ -160,11 +161,12 @@ func (m *MockAccountRepo) EXPECT() *MockAccountRepoMockRecorder {
 }
 
 // AddTransfer mocks base method.
-func (m *MockAccountRepo) AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) error {
+func (m *MockAccountRepo) AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddTransfer", ctx, transferUUID, accountOriginID, accountDestinationID, amount)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // AddTransfer indicates an expected call of AddTransfer.

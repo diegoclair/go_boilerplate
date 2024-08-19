@@ -2,12 +2,11 @@ package mysql
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/diegoclair/go_boilerplate/application/dto"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
 )
@@ -36,8 +35,9 @@ func TestCreateAndGetSession(t *testing.T) {
 		RefreshTokenExpiredAt: time.Now().Add(24 * time.Hour),
 	}
 
-	err := testMysql.Auth().CreateSession(ctx, session)
+	sessionID, err := testMysql.Auth().CreateSession(ctx, session)
 	require.NoError(t, err)
+	require.NotZero(t, sessionID)
 
 	session2, err := testMysql.Auth().GetSessionByUUID(ctx, session.SessionUUID)
 	require.NoError(t, err)
@@ -46,77 +46,15 @@ func TestCreateAndGetSession(t *testing.T) {
 }
 
 func TestCreateSessionErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-
-	tests := []struct {
-		name      string
-		setupTest func(dbMock sqlmock.Sqlmock)
-	}{
-		{
-			name: "Should return error when the prepare fails",
-			setupTest: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the exec fails",
-			setupTest: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectExec().WillReturnError(assert.AnError)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			db, mock, err := sqlmock.New()
-			assert.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupTest != nil {
-				tt.setupTest(mock)
-			}
-
-			// wantErr will only work with mocked database
-			repo := newAuthRepo(db)
-			err = repo.CreateSession(ctx, dto.Session{})
-			assert.Error(t, err)
-		})
-	}
+	testForInsertErrorsWithMock(t, func(db *sql.DB) error {
+		_, err := newAuthRepo(db).CreateSession(context.Background(), dto.Session{})
+		return err
+	})
 }
 
 func TestGetSessionErrorsWithMock(t *testing.T) {
-	ctx := context.Background()
-	tests := []struct {
-		name      string
-		setupTest func(dbMock sqlmock.Sqlmock)
-	}{
-		{
-			name: "Should return error when the prepare fails",
-			setupTest: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-		},
-		{
-			name: "Should return error when the query fails",
-			setupTest: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			db, mock, err := sqlmock.New()
-			assert.NoError(t, err)
-			defer db.Close()
-
-			if tt.setupTest != nil {
-				tt.setupTest(mock)
-			}
-
-			repo := newAuthRepo(db)
-			_, err = repo.GetSessionByUUID(ctx, "session-uuid")
-			assert.Error(t, err)
-		})
-	}
+	testForSelectErrorsWithMock(t, "session_id", func(db *sql.DB) error {
+		_, err := newAuthRepo(db).GetSessionByUUID(context.Background(), "session-uuid")
+		return err
+	})
 }

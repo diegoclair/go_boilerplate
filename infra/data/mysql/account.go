@@ -52,7 +52,7 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 	return account, nil
 }
 
-func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (err error) {
+func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (transferID int64, err error) {
 	query := `
 		INSERT INTO tab_transfer (
 			transfer_uuid,
@@ -65,21 +65,26 @@ func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, acco
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return transferID, mysqlutils.HandleMySQLError(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx,
+	result, err := stmt.ExecContext(ctx,
 		transferUUID,
 		accountOriginID,
 		accountDestinationID,
 		amount,
 	)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return transferID, mysqlutils.HandleMySQLError(err)
 	}
 
-	return nil
+	transferID, err = result.LastInsertId()
+	if err != nil {
+		return transferID, mysqlutils.HandleMySQLError(err)
+	}
+
+	return transferID, nil
 }
 
 func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account) (createdID int64, err error) {

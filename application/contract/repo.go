@@ -15,12 +15,12 @@ type DataManager interface {
 }
 
 type AuthRepo interface {
-	CreateSession(ctx context.Context, session dto.Session) (err error)
+	CreateSession(ctx context.Context, session dto.Session) (sessionID int64, err error)
 	GetSessionByUUID(ctx context.Context, sessionUUID string) (session dto.Session, err error)
 }
 
 type AccountRepo interface {
-	AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (err error)
+	AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (transferID int64, err error)
 	CreateAccount(ctx context.Context, account entity.Account) (createdID int64, err error)
 	GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error)
 	GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error)

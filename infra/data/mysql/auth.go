@@ -18,7 +18,7 @@ func newAuthRepo(db dbConn) contract.AuthRepo {
 	}
 }
 
-func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (err error) {
+func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (sessionID int64, err error) {
 	query := `
 		INSERT INTO tab_session (
 			session_uuid,
@@ -34,11 +34,11 @@ func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (err 
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return sessionID, mysqlutils.HandleMySQLError(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx,
+	result, err := stmt.ExecContext(ctx,
 		session.SessionUUID,
 		session.AccountID,
 		session.RefreshToken,
@@ -48,10 +48,15 @@ func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (err 
 		session.RefreshTokenExpiredAt,
 	)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return sessionID, mysqlutils.HandleMySQLError(err)
 	}
 
-	return nil
+	sessionID, err = result.LastInsertId()
+	if err != nil {
+		return sessionID, mysqlutils.HandleMySQLError(err)
+	}
+
+	return sessionID, nil
 }
 
 func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (session dto.Session, err error) {

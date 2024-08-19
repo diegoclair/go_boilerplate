@@ -77,7 +77,7 @@ func (s *authService) CreateSession(ctx context.Context, session dto.Session) (e
 		return err
 	}
 
-	err = s.svc.dm.Auth().CreateSession(ctx, session)
+	_, err = s.svc.dm.Auth().CreateSession(ctx, session)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error creating session: %s", err.Error())
 		return err
