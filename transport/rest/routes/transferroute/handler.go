@@ -34,14 +34,14 @@ func (s *Handler) handleAddTransfer(c echo.Context) error {
 
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return routeutils.ResponseInvalidRequestBody(c)
 	}
 
 	appContext := routeutils.GetContext(c)
 
 	err = s.transferService.CreateTransfer(appContext, input.ToDto())
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	return routeutils.ResponseCreated(c)
@@ -54,7 +54,7 @@ func (s *Handler) handleGetTransfers(c echo.Context) error {
 
 	transfers, totalRecords, err := s.transferService.GetTransfers(ctx, take, skip)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	response := []viewmodel.TransferResp{}

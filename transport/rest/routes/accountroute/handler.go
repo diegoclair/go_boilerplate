@@ -35,12 +35,12 @@ func (s *Handler) handleAddAccount(c echo.Context) error {
 	input := viewmodel.AddAccount{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return routeutils.ResponseInvalidRequestBody(c)
 	}
 
 	err = s.accountService.CreateAccount(ctx, input.ToDto())
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	return routeutils.ResponseCreated(c)
@@ -52,17 +52,17 @@ func (s *Handler) handleAddBalance(c echo.Context) error {
 	input := viewmodel.AddBalance{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return routeutils.ResponseInvalidRequestBody(c)
 	}
 
 	accountUUID, err := routeutils.GetRequiredStringPathParam(c, "account_uuid", "account_uuid is required")
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	err = s.accountService.AddBalance(ctx, input.ToDto(accountUUID))
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	return routeutils.ResponseCreated(c)
@@ -75,7 +75,7 @@ func (s *Handler) handleGetAccounts(c echo.Context) error {
 
 	accounts, totalRecords, err := s.accountService.GetAccounts(ctx, take, skip)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	response := []viewmodel.AccountResponse{}
@@ -95,12 +95,12 @@ func (s *Handler) handleGetAccountByID(c echo.Context) error {
 
 	accountUUID, err := routeutils.GetRequiredStringPathParam(c, "account_uuid", "Invalid account_uuid")
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	account, err := s.accountService.GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	response := viewmodel.AccountResponse{}

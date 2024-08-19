@@ -1,7 +1,6 @@
 package authroute
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -42,12 +41,12 @@ func (s *Handler) handleLogin(c echo.Context) error {
 	input := viewmodel.Login{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return routeutils.ResponseInvalidRequestBody(c)
 	}
 
 	account, err := s.authService.Login(ctx, input.ToDto())
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	sessionUUID := uuid.NewV4().String()
@@ -57,12 +56,12 @@ func (s *Handler) handleLogin(c echo.Context) error {
 	}
 	token, tokenPayload, err := s.authToken.CreateAccessToken(ctx, req)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	refreshToken, refreshTokenPayload, err := s.authToken.CreateRefreshToken(ctx, req)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	sessionReq := dto.Session{
@@ -76,7 +75,7 @@ func (s *Handler) handleLogin(c echo.Context) error {
 
 	err = s.authService.CreateSession(ctx, sessionReq)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	response := viewmodel.LoginResponse{
@@ -96,29 +95,29 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseBadRequestError(c, err)
+		return routeutils.ResponseInvalidRequestBody(c)
 	}
 
 	refreshPayload, err := s.authToken.VerifyToken(ctx, input.RefreshToken)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	session, err := s.authService.GetSessionByUUID(ctx, refreshPayload.SessionUUID)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	if session.IsBlocked {
-		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("blocked session"))
+		return routeutils.ResponseUnauthorizedError(c, "session blocked")
 	}
 
 	if session.RefreshToken != input.RefreshToken {
-		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("mismatched session token"))
+		return routeutils.ResponseUnauthorizedError(c, "mismatched session token")
 	}
 
 	if time.Now().After(session.RefreshTokenExpiredAt) {
-		return routeutils.ResponseUnauthorizedError(c, fmt.Errorf("expired session"))
+		return routeutils.ResponseUnauthorizedError(c, "expired session")
 	}
 
 	req := auth.TokenPayloadInput{
@@ -127,7 +126,7 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 	}
 	accessToken, accessPayload, err := s.authToken.CreateAccessToken(ctx, req)
 	if err != nil {
-		return routeutils.HandleAPIError(c, err)
+		return routeutils.HandleError(c, err)
 	}
 
 	response := viewmodel.RefreshTokenResponse{
