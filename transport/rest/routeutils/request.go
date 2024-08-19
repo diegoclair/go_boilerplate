@@ -17,8 +17,22 @@ func GetContext(c echo.Context) (ctx context.Context) {
 	return ctx
 }
 
-// GetAndValidateParam gets the param value and validates it, returning a validation error in case it's invalid
-func GetAndValidateParam(c echo.Context, paramName string, errorMessage string) (paramValue string, err error) {
+// GetRequiredInt64PathParam gets the param value and validates it, returning a validation error in case it's empty
+func GetRequiredInt64PathParam(c echo.Context, paramName string, errorMessage string) (paramValue int64, err error) {
+	paramValue, err = strconv.ParseInt(c.Param(paramName), 10, 64)
+	if err != nil {
+		return paramValue, resterrors.NewUnprocessableEntity(errorMessage)
+	}
+
+	if paramValue == 0 {
+		return paramValue, resterrors.NewUnprocessableEntity(errorMessage)
+	}
+
+	return paramValue, nil
+}
+
+// GetRequiredStringPathParam gets the param value and validates it, returning a validation error in case it's empty
+func GetRequiredStringPathParam(c echo.Context, paramName string, errorMessage string) (paramValue string, err error) {
 	paramValue = c.Param(paramName)
 
 	if strings.TrimSpace(paramValue) == "" {

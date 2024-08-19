@@ -46,7 +46,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.PaginatedResult-array_viewmodel_AccountResponse"
+                            "$ref": "#/definitions/viewmodel.PaginatedResponse-array_viewmodel_AccountResponse"
                         }
                     }
                 }
@@ -94,7 +94,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "accountUuid",
+                        "description": "account uuid",
                         "name": "account_uuid",
                         "in": "path",
                         "required": true
@@ -135,7 +135,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "accountUuid",
+                        "description": "account uuid",
                         "name": "account_uuid",
                         "in": "path",
                         "required": true
@@ -250,7 +250,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.PaginatedResult-array_viewmodel_TransferResp"
+                            "$ref": "#/definitions/viewmodel.PaginatedResponse-array_viewmodel_TransferResp"
                         }
                     }
                 }
@@ -384,7 +384,7 @@ const docTemplate = `{
                 }
             }
         },
-        "viewmodel.PaginatedResult-array_viewmodel_AccountResponse": {
+        "viewmodel.PaginatedResponse-array_viewmodel_AccountResponse": {
             "type": "object",
             "properties": {
                 "data": {
@@ -398,7 +398,7 @@ const docTemplate = `{
                 }
             }
         },
-        "viewmodel.PaginatedResult-array_viewmodel_TransferResp": {
+        "viewmodel.PaginatedResponse-array_viewmodel_TransferResp": {
             "type": "object",
             "properties": {
                 "data": {

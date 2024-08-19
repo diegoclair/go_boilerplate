@@ -18,7 +18,7 @@ func handleAddTransfer() {} //nolint:unused
 //	@Description	Get all transfers with paginated response
 //	@Tags			transfers
 //	@Produce		json
-//	@Success		200	{object}	viewmodel.PaginatedResult[[]viewmodel.TransferResp]
+//	@Success		200	{object}	viewmodel.PaginatedResponse[[]viewmodel.TransferResp]
 //	@Router			/transfers [get]
 func handleGetTransfers() {} //nolint:unused 
 
@@ -38,7 +38,7 @@ func handleAddAccount() {} //nolint:unused
 //	@Accept			json
 //	@Produce		json
 //	@Param			request			body	viewmodel.AddBalance	true	"Request"
-//	@Param			account_uuid	path	string					true	"accountUuid"	
+//	@Param			account_uuid	path	string					true	"account uuid"
 //	@Success		201
 //	@Router			/accounts/:account_uuid/balance [post]
 func handleAddBalance() {} //nolint:unused 
@@ -49,7 +49,7 @@ func handleAddBalance() {} //nolint:unused
 //	@Produce		json
 //	@Param			page		query		string	false	"number of page you want"
 //	@Param			quantity	query		string	false	"quantity of items per page"
-//	@Success		200			{object}	viewmodel.PaginatedResult[[]viewmodel.AccountResponse]
+//	@Success		200			{object}	viewmodel.PaginatedResponse[[]viewmodel.AccountResponse]
 //	@Router			/accounts [get]
 func handleGetAccounts() {} //nolint:unused 
 
@@ -57,7 +57,7 @@ func handleGetAccounts() {} //nolint:unused
 //	@Description	Get account by it UUID value
 //	@Tags			accounts
 //	@Produce		json
-//	@Param			account_uuid	path		string	true	"accountUuid"	
+//	@Param			account_uuid	path		string	true	"account uuid"
 //	@Success		200				{object}	viewmodel.AccountResponse
 //	@Router			/accounts/:account_uuid/ [get]
 func handleGetAccountByID() {} //nolint:unused 

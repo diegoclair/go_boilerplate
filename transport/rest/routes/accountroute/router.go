@@ -12,9 +12,9 @@ import (
 const GroupRouteName = "accounts"
 
 const (
-	RootRoute          = ""
-	AccountByID        = "/:account_uuid/"
-	AccountBalanceByID = "/:account_uuid/balance"
+	RootRoute               = ""
+	AccountByIDRoute        = "/:account_uuid/"
+	AccountBalanceByIDRoute = "/:account_uuid/balance"
 )
 
 type AccountRouter struct {
@@ -35,11 +35,12 @@ func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 		Read(viewmodel.AddAccount{}).
 		Returns([]models.ReturnType{{StatusCode: http.StatusCreated}})
 
-	router.POST(AccountBalanceByID, r.ctrl.handleAddBalance).
+	router.POST(AccountBalanceByIDRoute, r.ctrl.handleAddBalance).
 		Summary("Add balance to an account").
 		Description("Add balance to an account by account_uuid").
 		Read(viewmodel.AddBalance{}).
-		Returns([]models.ReturnType{{StatusCode: http.StatusCreated}})
+		Returns([]models.ReturnType{{StatusCode: http.StatusCreated}}).
+		PathParam("account_uuid", "account uuid", goswag.StringType, true)
 
 	router.GET(RootRoute, r.ctrl.handleGetAccounts).
 		Summary("Get all accounts").
@@ -53,7 +54,7 @@ func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 		QueryParam("page", "number of page you want", goswag.StringType, false).
 		QueryParam("quantity", "quantity of items per page", goswag.StringType, false)
 
-	router.GET(AccountByID, r.ctrl.handleGetAccountByID).
+	router.GET(AccountByIDRoute, r.ctrl.handleGetAccountByID).
 		Summary("Get account by ID").
 		Description("Get account by it UUID value").
 		Returns([]models.ReturnType{
@@ -61,5 +62,6 @@ func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 				StatusCode: http.StatusOK,
 				Body:       viewmodel.AccountResponse{},
 			},
-		})
+		}).
+		PathParam("account_uuid", "account uuid", goswag.StringType, true)
 }

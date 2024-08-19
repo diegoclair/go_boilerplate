@@ -65,7 +65,7 @@ definitions:
       refresh_token_expires_at:
         type: string
     type: object
-  viewmodel.PaginatedResult-array_viewmodel_AccountResponse:
+  viewmodel.PaginatedResponse-array_viewmodel_AccountResponse:
     properties:
       data:
         items:
@@ -74,7 +74,7 @@ definitions:
       pagination:
         $ref: '#/definitions/viewmodel.ReturnPagination'
     type: object
-  viewmodel.PaginatedResult-array_viewmodel_TransferResp:
+  viewmodel.PaginatedResponse-array_viewmodel_TransferResp:
     properties:
       data:
         items:
@@ -158,7 +158,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/viewmodel.PaginatedResult-array_viewmodel_AccountResponse'
+            $ref: '#/definitions/viewmodel.PaginatedResponse-array_viewmodel_AccountResponse'
       summary: Get all accounts
       tags:
       - accounts
@@ -185,7 +185,7 @@ paths:
     get:
       description: Get account by it UUID value
       parameters:
-      - description: accountUuid
+      - description: account uuid
         in: path
         name: account_uuid
         required: true
@@ -212,7 +212,7 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/viewmodel.AddBalance'
-      - description: accountUuid
+      - description: account uuid
         in: path
         name: account_uuid
         required: true
@@ -291,7 +291,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/viewmodel.PaginatedResult-array_viewmodel_TransferResp'
+            $ref: '#/definitions/viewmodel.PaginatedResponse-array_viewmodel_TransferResp'
       summary: Get all transfers
       tags:
       - transfers

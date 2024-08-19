@@ -55,7 +55,7 @@ func (s *Handler) handleAddBalance(c echo.Context) error {
 		return routeutils.ResponseBadRequestError(c, err)
 	}
 
-	accountUUID, err := routeutils.GetAndValidateParam(c, "account_uuid", "account_uuid is required")
+	accountUUID, err := routeutils.GetRequiredStringPathParam(c, "account_uuid", "account_uuid is required")
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
@@ -93,7 +93,7 @@ func (s *Handler) handleGetAccounts(c echo.Context) error {
 func (s *Handler) handleGetAccountByID(c echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
-	accountUUID, err := routeutils.GetAndValidateParam(c, "account_uuid", "Invalid account_uuid")
+	accountUUID, err := routeutils.GetRequiredStringPathParam(c, "account_uuid", "Invalid account_uuid")
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
