@@ -36,9 +36,9 @@ func ResponseAPIError(c echo.Context, status int, message string, err string, ca
 	return c.JSON(status, returnValue)
 }
 
-func ResponseInvalidRequestBody(c echo.Context) error {
-	err := resterrors.NewBadRequestError("Invalid request body")
-	return c.JSON(err.StatusCode(), err)
+func ResponseInvalidRequestBody(c echo.Context, err error) error {
+	e := resterrors.NewBadRequestError("Invalid request body", err)
+	return c.JSON(e.StatusCode(), e)
 }
 
 func HandleError(c echo.Context, errorToHandle error) (err error) {

@@ -35,7 +35,7 @@ func (s *Handler) handleAddAccount(c echo.Context) error {
 	input := viewmodel.AddAccount{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseInvalidRequestBody(c)
+		return routeutils.ResponseInvalidRequestBody(c, err)
 	}
 
 	err = s.accountService.CreateAccount(ctx, input.ToDto())
@@ -52,7 +52,7 @@ func (s *Handler) handleAddBalance(c echo.Context) error {
 	input := viewmodel.AddBalance{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseInvalidRequestBody(c)
+		return routeutils.ResponseInvalidRequestBody(c, err)
 	}
 
 	accountUUID, err := routeutils.GetRequiredStringPathParam(c, "account_uuid", "account_uuid is required")

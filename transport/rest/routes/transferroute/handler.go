@@ -34,7 +34,7 @@ func (s *Handler) handleAddTransfer(c echo.Context) error {
 
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseInvalidRequestBody(c)
+		return routeutils.ResponseInvalidRequestBody(c, err)
 	}
 
 	appContext := routeutils.GetContext(c)

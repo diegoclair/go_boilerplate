@@ -295,7 +295,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, resp.Code)
-				require.Contains(t, resp.Body.String(), "blocked session")
+				require.Contains(t, resp.Body.String(), "session blocked")
 			},
 		},
 		{

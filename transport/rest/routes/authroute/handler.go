@@ -41,7 +41,7 @@ func (s *Handler) handleLogin(c echo.Context) error {
 	input := viewmodel.Login{}
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseInvalidRequestBody(c)
+		return routeutils.ResponseInvalidRequestBody(c, err)
 	}
 
 	account, err := s.authService.Login(ctx, input.ToDto())
@@ -95,7 +95,7 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 
 	err := c.Bind(&input)
 	if err != nil {
-		return routeutils.ResponseInvalidRequestBody(c)
+		return routeutils.ResponseInvalidRequestBody(c, err)
 	}
 
 	refreshPayload, err := s.authToken.VerifyToken(ctx, input.RefreshToken)
