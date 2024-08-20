@@ -46,10 +46,11 @@ func getMigrations(filename string, migration []byte) []darwin.Migration {
 	instructions := strings.Split(migrationString, ";")
 
 	result := []darwin.Migration{}
+	fileVersion := strings.Split(filename, "_")[0]
 
 	// the darwin package can't handle multiple instructions in the same file, so we need to split the file into multiple instructions(migrations)
 	for i, instruction := range instructions {
-		version, err := getFileVersion(filename, i)
+		version, err := getFileVersion(fileVersion, i)
 		if err != nil {
 			panic(err)
 		}
@@ -59,29 +60,29 @@ func getMigrations(filename string, migration []byte) []darwin.Migration {
 			continue
 		}
 
+		action := strings.TrimSpace(strings.Split(instruction, "(")[0])
+
 		result = append(result, darwin.Migration{
 			Version:     version,
-			Description: filename,
+			Description: fmt.Sprintf("%s; %s", action, filename),
 			Script:      instruction + ";",
 		})
 	}
 
 	return result
-
 }
 
-func getFileVersion(filename string, i int) (float64, error) {
-	version := strings.Split(filename, "_")[0]
-	v, err := strconv.Atoi(version)
+func getFileVersion(fileVersion string, i int) (float64, error) {
+	fv, err := strconv.Atoi(fileVersion)
 	if err != nil {
 		return 0, err
 	}
 
-	instructionPosition := fmt.Sprintf("0.%d", i)
-	position, err := strconv.ParseFloat(instructionPosition, 64)
+	stringVersion := fmt.Sprintf("%d.%05d", fv, i)
+	version, err := strconv.ParseFloat(stringVersion, 64)
 	if err != nil {
 		return 0, err
 	}
 
-	return float64(v) + position, nil
+	return version, nil
 }

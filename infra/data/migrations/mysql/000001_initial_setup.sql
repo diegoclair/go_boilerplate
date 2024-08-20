@@ -1,4 +1,3 @@
--- create table tab_account
 CREATE TABLE IF NOT EXISTS tab_account (
     account_id INT NOT NULL AUTO_INCREMENT,
     account_uuid CHAR(36) NOT NULL,
@@ -15,7 +14,6 @@ CREATE TABLE IF NOT EXISTS tab_account (
     UNIQUE INDEX cpf_UNIQUE (cpf ASC) VISIBLE
 ) ENGINE = InnoDB CHARACTER SET=utf8;
 
--- create table tab_transfer
 CREATE TABLE IF NOT EXISTS tab_transfer (
     transfer_id INT NOT NULL AUTO_INCREMENT,
     account_origin_id INT NOT NULL,
