@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	contract "github.com/diegoclair/go_boilerplate/application/contract"
+	contract "github.com/diegoclair/go_boilerplate/domain/contract"
 	dto "github.com/diegoclair/go_boilerplate/application/dto"
 	entity "github.com/diegoclair/go_boilerplate/domain/entity"
 	gomock "go.uber.org/mock/gomock"

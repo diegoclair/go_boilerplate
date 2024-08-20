@@ -7,7 +7,7 @@ import (
 
 	"sync"
 
-	"github.com/diegoclair/go_boilerplate/application/contract"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/resterrors"

@@ -11,7 +11,7 @@ mocks:
 
 	@go install go.uber.org/mock/mockgen@latest
 	@rm -rf mocks
-	@for file in application/contract/*.go; do \
+	@for file in domain/contract/*.go; do \
 		filename=$$(basename $$file); \
 		mockgen -package mocks -source=$$file -destination=mocks/$$filename; \
 	done
