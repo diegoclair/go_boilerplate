@@ -14,17 +14,17 @@ const (
 	LoginRoute = "/login"
 )
 
-type AccountRouter struct {
+type AuthRouter struct {
 	ctrl *Handler
 }
 
-func NewRouter(ctrl *Handler) *AccountRouter {
-	return &AccountRouter{
+func NewRouter(ctrl *Handler) *AuthRouter {
+	return &AuthRouter{
 		ctrl: ctrl,
 	}
 }
 
-func (r *AccountRouter) RegisterRoutes(g *routeutils.EchoGroups) {
+func (r *AuthRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 	router := g.AppGroup.Group(GroupRouteName)
 
 	router.POST(LoginRoute, r.ctrl.handleLogin).
