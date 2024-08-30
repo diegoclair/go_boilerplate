@@ -232,17 +232,17 @@ func (mr *MockCacheManagerMockRecorder) SetStringWithExpiration(ctx, key, data, 
 }
 
 // SetStruct mocks base method.
-func (m *MockCacheManager) SetStruct(ctx context.Context, key string, data any, expiration time.Duration) error {
+func (m *MockCacheManager) SetStruct(ctx context.Context, key string, data any) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetStruct", ctx, key, data, expiration)
+	ret := m.ctrl.Call(m, "SetStruct", ctx, key, data)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetStruct indicates an expected call of SetStruct.
-func (mr *MockCacheManagerMockRecorder) SetStruct(ctx, key, data, expiration any) *gomock.Call {
+func (mr *MockCacheManagerMockRecorder) SetStruct(ctx, key, data any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStruct", reflect.TypeOf((*MockCacheManager)(nil).SetStruct), ctx, key, data, expiration)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStruct", reflect.TypeOf((*MockCacheManager)(nil).SetStruct), ctx, key, data)
 }
 
 // SetStructWithExpiration mocks base method.

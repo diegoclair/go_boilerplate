@@ -115,7 +115,7 @@ func (r *redisCache) GetString(ctx context.Context, key string) (data string, er
 	return string(val), nil
 }
 
-// SetString sets an item in cache
+// SetString sets an item in cache with default expiration
 func (r *redisCache) SetString(ctx context.Context, key string, data string) error {
 	err := r.SetStringWithExpiration(ctx, key, data, r.cfg.DefaultExpiration)
 	if err != nil {
@@ -125,7 +125,7 @@ func (r *redisCache) SetString(ctx context.Context, key string, data string) err
 	return nil
 }
 
-// SetStringWithExpiration sets an item in cache
+// SetStringWithExpiration sets an item in cache with an expiration
 func (r *redisCache) SetStringWithExpiration(ctx context.Context, key string, data string, expiration time.Duration) error {
 	err := r.SetItemWithExpiration(ctx, key, []byte(data), expiration)
 	if err != nil {
@@ -135,7 +135,7 @@ func (r *redisCache) SetStringWithExpiration(ctx context.Context, key string, da
 	return nil
 }
 
-// GetStruct returns an struct from cache
+// GetStruct receive a pointer to a struct and returns the struct from cache
 func (r *redisCache) GetStruct(ctx context.Context, key string, data any) (err error) {
 	val, err := r.GetItem(ctx, key)
 	if err != nil {
@@ -150,12 +150,9 @@ func (r *redisCache) GetStruct(ctx context.Context, key string, data any) (err e
 	return nil
 }
 
-// SetStruct sets an item in cache
-func (r *redisCache) SetStruct(ctx context.Context, key string, data any, expiration time.Duration) error {
-	if expiration == 0 {
-		expiration = r.cfg.DefaultExpiration
-	}
-	err := r.SetStructWithExpiration(ctx, key, data, expiration)
+// SetStruct sets an item in cache with default expiration
+func (r *redisCache) SetStruct(ctx context.Context, key string, data any) error {
+	err := r.SetStructWithExpiration(ctx, key, data, r.cfg.DefaultExpiration)
 	if err != nil {
 		return err
 	}
