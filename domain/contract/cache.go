@@ -19,9 +19,9 @@ type CacheManager interface {
 	GetInt(ctx context.Context, key string) (data int64, err error)
 	Increase(ctx context.Context, key string) error
 
-	GetStruct(ctx context.Context, key string, data interface{}) error
-	SetStruct(ctx context.Context, key string, data interface{}, expiration time.Duration) error
-	SetStructWithExpiration(ctx context.Context, key string, data interface{}, expiration time.Duration) error
+	GetStruct(ctx context.Context, key string, data any) error
+	SetStruct(ctx context.Context, key string, data any, expiration time.Duration) error
+	SetStructWithExpiration(ctx context.Context, key string, data any, expiration time.Duration) error
 
 	GetExpiration(ctx context.Context, key string) (time.Duration, error)
 	SetExpiration(ctx context.Context, key string, expiration time.Duration) error
