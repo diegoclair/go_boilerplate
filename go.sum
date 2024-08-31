@@ -74,10 +74,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
-github.com/diegoclair/go_utils v1.0.7 h1:jOC2WS04ginFXgDvxXomJ5zu2e6j2Z/mEXQneQcdpKc=
-github.com/diegoclair/go_utils v1.0.7/go.mod h1:ilpKQNfU7cyz/r0qccVbzgJT15KPcjv51yiFfKVwrJE=
-github.com/diegoclair/goswag v1.0.9 h1:LkrVn7CEQyUHoOwlA0uqgxAFiDlCcBIEI2nGcxbFNNY=
-github.com/diegoclair/goswag v1.0.9/go.mod h1:hihFuM/6Pzr4gjN/9mHTRWgIY0hLWUpJcn85GVuEXe0=
+github.com/diegoclair/go_utils v1.0.8 h1:DZ7xr8AJOFx43UFt7p2DQS4ZUVSEBQIQupjjR8parcs=
+github.com/diegoclair/go_utils v1.0.8/go.mod h1:xnPoCGFZhVMnL3cwglrfsLpossOVLVOlaT35vK8RF8k=
+github.com/diegoclair/goswag v1.0.10 h1:WwfNTzuC2lEltB+5n9ClDtwRzUhOzpHONp55rWmLUd8=
+github.com/diegoclair/goswag v1.0.10/go.mod h1:hihFuM/6Pzr4gjN/9mHTRWgIY0hLWUpJcn85GVuEXe0=
 github.com/distribution/reference v0.6.0 h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5QvfrDyIgxBk=
 github.com/distribution/reference v0.6.0/go.mod h1:BbU0aIcezP1/5jX/8MP0YiH4SdvB5Y4f/wlDRiLyi3E=
 github.com/docker/docker v27.2.0+incompatible h1:Rk9nIVdfH3+Vz4cyI/uhbINhEZ/oLmc+CBXmH6fbNk4=

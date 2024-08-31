@@ -15,6 +15,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/transport/rest/serverMiddleware"
 	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/goswag"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4/middleware"
@@ -50,7 +51,7 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 }
 
 func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, cache contract.CacheManager) *Server {
-	router := goswag.NewEcho()
+	router := goswag.NewEcho(resterrors.GoSwagDefaultResponseErrors()...)
 	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	pingHandler := pingroute.NewHandler()

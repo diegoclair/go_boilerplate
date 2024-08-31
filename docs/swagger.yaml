@@ -4,6 +4,16 @@ definitions:
       message:
         type: string
     type: object
+  resterrors.restErr:
+    properties:
+      causes: {}
+      error:
+        type: string
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
   viewmodel.AccountResponse:
     properties:
       balance:
@@ -159,6 +169,30 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/viewmodel.PaginatedResponse-array_viewmodel_AccountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Get all accounts
       tags:
       - accounts
@@ -178,6 +212,30 @@ paths:
       responses:
         "201":
           description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Add a new account
       tags:
       - accounts
@@ -197,6 +255,30 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/viewmodel.AccountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Get account by ID
       tags:
       - accounts
@@ -222,6 +304,30 @@ paths:
       responses:
         "201":
           description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Add balance to an account
       tags:
       - accounts
@@ -244,6 +350,30 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/viewmodel.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Login
       tags:
       - auth
@@ -263,6 +393,30 @@ paths:
       responses:
         "200":
           description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Logout
       tags:
       - auth
@@ -285,6 +439,30 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/viewmodel.RefreshTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Refresh Token
       tags:
       - auth
@@ -298,6 +476,30 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/pingroute.pingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Ping the server
       tags:
       - ping
@@ -317,6 +519,30 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/viewmodel.PaginatedResponse-array_viewmodel_TransferResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Get all transfers
       tags:
       - transfers
@@ -341,6 +567,30 @@ paths:
       responses:
         "201":
           description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resterrors.restErr'
       summary: Add a new transfer
       tags:
       - transfers

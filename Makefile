@@ -30,7 +30,7 @@ docs:
 	@cd goswag && \
 	go run main.go && \
 	cd .. && \
-	swag init -g ./goswag/main.go && \
+	swag init --pd -g ./goswag/main.go && \
 	swag fmt -d ./goswag/
 
 	@echo "=====> Docs generated"
