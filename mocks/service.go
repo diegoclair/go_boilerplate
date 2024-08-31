@@ -100,6 +100,36 @@ func (mr *MockAccountServiceMockRecorder) GetAccounts(ctx, take, skip any) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockAccountService)(nil).GetAccounts), ctx, take, skip)
 }
 
+// GetLoggedAccount mocks base method.
+func (m *MockAccountService) GetLoggedAccount(ctx context.Context) (entity.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLoggedAccount", ctx)
+	ret0, _ := ret[0].(entity.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLoggedAccount indicates an expected call of GetLoggedAccount.
+func (mr *MockAccountServiceMockRecorder) GetLoggedAccount(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoggedAccount", reflect.TypeOf((*MockAccountService)(nil).GetLoggedAccount), ctx)
+}
+
+// GetLoggedAccountID mocks base method.
+func (m *MockAccountService) GetLoggedAccountID(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLoggedAccountID", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLoggedAccountID indicates an expected call of GetLoggedAccountID.
+func (mr *MockAccountServiceMockRecorder) GetLoggedAccountID(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoggedAccountID", reflect.TypeOf((*MockAccountService)(nil).GetLoggedAccountID), ctx)
+}
+
 // MockAuthService is a mock of AuthService interface.
 type MockAuthService struct {
 	ctrl     *gomock.Controller
@@ -165,6 +195,20 @@ func (m *MockAuthService) Login(ctx context.Context, input dto.LoginInput) (enti
 func (mr *MockAuthServiceMockRecorder) Login(ctx, input any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockAuthService)(nil).Login), ctx, input)
+}
+
+// Logout mocks base method.
+func (m *MockAuthService) Logout(ctx context.Context, accessToken string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Logout", ctx, accessToken)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Logout indicates an expected call of Logout.
+func (mr *MockAuthServiceMockRecorder) Logout(ctx, accessToken any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockAuthService)(nil).Logout), ctx, accessToken)
 }
 
 // MockTransferService is a mock of TransferService interface.

@@ -23,6 +23,6 @@ func main() {
 		Log: config.LogConfig{},
 	}
 
-	server := rest.NewRestServer(&service.Services{}, nil, cfg)
+	server := rest.NewRestServer(&service.Services{}, nil, cfg, nil)
 	server.Router.GenerateSwagger()
 }

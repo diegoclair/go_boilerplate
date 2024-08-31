@@ -3,13 +3,14 @@ package servermiddleware
 import (
 	"net/http"
 
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_utils/resterrors"
 	echo "github.com/labstack/echo/v4"
 )
 
-func AuthMiddlewarePrivateRoute(authToken auth.AuthToken) echo.MiddlewareFunc {
+func AuthMiddlewarePrivateRoute(authToken auth.AuthToken, cache contract.CacheManager) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 
@@ -21,6 +22,11 @@ func AuthMiddlewarePrivateRoute(authToken auth.AuthToken) echo.MiddlewareFunc {
 			payload, err := authToken.VerifyToken(ctx.Request().Context(), accessToken)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, err)
+			}
+
+			valid, _ := cache.GetString(ctx.Request().Context(), accessToken)
+			if valid != "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, resterrors.NewUnauthorizedError("token is invalid"))
 			}
 
 			// Add information to the echo context

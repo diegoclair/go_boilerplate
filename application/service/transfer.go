@@ -2,23 +2,23 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/twinj/uuid"
 )
 
 type transferService struct {
-	svc *service
+	svc        *service
+	accountSvc contract.AccountService
 }
 
-func newTransferService(svc *service) contract.TransferService {
+func newTransferService(svc *service, accountSvc contract.AccountService) contract.TransferService {
 	return &transferService{
-		svc: svc,
+		svc:        svc,
+		accountSvc: accountSvc,
 	}
 }
 
@@ -32,16 +32,9 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 		return err
 	}
 
-	loggedAccountUUID, ok := ctx.Value(infra.AccountUUIDKey).(string)
-	if !ok {
-		errMsg := "accountUUID should not be empty"
-		s.svc.log.Error(ctx, errMsg)
-		return errors.New(errMsg)
-	}
-
-	fromAccount, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
+	fromAccount, err := s.accountSvc.GetLoggedAccount(ctx)
 	if err != nil {
-		s.svc.log.Errorf(ctx, "error to get logged account by uuid: %s", err.Error())
+		s.svc.log.Errorf(ctx, "error to get logged account: %s", err.Error())
 		return err
 	}
 
@@ -92,20 +85,13 @@ func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (t
 	s.svc.log.Info(ctx, "Process Started")
 	defer s.svc.log.Info(ctx, "Process Finished")
 
-	loggedAccountUUID, ok := ctx.Value(infra.AccountUUIDKey).(string)
-	if !ok {
-		errMsg := "accountUUID should not be empty"
-		s.svc.log.Error(ctx, errMsg)
-		return transfers, totalRecords, errors.New(errMsg)
-	}
-
-	account, err := s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
+	accountID, err := s.accountSvc.GetLoggedAccountID(ctx)
 	if err != nil {
-		s.svc.log.Errorf(ctx, "error to get logged account by uuid: %s", err.Error())
+		s.svc.log.Errorf(ctx, "error to get logged account: %s", err.Error())
 		return transfers, totalRecords, err
 	}
 
-	madeTransfers, madeTotalRecords, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, take, skip, true)
+	madeTransfers, madeTotalRecords, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, accountID, take, skip, true)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get made transfers: %s", err.Error())
 		return transfers, totalRecords, err
@@ -113,7 +99,7 @@ func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (t
 
 	transfers = append(transfers, madeTransfers...)
 
-	receivedTransfers, receivedTotalRecords, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, account.ID, take, skip, false)
+	receivedTransfers, receivedTotalRecords, err := s.svc.dm.Account().GetTransfersByAccountID(ctx, accountID, take, skip, false)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get received transfers: %s", err.Error())
 		return transfers, totalRecords, err

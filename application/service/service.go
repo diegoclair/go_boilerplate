@@ -23,10 +23,12 @@ func New(svcOptions ...ServiceOptions) (*Services, error) {
 		opt(svc)
 	}
 
+	accSvc := newAccountService(svc)
+
 	return &Services{
-		AccountService:  newAccountService(svc),
-		AuthService:     newAuthService(svc),
-		TransferService: newTransferService(svc),
+		AccountService:  accSvc,
+		AuthService:     newAuthService(svc, accSvc),
+		TransferService: newTransferService(svc, accSvc),
 	}, nil
 }
 

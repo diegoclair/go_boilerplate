@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/twinj/uuid"
@@ -105,6 +107,56 @@ func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID strin
 	account, err = s.svc.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
 		s.svc.log.Errorf(ctx, "error to get account by uuid: %s", err.Error())
+		return account, err
+	}
+
+	return account, nil
+}
+
+func (s *accountService) getLoggedAccountUUID(ctx context.Context) (accountUUID string, err error) {
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
+
+	loggedAccountUUID, ok := ctx.Value(infra.AccountUUIDKey).(string)
+	if !ok {
+		errMsg := "accountUUID should not be empty"
+		s.svc.log.Error(ctx, errMsg)
+		return accountUUID, errors.New(errMsg)
+	}
+
+	return loggedAccountUUID, nil
+}
+
+func (s *accountService) GetLoggedAccountID(ctx context.Context) (accountID int64, err error) {
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
+
+	loggedAccountUUID, err := s.getLoggedAccountUUID(ctx)
+	if err != nil {
+		return accountID, err
+	}
+
+	accountID, err = s.svc.dm.Account().GetAccountIDByUUID(ctx, loggedAccountUUID)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error to get logged account ID by uuid: %s", err.Error())
+		return accountID, err
+	}
+
+	return accountID, nil
+}
+
+func (s *accountService) GetLoggedAccount(ctx context.Context) (account entity.Account, err error) {
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
+
+	loggedAccountUUID, err := s.getLoggedAccountUUID(ctx)
+	if err != nil {
+		return account, err
+	}
+
+	account, err = s.svc.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error to get logged account by uuid: %s", err.Error())
 		return account, err
 	}
 

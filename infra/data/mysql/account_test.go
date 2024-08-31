@@ -72,7 +72,10 @@ func TestGetAccountByDocument(t *testing.T) {
 }
 
 func TestGetAccountByDocumentErrorsWithMock(t *testing.T) {
-
+	testForSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
+		_, err := newAccountRepo(db).GetAccountByDocument(context.Background(), "cpf")
+		return err
+	})
 }
 
 func TestGetAccounts(t *testing.T) {
@@ -134,6 +137,22 @@ func TestGetAccountByUUID(t *testing.T) {
 func TestGetAccountByUUIDErrorsWithMock(t *testing.T) {
 	testForSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
 		_, err := newAccountRepo(db).GetAccountByUUID(context.Background(), "uuid")
+		return err
+	})
+}
+
+func TestGetAccountIDByUUID(t *testing.T) {
+	account := createRandomAccount(t)
+
+	accountID, err := testMysql.Account().GetAccountIDByUUID(context.Background(), account.UUID)
+	require.NoError(t, err)
+	require.NotZero(t, accountID)
+	require.Equal(t, account.ID, accountID)
+}
+
+func TestGetAccountIDByUUIDErrorsWithMock(t *testing.T) {
+	testForSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
+		_, err := newAccountRepo(db).GetAccountIDByUUID(context.Background(), "uuid")
 		return err
 	})
 }

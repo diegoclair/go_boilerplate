@@ -5,13 +5,17 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
+	"github.com/diegoclair/goswag"
 	"github.com/diegoclair/goswag/models"
+
+	"github.com/diegoclair/go_boilerplate/infra"
 )
 
 const GroupRouteName = "auth"
 
 const (
-	LoginRoute = "/login"
+	LoginRoute  = "/login"
+	LogoutRoute = "/logout"
 )
 
 type AuthRouter struct {
@@ -26,6 +30,7 @@ func NewRouter(ctrl *Handler) *AuthRouter {
 
 func (r *AuthRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 	router := g.AppGroup.Group(GroupRouteName)
+	privateRouter := g.PrivateGroup.Group(GroupRouteName)
 
 	router.POST(LoginRoute, r.ctrl.handleLogin).
 		Summary("Login").
@@ -47,4 +52,14 @@ func (r *AuthRouter) RegisterRoutes(g *routeutils.EchoGroups) {
 				Body:       viewmodel.RefreshTokenResponse{},
 			},
 		})
+
+	privateRouter.POST(LogoutRoute, r.ctrl.handleLogout).
+		Summary("Logout").
+		Description("Logout the user").
+		Returns([]models.ReturnType{
+			{
+				StatusCode: http.StatusOK,
+			},
+		}).
+		HeaderParam(infra.TokenKey.String(), infra.TokenKeyDescription, goswag.StringType, true)
 }

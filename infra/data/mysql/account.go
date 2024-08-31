@@ -33,7 +33,6 @@ const querySelectBase string = `
 		`
 
 func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err error) {
-
 	err = row.Scan(
 		&account.ID,
 		&account.UUID,
@@ -123,7 +122,6 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account)
 }
 
 func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error) {
-
 	query := querySelectBase + `
 		WHERE  	ta.cpf 	= ?
 	`
@@ -144,7 +142,6 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 }
 
 func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
-
 	var params = []any{}
 
 	query := querySelectBase
@@ -198,7 +195,6 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 }
 
 func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
-
 	var params = []any{}
 
 	query := querySelectBase + `
@@ -219,6 +215,32 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 	}
 
 	return account, nil
+}
+
+func (r *accountRepo) GetAccountIDByUUID(ctx context.Context, accountUUID string) (accountID int64, err error) {
+	var params = []any{}
+
+	query := `
+		SELECT 
+			account_id
+		
+		FROM tab_account
+		WHERE account_uuid = ?
+	`
+	params = append(params, accountUUID)
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		return accountID, mysqlutils.HandleMySQLError(err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowContext(ctx, params...).Scan(&accountID)
+	if err != nil {
+		return accountID, mysqlutils.HandleMySQLError(err)
+	}
+
+	return accountID, nil
 }
 
 func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) (transfers []entity.Transfer, totalRecords int64, err error) {
@@ -311,7 +333,6 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 }
 
 func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64, balance float64) (err error) {
-
 	var params = []any{}
 	query := `
 		UPDATE 	tab_account
@@ -332,5 +353,6 @@ func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64,
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
 	}
+
 	return nil
 }

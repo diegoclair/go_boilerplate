@@ -412,3 +412,62 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_handleLogout(t *testing.T) {
+	tests := append(test.PrivateEndpointValidations,
+		test.PrivateEndpointTest{
+			Name: "Should complete request with no error",
+			SetupAuth: func(ctx context.Context, t *testing.T, req *http.Request, m test.SvcMocks) {
+				test.AddAuthorization(ctx, t, req, m)
+			},
+			BuildMocks: func(ctx context.Context, m test.SvcMocks, body any) {
+				m.AuthSvcMock.EXPECT().Logout(ctx, gomock.Any()).Return(nil).Times(1)
+			},
+			CheckResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		test.PrivateEndpointTest{
+			Name: "Should return error when logout fails",
+			SetupAuth: func(ctx context.Context, t *testing.T, req *http.Request, m test.SvcMocks) {
+				test.AddAuthorization(ctx, t, req, m)
+			},
+			BuildMocks: func(ctx context.Context, m test.SvcMocks, body any) {
+				m.AuthSvcMock.EXPECT().Logout(ctx, gomock.Any()).Return(fmt.Errorf("error to logout")).Times(1)
+			},
+			CheckResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusServiceUnavailable, recorder.Code)
+				require.Contains(t, recorder.Body.String(), "error to logout")
+			},
+		},
+	)
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			authroute.Once = sync.Once{}
+			m, server, ctrl := test.GetServerTest(t)
+			defer ctrl.Finish()
+
+			recorder := httptest.NewRecorder()
+			url := fmt.Sprintf("/%s%s", authroute.GroupRouteName, authroute.LogoutRoute)
+
+			req, err := http.NewRequest(http.MethodPost, url, nil)
+			require.NoError(t, err)
+
+			ctx := test.GetTestContext(t, req, recorder, true)
+
+			if tt.SetupAuth != nil {
+				tt.SetupAuth(ctx, t, req, m)
+			}
+
+			if tt.BuildMocks != nil {
+				tt.BuildMocks(ctx, m, nil)
+			}
+
+			server.Echo().ServeHTTP(recorder, req)
+			if tt.CheckResponse != nil {
+				tt.CheckResponse(t, recorder)
+			}
+		})
+	}
+}

@@ -11,3 +11,7 @@ const (
 	TokenKey       Key = "user-token"
 	SessionKey     Key = "Session"
 )
+
+const (
+	TokenKeyDescription = "User access token"
+)

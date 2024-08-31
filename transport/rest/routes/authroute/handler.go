@@ -6,6 +6,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
@@ -135,4 +136,16 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 	}
 
 	return routeutils.ResponseAPIOk(c, response)
+}
+
+func (s *Handler) handleLogout(c echo.Context) error {
+	accessToken := c.Request().Header.Get(infra.TokenKey.String())
+	ctx := routeutils.GetContext(c)
+
+	err := s.authService.Logout(ctx, accessToken)
+	if err != nil {
+		return routeutils.HandleError(c, err)
+	}
+
+	return routeutils.ResponseAPIOk(c, struct{}{})
 }

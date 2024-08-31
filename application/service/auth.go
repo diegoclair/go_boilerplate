@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"log/slog"
 
@@ -18,16 +19,16 @@ const (
 )
 
 type authService struct {
-	svc *service
+	svc        *service
+	accountSvc contract.AccountService
 }
 
-func newAuthService(svc *service) contract.AuthService {
+func newAuthService(svc *service, accountSvc contract.AccountService) contract.AuthService {
 	return &authService{
-		svc: svc,
+		svc:        svc,
+		accountSvc: accountSvc,
 	}
 }
-
-// TODO: create logout process
 
 func (s *authService) Login(ctx context.Context, input dto.LoginInput) (account entity.Account, err error) {
 	s.svc.log.Info(ctx, "Process Started")
@@ -97,4 +98,29 @@ func (s *authService) GetSessionByUUID(ctx context.Context, sessionUUID string) 
 	}
 
 	return session, nil
+}
+
+func (s *authService) Logout(ctx context.Context, accessToken string) (err error) {
+	s.svc.log.Info(ctx, "Process Started")
+	defer s.svc.log.Info(ctx, "Process Finished")
+
+	loggedAccountID, err := s.accountSvc.GetLoggedAccountID(ctx)
+	if err != nil {
+		return err
+	}
+
+	// access token will be on cache for 3 minutes after it duration
+	err = s.svc.cache.SetStringWithExpiration(ctx, accessToken, "true", s.svc.cfg.App.Auth.AccessTokenDuration+3*time.Minute)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error logging out: %s", err.Error())
+		return err
+	}
+
+	err = s.svc.dm.Auth().SetSessionAsBlocked(ctx, loggedAccountID)
+	if err != nil {
+		s.svc.log.Errorf(ctx, "error logging out: %s", err.Error())
+		return err
+	}
+
+	return nil
 }

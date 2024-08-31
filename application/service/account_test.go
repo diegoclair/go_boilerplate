@@ -8,6 +8,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -347,6 +348,130 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 			}
 			if !reflect.DeepEqual(gotAccount, tt.wantAccount) {
 				t.Errorf("accountService.GetAccountByUUID() = %v, want %v", gotAccount, tt.wantAccount)
+			}
+		})
+	}
+}
+
+func Test_accountService_GetLoggedAccountID(t *testing.T) {
+	type args struct {
+		ctx context.Context
+	}
+	tests := []struct {
+		name      string
+		args      args
+		buildMock func(ctx context.Context, mocks allMocks)
+		want      int64
+		wantErr   bool
+	}{
+		{
+			name: "Should return logged account ID without any errors",
+			args: args{ctx: context.WithValue(context.Background(), infra.AccountUUIDKey, "123")},
+			buildMock: func(ctx context.Context, mocks allMocks) {
+				mocks.mockAccountRepo.EXPECT().GetAccountIDByUUID(ctx, "123").Return(int64(1), nil).Times(1)
+			},
+			want:    1,
+			wantErr: false,
+		},
+		{
+			name:    "Should return error when there is some error to get logged account UUID",
+			args:    args{ctx: context.Background()},
+			want:    0,
+			wantErr: true,
+		},
+		{
+			name: "Should return error when there is some error to get account ID by uuid",
+			args: args{ctx: context.WithValue(context.Background(), infra.AccountUUIDKey, "123")},
+			buildMock: func(ctx context.Context, mocks allMocks) {
+				mocks.mockAccountRepo.EXPECT().GetAccountIDByUUID(ctx, "123").Return(int64(0), assert.AnError).Times(1)
+			},
+			want:    0,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			m, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
+			s := &accountService{
+				svc: svc,
+			}
+
+			if tt.buildMock != nil {
+				tt.buildMock(tt.args.ctx, m)
+			}
+
+			got, err := s.GetLoggedAccountID(tt.args.ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("accountService.GetLoggedAccountID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("accountService.GetLoggedAccountID() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_accountService_GetLoggedAccount(t *testing.T) {
+	type args struct {
+		ctx context.Context
+	}
+	tests := []struct {
+		name      string
+		buildMock func(ctx context.Context, mocks allMocks, args args)
+		args      args
+		want      entity.Account
+		wantErr   bool
+	}{
+		{
+			name: "Should return logged account without any errors",
+			args: args{ctx: context.WithValue(context.Background(), infra.AccountUUIDKey, "123")},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, "123").Return(entity.Account{ID: 1, UUID: "123", Name: "name"}, nil).Times(1)
+			},
+			want:    entity.Account{ID: 1, UUID: "123", Name: "name"},
+			wantErr: false,
+		},
+		{
+			name:    "Should return error with there is some error to get logged account",
+			args:    args{ctx: context.Background()},
+			want:    entity.Account{},
+			wantErr: true,
+		},
+		{
+			name: "Should return error with there is some error to get account by uuid",
+			args: args{ctx: context.WithValue(context.Background(), infra.AccountUUIDKey, "123")},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, "123").Return(entity.Account{}, assert.AnError).Times(1)
+			},
+			want:    entity.Account{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			m, svc, ctrl := newServiceTestMock(t)
+			defer ctrl.Finish()
+
+			s := &accountService{
+				svc: svc,
+			}
+
+			if tt.buildMock != nil {
+				tt.buildMock(tt.args.ctx, m, tt.args)
+			}
+
+			got, err := s.GetLoggedAccount(tt.args.ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("accountService.GetLoggedAccount() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("accountService.GetLoggedAccount() = %v, want %v", got, tt.want)
 			}
 		})
 	}

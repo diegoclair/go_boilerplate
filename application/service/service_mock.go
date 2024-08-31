@@ -19,10 +19,11 @@ type allMocks struct {
 
 	mockCacheManager *mocks.MockCacheManager
 	mockCrypto       *mocks.MockCrypto
+
+	mockAccountSvc *mocks.MockAccountService
 }
 
 func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Controller) {
-
 	cfg, err := config.GetConfigEnvironment("../../" + config.ProfileTest)
 	require.NoError(t, err)
 
@@ -40,12 +41,15 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 	cm := mocks.NewMockCacheManager(ctrl)
 	crypto := mocks.NewMockCrypto(ctrl)
 
+	accountSvc := mocks.NewMockAccountService(ctrl)
+
 	m = allMocks{
 		mockDataManager:  dm,
 		mockAccountRepo:  accountRepo,
 		mockCacheManager: cm,
 		mockAuthRepo:     authRepo,
 		mockCrypto:       crypto,
+		mockAccountSvc:   accountSvc,
 	}
 
 	v, err := validator.NewValidator()

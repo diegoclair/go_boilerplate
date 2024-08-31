@@ -75,7 +75,7 @@ func main() {
 		return
 	}
 
-	server := rest.StartRestServer(ctx, cfg, services, log, authToken)
+	server := rest.StartRestServer(ctx, cfg, services, log, authToken, cache)
 
 	gracefulShutdown(server, log)
 }

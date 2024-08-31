@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/diegoclair/go_boilerplate/application/service"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/accountroute"
@@ -23,10 +24,11 @@ type Server struct {
 	routes []routeutils.IRoute
 	Router goswag.Echo
 	cfg    *config.Config
+	cache  contract.CacheManager
 }
 
-func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken) *Server {
-	server := NewRestServer(services, authToken, cfg)
+func StartRestServer(ctx context.Context, cfg *config.Config, services *service.Services, log logger.Logger, authToken auth.AuthToken, cache contract.CacheManager) *Server {
+	server := NewRestServer(services, authToken, cfg, cache)
 	port := cfg.App.Port
 	if port == "" {
 		port = "5000"
@@ -47,7 +49,7 @@ func StartRestServer(ctx context.Context, cfg *config.Config, services *service.
 	return server
 }
 
-func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config) *Server {
+func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *config.Config, cache contract.CacheManager) *Server {
 	router := goswag.NewEcho()
 	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
@@ -61,7 +63,7 @@ func NewRestServer(services *service.Services, authToken auth.AuthToken, cfg *co
 	authRoute := authroute.NewRouter(authHandler)
 	transferRoute := transferroute.NewRouter(transferHandler)
 
-	server := &Server{Router: router, cfg: cfg}
+	server := &Server{Router: router, cfg: cfg, cache: cache}
 	server.addRouters(accountRoute)
 	server.addRouters(authRoute)
 	server.addRouters(pingRoute)
@@ -81,7 +83,7 @@ func (r *Server) registerAppRouters(authToken auth.AuthToken) {
 	g := &routeutils.EchoGroups{}
 	g.AppGroup = r.Router.Group("/")
 	g.PrivateGroup = g.AppGroup.Group("",
-		servermiddleware.AuthMiddlewarePrivateRoute(authToken),
+		servermiddleware.AuthMiddlewarePrivateRoute(authToken, r.cache),
 	)
 
 	for _, appRouter := range r.routes {

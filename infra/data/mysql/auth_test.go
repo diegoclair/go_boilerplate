@@ -58,3 +58,36 @@ func TestGetSessionErrorsWithMock(t *testing.T) {
 		return err
 	})
 }
+
+func TestSetSessionAsBlocked(t *testing.T) {
+	ctx := context.Background()
+	account := createRandomAccount(t)
+
+	session := dto.Session{
+		SessionUUID:           uuid.NewV4().String(),
+		AccountID:             account.ID,
+		RefreshToken:          uuid.NewV4().String(),
+		UserAgent:             "user-agent",
+		ClientIP:              "client-ip",
+		IsBlocked:             false,
+		RefreshTokenExpiredAt: time.Now().Add(24 * time.Hour),
+	}
+
+	sessionID, err := testMysql.Auth().CreateSession(ctx, session)
+	require.NoError(t, err)
+	require.NotZero(t, sessionID)
+
+	err = testMysql.Auth().SetSessionAsBlocked(ctx, session.AccountID)
+	require.NoError(t, err)
+
+	session2, err := testMysql.Auth().GetSessionByUUID(ctx, session.SessionUUID)
+	require.NoError(t, err)
+	require.NotEmpty(t, session2)
+	require.True(t, session2.IsBlocked)
+}
+
+func TestSetSessionAsBlockedErrorsWithMock(t *testing.T) {
+	testForUpdateDeleteErrorsWithMock(t, func(db *sql.DB) error {
+		return newAuthRepo(db).SetSessionAsBlocked(context.Background(), 1)
+	})
+}

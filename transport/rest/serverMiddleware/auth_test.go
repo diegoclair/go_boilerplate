@@ -14,9 +14,31 @@ import (
 )
 
 func TestAuthMiddleware(t *testing.T) {
-	mockAuthToken := mocks.NewMockAuthToken(gomock.NewController(t))
-	middleware := AuthMiddlewarePrivateRoute(mockAuthToken)
+	ctrl := gomock.NewController(t)
+	mockAuthToken := mocks.NewMockAuthToken(ctrl)
+	cacheMock := mocks.NewMockCacheManager(ctrl)
+	middleware := AuthMiddlewarePrivateRoute(mockAuthToken, cacheMock)
 
+	t.Run("Should complete the middleware without errors", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set(infra.TokenKey.String(), "Bearer")
+		rec := httptest.NewRecorder()
+		c := echo.New().NewContext(req, rec)
+
+		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(&auth.TokenPayload{
+			AccountUUID: "uuid",
+			SessionUUID: "session",
+		}, nil)
+
+		cacheMock.EXPECT().GetString(gomock.Any(), "Bearer").Return("", nil)
+		err := middleware(func(c echo.Context) error {
+			return nil
+		})(c)
+
+		assert.Nil(t, err)
+		assert.Equal(t, "uuid", c.Get(infra.AccountUUIDKey.String()))
+		assert.Equal(t, "session", c.Get(infra.SessionKey.String()))
+	})
 	t.Run("Should return error when access token is required", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		rec := httptest.NewRecorder()
@@ -46,7 +68,7 @@ func TestAuthMiddleware(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, err.(*echo.HTTPError).Code)
 	})
 
-	t.Run("Should complete the middleware without errors", func(t *testing.T) {
+	t.Run("Should return error when token is already invalid", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.Header.Set(infra.TokenKey.String(), "Bearer")
 		rec := httptest.NewRecorder()
@@ -57,12 +79,12 @@ func TestAuthMiddleware(t *testing.T) {
 			SessionUUID: "session",
 		}, nil)
 
+		cacheMock.EXPECT().GetString(gomock.Any(), "Bearer").Return("invalid", nil)
 		err := middleware(func(c echo.Context) error {
 			return nil
 		})(c)
 
-		assert.Nil(t, err)
-		assert.Equal(t, "uuid", c.Get(infra.AccountUUIDKey.String()))
-		assert.Equal(t, "session", c.Get(infra.SessionKey.String()))
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusUnauthorized, err.(*echo.HTTPError).Code)
 	})
 }

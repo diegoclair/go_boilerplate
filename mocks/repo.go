@@ -137,6 +137,20 @@ func (mr *MockAuthRepoMockRecorder) GetSessionByUUID(ctx, sessionUUID any) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionByUUID", reflect.TypeOf((*MockAuthRepo)(nil).GetSessionByUUID), ctx, sessionUUID)
 }
 
+// SetSessionAsBlocked mocks base method.
+func (m *MockAuthRepo) SetSessionAsBlocked(ctx context.Context, accountID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetSessionAsBlocked", ctx, accountID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetSessionAsBlocked indicates an expected call of SetSessionAsBlocked.
+func (mr *MockAuthRepoMockRecorder) SetSessionAsBlocked(ctx, accountID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSessionAsBlocked", reflect.TypeOf((*MockAuthRepo)(nil).SetSessionAsBlocked), ctx, accountID)
+}
+
 // MockAccountRepo is a mock of AccountRepo interface.
 type MockAccountRepo struct {
 	ctrl     *gomock.Controller
@@ -218,6 +232,21 @@ func (m *MockAccountRepo) GetAccountByUUID(ctx context.Context, accountUUID stri
 func (mr *MockAccountRepoMockRecorder) GetAccountByUUID(ctx, accountUUID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountByUUID", reflect.TypeOf((*MockAccountRepo)(nil).GetAccountByUUID), ctx, accountUUID)
+}
+
+// GetAccountIDByUUID mocks base method.
+func (m *MockAccountRepo) GetAccountIDByUUID(ctx context.Context, accountUUID string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAccountIDByUUID", ctx, accountUUID)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountIDByUUID indicates an expected call of GetAccountIDByUUID.
+func (mr *MockAccountRepoMockRecorder) GetAccountIDByUUID(ctx, accountUUID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountIDByUUID", reflect.TypeOf((*MockAccountRepo)(nil).GetAccountIDByUUID), ctx, accountUUID)
 }
 
 // GetAccounts mocks base method.
