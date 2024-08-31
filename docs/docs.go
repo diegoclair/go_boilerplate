@@ -182,6 +182,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/logout": {
+            "post": {
+                "description": "Logout the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User access token",
+                        "name": "user-token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/auth/refresh-token": {
             "post": {
                 "description": "Generate a new token using the refresh token",
@@ -246,6 +275,15 @@ const docTemplate = `{
                     "transfers"
                 ],
                 "summary": "Get all transfers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User access token",
+                        "name": "user-token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -276,6 +314,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/viewmodel.TransferReq"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "User access token",
+                        "name": "user-token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {

@@ -4,12 +4,23 @@ import (
 	_ "github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 )
 
+//	@Summary		Logout
+//	@Description	Logout the user
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user-token	header	string	true	"User access token"
+//	@Success		200
+//	@Router			/auth/logout [post]
+func handleLogout() {} //nolint:unused 
+
 //	@Summary		Add a new transfer
 //	@Description	Add a new transfer
 //	@Tags			transfers
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body	viewmodel.TransferReq	true	"Request"
+//	@Param			request		body	viewmodel.TransferReq	true	"Request"
+//	@Param			user-token	header	string					true	"User access token"
 //	@Success		201
 //	@Router			/transfers [post]
 func handleAddTransfer() {} //nolint:unused 
@@ -18,7 +29,8 @@ func handleAddTransfer() {} //nolint:unused
 //	@Description	Get all transfers with paginated response
 //	@Tags			transfers
 //	@Produce		json
-//	@Success		200	{object}	viewmodel.PaginatedResponse[[]viewmodel.TransferResp]
+//	@Param			user-token	header		string	true	"User access token"
+//	@Success		200			{object}	viewmodel.PaginatedResponse[[]viewmodel.TransferResp]
 //	@Router			/transfers [get]
 func handleGetTransfers() {} //nolint:unused 
 

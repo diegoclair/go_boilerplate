@@ -247,6 +247,25 @@ paths:
       summary: Login
       tags:
       - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout the user
+      parameters:
+      - description: User access token
+        in: header
+        name: user-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Logout
+      tags:
+      - auth
   /auth/refresh-token:
     post:
       consumes:
@@ -285,6 +304,12 @@ paths:
   /transfers:
     get:
       description: Get all transfers with paginated response
+      parameters:
+      - description: User access token
+        in: header
+        name: user-token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -306,6 +331,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/viewmodel.TransferReq'
+      - description: User access token
+        in: header
+        name: user-token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
