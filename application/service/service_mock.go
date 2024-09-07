@@ -24,6 +24,7 @@ type allMocks struct {
 }
 
 func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Controller) {
+	t.Helper()
 	cfg, err := config.GetConfigEnvironment("../../" + config.ProfileTest)
 	require.NoError(t, err)
 
