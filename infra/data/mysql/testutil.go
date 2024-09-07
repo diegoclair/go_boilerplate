@@ -17,7 +17,6 @@ import (
 //
 // You can use this function to set the mysql container for an integration testing
 func SetMysqlTestContainerConfig(ctx context.Context, cfg *config.Config) (closeFunc func()) {
-
 	mysqlContainer, err := mysql.Run(
 		ctx,
 		"mysql:8.0.32",
