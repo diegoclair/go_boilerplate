@@ -10,7 +10,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )
 
@@ -19,9 +18,9 @@ import (
 // You can use this function to set the mysql container for an integration testing
 func SetMysqlTestContainerConfig(ctx context.Context, cfg *config.Config) (closeFunc func()) {
 
-	mysqlContainer, err := mysql.RunContainer(
+	mysqlContainer, err := mysql.Run(
 		ctx,
-		testcontainers.WithImage("mysql:8.0.32"),
+		"mysql:8.0.32",
 		mysql.WithDatabase(cfg.DB.MySQL.DBName),
 		mysql.WithUsername(cfg.DB.MySQL.Username),
 		mysql.WithPassword(cfg.DB.MySQL.Password),
