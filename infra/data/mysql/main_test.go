@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot get config: ", err)
 	}
 
-	close := SetMysqlTestContainerConfig(ctx, cfg)
+	close := setMysqlTestContainerConfig(ctx, cfg)
 	defer close()
 
 	rootDir, err := os.Getwd()
