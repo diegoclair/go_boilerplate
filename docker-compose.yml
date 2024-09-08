@@ -1,11 +1,10 @@
-version: '3.9'
-
 services:
 
   app:
     container_name: go-boilerplate-app
-    build: .
-    command: sh -c "/wait && ./myapp rest"
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 5000:5000
     environment:
