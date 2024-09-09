@@ -10,6 +10,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
+	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 )
 
@@ -93,6 +94,9 @@ func (s *authService) GetSessionByUUID(ctx context.Context, sessionUUID string) 
 
 	session, err = s.svc.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
 	if err != nil {
+		if mysqlutils.SQLNotFound(err.Error()) {
+			return session, resterrors.NewUnauthorizedError("session not found")
+		}
 		s.svc.log.Errorf(ctx, "error getting session: %s", err.Error())
 		return session, err
 	}

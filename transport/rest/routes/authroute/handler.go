@@ -1,6 +1,7 @@
 package authroute
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -103,6 +104,9 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 	if err != nil {
 		return routeutils.HandleError(c, err)
 	}
+
+	ctx = context.WithValue(ctx, infra.AccountUUIDKey, refreshPayload.AccountUUID)
+	ctx = context.WithValue(ctx, infra.SessionKey, refreshPayload.SessionUUID)
 
 	session, err := s.authService.GetSessionByUUID(ctx, refreshPayload.SessionUUID)
 	if err != nil {
