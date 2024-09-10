@@ -7,8 +7,7 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
 )
 
 var (
@@ -18,10 +17,7 @@ var (
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	cfg, err := config.GetConfigEnvironment(config.ProfileTest)
-	if err != nil {
-		log.Fatal("cannot get config: ", err)
-	}
+	cfg := configmock.New()
 
 	close := setMysqlTestContainerConfig(ctx, cfg)
 	defer close()
@@ -33,7 +29,15 @@ func TestMain(m *testing.M) {
 
 	migrationsDir := rootDir + "/../migrations/mysql"
 
-	mysql, err := Instance(ctx, cfg, logger.NewNoop(), migrationsDir)
+	mysql, _, err := Instance(ctx,
+		cfg.DB.MySQL.Host,
+		cfg.DB.MySQL.Port,
+		cfg.DB.MySQL.Username,
+		cfg.DB.MySQL.Password,
+		cfg.DB.MySQL.DBName,
+		cfg.GetLogger(),
+		migrationsDir,
+	)
 	if err != nil {
 		log.Fatalf("cannot connect to mysql: %v", err)
 	}

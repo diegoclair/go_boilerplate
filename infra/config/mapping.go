@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"sync"
 	"time"
 )
@@ -12,6 +13,8 @@ type Config struct {
 	Log      LogConfig   `mapstructure:"log"`
 	closers  []func()
 	closerMu sync.Mutex
+	ctx      context.Context
+	appName  string
 }
 
 func (c *Config) AddCloser(close func()) {
@@ -36,10 +39,8 @@ type AppConfig struct {
 	Auth        AuthConfig `mapstructure:"auth"`
 }
 type AuthConfig struct {
-	AccessTokenType      string        `mapstructure:"access-token-type"`
 	AccessTokenDuration  time.Duration `mapstructure:"access-token-duration"`
 	RefreshTokenDuration time.Duration `mapstructure:"refresh-token-duration"`
-	JWTPrivateKey        string        `mapstructure:"jwt-private-key"`
 	PasetoSymmetricKey   string        `mapstructure:"paseto-symmetric-key"`
 }
 

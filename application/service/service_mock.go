@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
@@ -25,7 +26,7 @@ type allMocks struct {
 
 func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Controller) {
 	t.Helper()
-	cfg, err := config.GetConfigEnvironment("../../" + config.ProfileTest)
+	cfg, err := config.GetConfigEnvironment(context.Background(), "test")
 	require.NoError(t, err)
 
 	ctrl = gomock.NewController(t)

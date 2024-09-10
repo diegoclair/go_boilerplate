@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_utils/logger"
 )
 
@@ -22,8 +21,6 @@ type AuthToken interface {
 }
 
 const (
-	tokenTypeJWT     = "jwt"
-	tokenTypePaseto  = "paseto"
 	minSecretKeySize = 32
 )
 
@@ -38,12 +35,9 @@ var (
 	errInvalidPrivateKey = fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 )
 
-func NewAuthToken(cfg config.AuthConfig, log logger.Logger) (AuthToken, error) {
-	accessTokenDurationTime = cfg.AccessTokenDuration
-	refreshTokenDurationTime = cfg.RefreshTokenDuration
+func NewAuthToken(accessTokenDuration, refreshTokenDuration time.Duration, pasetoSymmetricKey string, log logger.Logger) (AuthToken, error) {
+	accessTokenDurationTime = accessTokenDuration
+	refreshTokenDurationTime = refreshTokenDuration
 
-	if cfg.AccessTokenType == tokenTypeJWT {
-		return newJwtAuth(cfg.JWTPrivateKey, log)
-	}
-	return newPasetoAuth(cfg.PasetoSymmetricKey, log)
+	return newPasetoAuth(pasetoSymmetricKey, log)
 }

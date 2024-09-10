@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_utils/logger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,7 +36,6 @@ func TestPasetoTokenMaker(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.args.tokenType = tokenTypePaseto
 			validateTokenMaker(t, tt.args)
 		})
 	}
@@ -69,9 +67,7 @@ func Test_paseto_VerifyToken(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.args.tokenType = tokenTypePaseto
-			cfg := getConfig(t, tt.args)
-			maker, err := NewAuthToken(cfg.App.Auth, logger.NewNoop())
+			maker, err := getTokenAuth(getConfig(t, tt.args))
 			require.NoError(t, err)
 
 			ctx := context.Background()

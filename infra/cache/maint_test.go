@@ -6,30 +6,28 @@ import (
 	"os"
 	"testing"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
 )
 
 var (
-	testRedis contract.CacheManager
+	testRedis *CacheManager
+	cfg       *configmock.ConfigMock = configmock.New()
 )
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	cfg, err := config.GetConfigEnvironment(config.ProfileTest)
-	if err != nil {
-		log.Fatal("cannot get config: ", err)
-	}
-
 	close := SetRedisTestContainerConfig(ctx, cfg)
 	defer close()
 
-	redis, err := Instance(ctx, cfg, logger.NewNoop())
+	redis, client, err := NewRedisCache(ctx,
+		cfg.Redis.Host, cfg.Redis.Password, cfg.Redis.DB, cfg.Redis.DefaultExpiration,
+		cfg.GetLogger(),
+	)
 	if err != nil {
 		log.Fatalf("cannot connect to redis: %v", err)
 	}
+	defer client.Close()
 
 	testRedis = redis
 

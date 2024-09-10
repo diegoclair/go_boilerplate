@@ -10,14 +10,13 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
-	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/accountroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/transferroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/transport/rest/serverMiddleware"
-	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/goswag"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -78,14 +77,19 @@ func getTestTokenMaker(t *testing.T) auth.AuthToken {
 	t.Helper()
 
 	onceToken.Do(func() {
-		cfg, err := config.GetConfigEnvironment(config.ProfileTest)
-		require.NoError(t, err)
+		cfg := configmock.New()
+		var err error
 
-		cfg.App.Auth.AccessTokenDuration = 2 * time.Second
-		cfg.App.Auth.RefreshTokenDuration = 2 * time.Second
+		cfg.Auth.AccessTokenDuration = 2 * time.Second
+		cfg.Auth.RefreshTokenDuration = 2 * time.Second
 
-		tokenMaker, err = auth.NewAuthToken(cfg.App.Auth, logger.NewNoop())
+		tokenMaker, err = auth.NewAuthToken(cfg.Auth.AccessTokenDuration,
+			cfg.Auth.RefreshTokenDuration,
+			cfg.Auth.PasetoSymmetricKey,
+			cfg.GetLogger(),
+		)
 		require.NoError(t, err)
+		require.NotEmpty(t, tokenMaker)
 	})
 	return tokenMaker
 }

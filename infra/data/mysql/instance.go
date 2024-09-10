@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/resterrors"
 	mysqlDriver "github.com/go-sql-driver/mysql"
@@ -36,29 +35,27 @@ func getMysqlInstance(dataSourceName string) (*sql.DB, error) {
 }
 
 // Instance returns an instance of a MySQLRepo
-func Instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrationsDir string) (contract.DataManager, error) {
-	return instance(ctx, cfg, log, migrationsDir, getMysqlInstance)
+func Instance(ctx context.Context,
+	host, port, username, password, dbName string,
+	log logger.Logger, migrationsDir string,
+) (*mysqlConn, *sql.DB, error) {
+	return instance(ctx, host, port, username, password, dbName, log, migrationsDir, getMysqlInstance)
 }
 
-func instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrationsDir string, getMysql getMysql) (contract.DataManager, error) {
+func instance(ctx context.Context,
+	host, port, username, password, dbName string,
+	log logger.Logger, migrationsDir string, getMysql getMysql) (*mysqlConn, *sql.DB, error) {
+	var db *sql.DB
 	onceDB.Do(func() {
 		dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
-			cfg.DB.MySQL.Username, cfg.DB.MySQL.Password, cfg.DB.MySQL.Host, cfg.DB.MySQL.Port,
+			username, password, host, port,
 		)
 
-		var db *sql.DB
 		log.Info(ctx, "Connecting to database...")
 		db, connErr = getMysql(dataSourceName)
 		if connErr != nil {
 			return
 		}
-
-		cfg.AddCloser(func() {
-			log.Info(ctx, "Closing mysql connection...")
-			if err := db.Close(); err != nil {
-				log.Errorf(ctx, "Error closing mysql connection: %v", err)
-			}
-		})
 
 		log.Info(ctx, "Database Ping...")
 		connErr = db.PingContext(ctx)
@@ -68,12 +65,12 @@ func instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrat
 		}
 
 		log.Info(ctx, "Creating database if not exists...")
-		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", cfg.DB.MySQL.DBName)); connErr != nil {
+		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", dbName)); connErr != nil {
 			log.Errorf(ctx, "Create Database error: %v", connErr)
 			return
 		}
 
-		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", cfg.DB.MySQL.DBName)); connErr != nil {
+		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", dbName)); connErr != nil {
 			log.Errorf(ctx, "Default Database error: %v", connErr)
 			return
 		}
@@ -97,7 +94,7 @@ func instance(ctx context.Context, cfg *config.Config, log logger.Logger, migrat
 		conn.db = db
 	})
 
-	return conn, connErr
+	return conn, db, connErr
 }
 
 func repoInstances(dbConn dbConn) *mysqlConn {
