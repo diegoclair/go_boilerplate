@@ -28,4 +28,5 @@ type CacheManager interface {
 
 	Delete(ctx context.Context, keys ...string) error
 	CleanAll(ctx context.Context) error
+	GetAllKeys(ctx context.Context, pattern string) ([]string, error)
 }

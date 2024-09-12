@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_utils/logger"
 
 	"github.com/redis/go-redis/v9"
@@ -24,43 +24,35 @@ type IRedisCache interface {
 	Keys(ctx context.Context, pattern string) *redis.StringSliceCmd
 }
 
-// redisCache implements the CacheManager interface
-type redisCache struct {
-	cfg   config.RedisConfig
-	redis IRedisCache
-	log   logger.Logger
+// CacheManager implements the CacheManager interface
+type CacheManager struct {
+	defaultExpiration time.Duration
+	redis             IRedisCache
+	log               logger.Logger
 }
 
-// newRedisCache returns a RedisCache instance
-func newRedisCache(ctx context.Context, cfg *config.Config, log logger.Logger) (*redisCache, error) {
-	rCfg := cfg.Cache.Redis
+// NewRedisCache returns a RedisCache instance
+func NewRedisCache(ctx context.Context, addr string, password string, db int, defaultExpiration time.Duration, log logger.Logger) (*CacheManager, *redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:     rCfg.Host + ":" + strconv.Itoa(rCfg.Port),
-		Password: rCfg.Pass,
-		DB:       rCfg.DB,
-	})
-
-	cfg.AddCloser(func() {
-		log.Info(ctx, "Closing redis connection...")
-		if err := client.Close(); err != nil {
-			log.Errorf(ctx, "Error closing redis connection: %v", err)
-		}
+		Addr:     addr,
+		Password: password,
+		DB:       db,
 	})
 
 	_, err := client.Ping(ctx).Result()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &redisCache{
-		cfg:   rCfg,
-		redis: client,
-		log:   log,
-	}, nil
+	return &CacheManager{
+		redis:             client,
+		defaultExpiration: defaultExpiration,
+		log:               log,
+	}, client, nil
 }
 
 // GetItem returns an Item from cache
-func (r *redisCache) GetItem(ctx context.Context, key string) (data []byte, err error) {
+func (r *CacheManager) GetItem(ctx context.Context, key string) (data []byte, err error) {
 	val, err := r.redis.Get(ctx, key).Bytes()
 	if errors.Is(err, redis.Nil) {
 		return val, ErrCacheMiss
@@ -72,8 +64,8 @@ func (r *redisCache) GetItem(ctx context.Context, key string) (data []byte, err 
 }
 
 // SetItem sets an item in cache
-func (r *redisCache) SetItem(ctx context.Context, key string, data []byte) error {
-	err := r.SetItemWithExpiration(ctx, key, data, r.cfg.DefaultExpiration)
+func (r *CacheManager) SetItem(ctx context.Context, key string, data []byte) error {
+	err := r.SetItemWithExpiration(ctx, key, data, r.defaultExpiration)
 	if err != nil {
 		return err
 	}
@@ -82,7 +74,7 @@ func (r *redisCache) SetItem(ctx context.Context, key string, data []byte) error
 }
 
 // SetItemWithExpiration sets an item in cache
-func (r *redisCache) SetItemWithExpiration(ctx context.Context, key string, data []byte, expiration time.Duration) error {
+func (r *CacheManager) SetItemWithExpiration(ctx context.Context, key string, data []byte, expiration time.Duration) error {
 	err := r.redis.Set(ctx, key, data, expiration).Err()
 	if err != nil {
 		return err
@@ -92,7 +84,7 @@ func (r *redisCache) SetItemWithExpiration(ctx context.Context, key string, data
 }
 
 // GetInt returns an int64 from cache
-func (r *redisCache) GetInt(ctx context.Context, key string) (data int64, err error) {
+func (r *CacheManager) GetInt(ctx context.Context, key string) (data int64, err error) {
 	val, err := r.GetItem(ctx, key)
 	if errors.Is(err, ErrCacheMiss) {
 		return data, ErrCacheMiss
@@ -104,7 +96,7 @@ func (r *redisCache) GetInt(ctx context.Context, key string) (data int64, err er
 }
 
 // GetString returns an string from cache
-func (r *redisCache) GetString(ctx context.Context, key string) (data string, err error) {
+func (r *CacheManager) GetString(ctx context.Context, key string) (data string, err error) {
 	val, err := r.GetItem(ctx, key)
 	if errors.Is(err, ErrCacheMiss) {
 		return data, ErrCacheMiss
@@ -116,8 +108,8 @@ func (r *redisCache) GetString(ctx context.Context, key string) (data string, er
 }
 
 // SetString sets an item in cache with default expiration
-func (r *redisCache) SetString(ctx context.Context, key string, data string) error {
-	err := r.SetStringWithExpiration(ctx, key, data, r.cfg.DefaultExpiration)
+func (r *CacheManager) SetString(ctx context.Context, key string, data string) error {
+	err := r.SetStringWithExpiration(ctx, key, data, r.defaultExpiration)
 	if err != nil {
 		return err
 	}
@@ -126,7 +118,7 @@ func (r *redisCache) SetString(ctx context.Context, key string, data string) err
 }
 
 // SetStringWithExpiration sets an item in cache with an expiration
-func (r *redisCache) SetStringWithExpiration(ctx context.Context, key string, data string, expiration time.Duration) error {
+func (r *CacheManager) SetStringWithExpiration(ctx context.Context, key string, data string, expiration time.Duration) error {
 	err := r.SetItemWithExpiration(ctx, key, []byte(data), expiration)
 	if err != nil {
 		return err
@@ -136,7 +128,7 @@ func (r *redisCache) SetStringWithExpiration(ctx context.Context, key string, da
 }
 
 // GetStruct receive a pointer to a struct and returns the struct from cache
-func (r *redisCache) GetStruct(ctx context.Context, key string, data any) (err error) {
+func (r *CacheManager) GetStruct(ctx context.Context, key string, data any) (err error) {
 	val, err := r.GetItem(ctx, key)
 	if err != nil {
 		return err
@@ -151,8 +143,8 @@ func (r *redisCache) GetStruct(ctx context.Context, key string, data any) (err e
 }
 
 // SetStruct sets an item in cache with default expiration
-func (r *redisCache) SetStruct(ctx context.Context, key string, data any) error {
-	err := r.SetStructWithExpiration(ctx, key, data, r.cfg.DefaultExpiration)
+func (r *CacheManager) SetStruct(ctx context.Context, key string, data any) error {
+	err := r.SetStructWithExpiration(ctx, key, data, r.defaultExpiration)
 	if err != nil {
 		return err
 	}
@@ -161,7 +153,7 @@ func (r *redisCache) SetStruct(ctx context.Context, key string, data any) error 
 }
 
 // SetStructWithExpiration sets an item in cache
-func (r *redisCache) SetStructWithExpiration(ctx context.Context, key string, data any, expiration time.Duration) error {
+func (r *CacheManager) SetStructWithExpiration(ctx context.Context, key string, data any, expiration time.Duration) error {
 	dataString, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -176,7 +168,7 @@ func (r *redisCache) SetStructWithExpiration(ctx context.Context, key string, da
 }
 
 // GetExpiration returns the expiration time for a key
-func (r *redisCache) GetExpiration(ctx context.Context, key string) (expiration time.Duration, err error) {
+func (r *CacheManager) GetExpiration(ctx context.Context, key string) (expiration time.Duration, err error) {
 	expiration, err = r.redis.TTL(ctx, key).Result()
 	if err != nil {
 		return expiration, err
@@ -186,7 +178,7 @@ func (r *redisCache) GetExpiration(ctx context.Context, key string) (expiration 
 }
 
 // SetExpiration sets the expiration time for a key
-func (r *redisCache) SetExpiration(ctx context.Context, key string, expiration time.Duration) (err error) {
+func (r *CacheManager) SetExpiration(ctx context.Context, key string, expiration time.Duration) (err error) {
 	err = r.redis.Expire(ctx, key, expiration).Err()
 	if err != nil {
 		return err
@@ -196,7 +188,7 @@ func (r *redisCache) SetExpiration(ctx context.Context, key string, expiration t
 }
 
 // Increase increases an int key, setting it to zero if the key doesn't exists
-func (r *redisCache) Increase(ctx context.Context, key string) (err error) {
+func (r *CacheManager) Increase(ctx context.Context, key string) (err error) {
 	err = r.redis.Incr(ctx, key).Err()
 	if err != nil {
 		return err
@@ -206,7 +198,7 @@ func (r *redisCache) Increase(ctx context.Context, key string) (err error) {
 }
 
 // Delete removes a list of keys from the cache
-func (r *redisCache) Delete(ctx context.Context, keys ...string) (err error) {
+func (r *CacheManager) Delete(ctx context.Context, keys ...string) (err error) {
 	err = r.redis.Del(ctx, keys...).Err()
 	if err != nil {
 		return err
@@ -216,7 +208,7 @@ func (r *redisCache) Delete(ctx context.Context, keys ...string) (err error) {
 }
 
 // CleanAll clean everything with the prefix.
-func (r *redisCache) CleanAll(ctx context.Context) (err error) {
+func (r *CacheManager) CleanAll(ctx context.Context) (err error) {
 	keys, err := r.redis.Keys(ctx, "*").Result()
 	if errors.Is(err, redis.Nil) {
 		return ErrCacheMiss
@@ -234,4 +226,13 @@ func (r *redisCache) CleanAll(ctx context.Context) (err error) {
 	}
 
 	return nil
+}
+
+// GetAllKeys retrieves all keys matching a given pattern
+func (r *CacheManager) GetAllKeys(ctx context.Context, pattern string) ([]string, error) {
+	keys, err := r.redis.Keys(ctx, pattern).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get keys: %w", err)
+	}
+	return keys, nil
 }

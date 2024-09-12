@@ -9,13 +9,8 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/application/service"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
-	"github.com/diegoclair/go_boilerplate/infra/cache"
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_boilerplate/infra/data"
-	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/transport/rest"
-	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/validator"
 )
@@ -25,36 +20,19 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
 
-	cfg, err := config.GetConfigEnvironment(config.ProfileRun)
+	cfg, err := config.GetConfigEnvironment(ctx, "boilerplate")
 	if err != nil {
 		log.Fatalf("Error to load config: %v", err)
 	}
 	defer cfg.Close()
 
-	ctx := context.Background()
-	log := infraLogger.New(cfg)
-
-	authToken, err := auth.NewAuthToken(cfg.App.Auth, log)
-	if err != nil {
-		log.Errorf(ctx, "Error getting NewAuthToken: %v", err)
-		return
-	}
-
-	data, err := data.Connect(ctx, cfg, log)
-	if err != nil {
-		log.Errorf(ctx, "Error to connect dataManager repositories: %v", err)
-		return
-	}
-
-	log.Infof(ctx, "Connecting to the cache server at %s:%d.", cfg.Cache.Redis.Host, cfg.Cache.Redis.Port)
-	cache, err := cache.Instance(ctx, cfg, log)
-	if err != nil {
-		log.Errorf(ctx, "Error connecting to cache server: %v", err)
-		return
-	}
-
-	c := crypto.NewCrypto()
+	log := cfg.GetLogger()
+	authToken := cfg.GetAuthToken()
+	data := cfg.GetDataManager()
+	cache := cfg.GetCacheManager()
+	c := cfg.GetCrypto()
 
 	v, err := validator.NewValidator()
 	if err != nil {

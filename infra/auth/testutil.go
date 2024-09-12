@@ -5,8 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,50 +14,33 @@ type utilArgs struct {
 	payload              TokenPayloadInput
 	accessTokenDuration  time.Duration
 	refreshTokenDuration time.Duration
-	tokenType            string
 	expiredToken         bool
 	withoutPrivateKey    bool
 	wantErr              bool
 	wantErrValue         error
 }
 
-func getConfig(t *testing.T, args utilArgs) *config.Config {
-	cfgPointer, err := config.GetConfigEnvironment(config.ProfileTest)
-	require.NoError(t, err)
-	require.NotNil(t, cfgPointer)
-
-	cfg := copyConfig(cfgPointer)
-	cfg.App.Auth.AccessTokenType = args.tokenType
+func getConfig(t *testing.T, args utilArgs) *configmock.ConfigMock {
+	cfg := configmock.New()
 
 	if args.accessTokenDuration.String() != "0s" {
-		cfg.App.Auth.AccessTokenDuration = args.accessTokenDuration
+		cfg.Auth.AccessTokenDuration = args.accessTokenDuration
 	}
 	if args.refreshTokenDuration.String() != "0s" {
-		cfg.App.Auth.RefreshTokenDuration = args.refreshTokenDuration
+		cfg.Auth.RefreshTokenDuration = args.refreshTokenDuration
 	}
 
 	if args.expiredToken {
-		cfg.App.Auth.AccessTokenDuration = 0 * time.Second
-		cfg.App.Auth.RefreshTokenDuration = 0 * time.Second
+		cfg.Auth.AccessTokenDuration = 0 * time.Second
+		cfg.Auth.RefreshTokenDuration = 0 * time.Second
 	}
 
 	if args.withoutPrivateKey {
-		cfg.App.Auth.JWTPrivateKey = ""
-		cfg.App.Auth.PasetoSymmetricKey = ""
+		cfg.Auth.PasetoSymmetricKey = ""
 	}
 
 	require.NotEmpty(t, cfg)
 	return cfg
-}
-
-// copyConfig returns a copy of the config avoiding problems with pointer and multiple tests
-func copyConfig(cfg *config.Config) *config.Config {
-	return &config.Config{
-		App:   cfg.App,
-		Cache: cfg.Cache,
-		DB:    cfg.DB,
-		Log:   cfg.Log,
-	}
 }
 
 func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
@@ -93,7 +75,7 @@ func validateTokenMaker(t *testing.T, args utilArgs) {
 	cfg := getConfig(t, args)
 	require.NotNil(t, cfg)
 
-	maker, err := NewAuthToken(cfg.App.Auth, logger.NewNoop())
+	maker, err := getTokenAuth(cfg)
 	if args.wantErr {
 		require.Equal(t, args.wantErrValue, err)
 		return
@@ -102,4 +84,12 @@ func validateTokenMaker(t *testing.T, args utilArgs) {
 
 	createTestAccessToken(ctx, t, maker, args)
 	createTestRefreshToken(ctx, t, maker, args)
+}
+
+func getTokenAuth(cfg *configmock.ConfigMock) (AuthToken, error) {
+	return NewAuthToken(cfg.Auth.AccessTokenDuration,
+		cfg.Auth.RefreshTokenDuration,
+		cfg.Auth.PasetoSymmetricKey,
+		cfg.GetLogger(),
+	)
 }

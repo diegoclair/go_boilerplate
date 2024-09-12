@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
@@ -16,7 +16,7 @@ import (
 // setMysqlTestContainerConfig set the mysql container for testing
 //
 // You can use this function to set the mysql container for an integration testing
-func setMysqlTestContainerConfig(ctx context.Context, cfg *config.Config) (closeFunc func()) {
+func setMysqlTestContainerConfig(ctx context.Context, cfg *configmock.ConfigMock) (closeFunc func()) {
 	mysqlContainer, err := mysql.Run(
 		ctx,
 		"mysql:8.0.32",
@@ -28,7 +28,7 @@ func setMysqlTestContainerConfig(ctx context.Context, cfg *config.Config) (close
 		log.Fatalf("cannot start mysql container: %v", err)
 	}
 
-	cfg.DB.MySQL.Host, err = mysqlContainer.Host(ctx)
+	host, err := mysqlContainer.Host(ctx)
 	if err != nil {
 		log.Fatalf("failed to get container host: %v", err)
 	}
@@ -38,7 +38,7 @@ func setMysqlTestContainerConfig(ctx context.Context, cfg *config.Config) (close
 		log.Fatalf("failed to get container port: %v", err)
 	}
 
-	cfg.DB.MySQL.Port = port.Port()
+	cfg.SetMySQLHostAndPort(host, port.Port())
 
 	return func() {
 		if err := mysqlContainer.Terminate(ctx); err != nil {

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,12 +15,10 @@ import (
 
 func Test_instance(t *testing.T) {
 	ctx := context.Background()
-	cfg, err := config.GetConfigEnvironment(config.ProfileTest)
-	require.NoError(t, err)
+	cfg := configmock.New()
 
 	db, dbMock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
 	require.NoError(t, err)
-
 	var getTestMysql getMysql = func(string) (*sql.DB, error) {
 		return db, nil
 	}
@@ -88,7 +86,16 @@ func Test_instance(t *testing.T) {
 			}
 
 			onceDB = sync.Once{}
-			mysql, err := instance(ctx, cfg, logger.NewNoop(), "", tt.args.testMysql)
+			mysql, db, err := instance(ctx,
+				cfg.DB.MySQL.Host,
+				cfg.DB.MySQL.Port,
+				cfg.DB.MySQL.Username,
+				cfg.DB.MySQL.Password,
+				cfg.DB.MySQL.DBName,
+				logger.NewNoop(),
+				"",
+				tt.args.testMysql,
+			)
 			if tt.wantErr && err != nil {
 				assert.Error(t, err)
 				return
@@ -96,6 +103,7 @@ func Test_instance(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.NotNil(t, mysql)
+			assert.NotNil(t, db)
 		})
 	}
 

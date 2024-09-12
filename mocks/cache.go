@@ -73,6 +73,21 @@ func (mr *MockCacheManagerMockRecorder) Delete(ctx any, keys ...any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCacheManager)(nil).Delete), varargs...)
 }
 
+// GetAllKeys mocks base method.
+func (m *MockCacheManager) GetAllKeys(ctx context.Context, pattern string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllKeys", ctx, pattern)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllKeys indicates an expected call of GetAllKeys.
+func (mr *MockCacheManagerMockRecorder) GetAllKeys(ctx, pattern any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllKeys", reflect.TypeOf((*MockCacheManager)(nil).GetAllKeys), ctx, pattern)
+}
+
 // GetExpiration mocks base method.
 func (m *MockCacheManager) GetExpiration(ctx context.Context, key string) (time.Duration, error) {
 	m.ctrl.T.Helper()

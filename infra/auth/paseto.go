@@ -17,7 +17,7 @@ type pasetoAuth struct {
 	log          logger.Logger
 }
 
-func newPasetoAuth(symmetricKey string, log logger.Logger) (AuthToken, error) {
+func newPasetoAuth(symmetricKey string, log logger.Logger) (*pasetoAuth, error) {
 	if len(symmetricKey) != chacha20poly1305.KeySize {
 		return nil, errInvalidPrivateKey
 	}

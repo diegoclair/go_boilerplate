@@ -4,10 +4,8 @@ environment = "local"
 port = "5000"
 
   [app.auth]
-  access-token-type = "paseto" #paseto or jwt
   access-token-duration = "15m"
   refresh-token-duration = "24h"
-  jwt-private-key = "0z6eQbA4EZVcEbmyyojJ8FXhy0cd1jrv"
   paseto-symmetric-key = "dFRpaeCkdLuKpv65vN7QDSGm5M4H6EWe"
 
 [cache]

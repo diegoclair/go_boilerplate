@@ -5,13 +5,11 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/stretchr/testify/require"
 )
 
-func TestNew(t *testing.T) {
-	cfg := &config.Config{}
-	logger := New(cfg)
+func TestNewLogger(t *testing.T) {
+	logger := NewLogger("test", true)
 	require.NotNil(t, logger)
 }
 

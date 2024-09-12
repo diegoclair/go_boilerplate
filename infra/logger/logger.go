@@ -4,18 +4,15 @@ import (
 	"context"
 
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_utils/logger"
 )
 
-func New(cfg *config.Config) logger.Logger {
-
+func NewLogger(appName string, debugLevel bool) logger.Logger {
 	params := logger.LogParams{
-		AppName:                  cfg.App.Name,
-		DebugLevel:               cfg.Log.Debug,
+		AppName:                  appName,
+		DebugLevel:               debugLevel,
 		AddAttributesFromContext: addDefaultAttributesToLogger,
 	}
-
 	return logger.New(params)
 }
 

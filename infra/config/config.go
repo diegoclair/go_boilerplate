@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"strings"
@@ -8,19 +9,6 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-)
-
-// Profile configuration profile
-type Profile string
-
-func (p Profile) String() string {
-	return string(p)
-}
-
-// Profile default values
-const (
-	ProfileRun  Profile = "config"
-	ProfileTest Profile = "config" // if you need a different file for test, you can create a different and change the name here
 )
 
 var (
@@ -32,27 +20,19 @@ var (
 // EnvKeyReplacer replace for environment variable parse
 var EnvKeyReplacer = strings.NewReplacer(".", "_", "-", "_")
 
-func setup(profile Profile) {
+func setup() {
 	viper.AutomaticEnv()
 
-	viper.SetConfigName(profile.String())
+	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
-
-	if profile == ProfileTest {
-		// a test file that use config, can be in deep structure, so we need to add more paths to be possible find the config file.
-		viper.AddConfigPath("../")
-		viper.AddConfigPath("../../")
-		viper.AddConfigPath("../../../")
-		viper.AddConfigPath("../../../../")
-	}
 }
 
 // GetConfigEnvironment read config from environment variables and config.toml file
-func GetConfigEnvironment(profile Profile) (*Config, error) {
+func GetConfigEnvironment(ctx context.Context, appName string) (*Config, error) {
 	once.Do(func() {
 
-		setup(profile)
+		setup()
 
 		configError = viper.ReadInConfig()
 		if configError != nil {

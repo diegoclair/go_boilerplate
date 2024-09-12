@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -12,10 +12,10 @@ import (
 // SetRedisTestContainerConfig set the redis container for testing
 //
 // You can use this function to set the redis container for an integration testing
-func SetRedisTestContainerConfig(ctx context.Context, cfg *config.Config) (closeFunc func()) {
+func SetRedisTestContainerConfig(ctx context.Context, cfg *configmock.ConfigMock) (closeFunc func()) {
 
 	req := testcontainers.ContainerRequest{
-		Image:        "redis:7.2-alpine",
+		Image:        "redis:7.4-alpine",
 		ExposedPorts: []string{"6379/tcp"},
 		WaitingFor:   wait.ForLog("Server initialized"),
 		// this commands are the same as the command from docker-compose.yml
@@ -30,17 +30,18 @@ func SetRedisTestContainerConfig(ctx context.Context, cfg *config.Config) (close
 		log.Fatalf("cannot start mysql container: %v", err)
 	}
 
-	cfg.Cache.Redis.Host, err = redisContainer.Host(ctx)
+	mappedPort, err := redisContainer.MappedPort(ctx, "6379")
 	if err != nil {
-		log.Fatalf("failed to get container host: %v", err)
+		log.Fatalf("failed to get container external port: %s", err)
 	}
 
-	port, err := redisContainer.MappedPort(ctx, "6379")
+	hostIP, err := redisContainer.Host(ctx)
 	if err != nil {
-		log.Fatalf("failed to get container port: %v", err)
+		log.Fatalf("failed to get container host: %s", err)
 	}
 
-	cfg.Cache.Redis.Port = port.Int()
+	// Update the ConfigMock with the test container's URI
+	cfg.SetRedisHost(hostIP, mappedPort.Port())
 
 	return func() {
 		if err := redisContainer.Terminate(ctx); err != nil {
