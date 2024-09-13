@@ -26,6 +26,8 @@ func setup() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("../")
+	viper.AddConfigPath("../../")
 }
 
 // GetConfigEnvironment read config from environment variables and config.toml file
@@ -53,7 +55,10 @@ func GetConfigEnvironment(ctx context.Context, appName string) (*Config, error) 
 			}
 		}
 
-		config = &Config{}
+		config = &Config{
+			ctx:     ctx,
+			appName: appName,
+		}
 		configError = viper.Unmarshal(config)
 		if configError != nil {
 			slog.Error("Error to unmarshal configs: ", slog.String("error", configError.Error()))
