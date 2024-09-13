@@ -1,8 +1,6 @@
 package servermiddleware
 
 import (
-	"net/http"
-
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
@@ -16,17 +14,17 @@ func AuthMiddlewarePrivateRoute(authToken auth.AuthToken, cache contract.CacheMa
 
 			accessToken := ctx.Request().Header.Get(infra.TokenKey.String())
 			if len(accessToken) == 0 {
-				return echo.NewHTTPError(http.StatusUnauthorized, resterrors.NewUnauthorizedError("access token is required"))
+				return resterrors.NewUnauthorizedError("access token is required")
 			}
 
 			payload, err := authToken.VerifyToken(ctx.Request().Context(), accessToken)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, err)
+				return err
 			}
 
 			valid, _ := cache.GetString(ctx.Request().Context(), accessToken)
 			if valid != "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, resterrors.NewUnauthorizedError("token is invalid"))
+				return resterrors.NewUnauthorizedError("token is invalid")
 			}
 
 			// Add information to the echo context
