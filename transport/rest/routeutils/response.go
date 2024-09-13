@@ -1,7 +1,6 @@
 package routeutils
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/diegoclair/go_utils/resterrors"
@@ -49,9 +48,8 @@ func HandleError(c echo.Context, errorToHandle error) (err error) {
 	if errorToHandle != nil {
 		errorString := errorToHandle.Error()
 
-		restErr, ok := errorToHandle.(resterrors.RestErr)
+		restErr, ok := resterrors.FromError(errorToHandle).(resterrors.RestErr)
 		if !ok {
-			fmt.Println("errorToHandle", errorToHandle, ok)
 			return ResponseAPIError(c, statusCode, errorMessage, errorString, nil)
 		}
 
