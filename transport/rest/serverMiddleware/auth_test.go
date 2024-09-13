@@ -8,6 +8,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/go_utils/resterrors"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -49,7 +50,7 @@ func TestAuthMiddleware(t *testing.T) {
 		})(c)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusUnauthorized, err.(*echo.HTTPError).Code)
+		assert.Equal(t, http.StatusUnauthorized, err.(resterrors.RestErr).StatusCode())
 	})
 
 	t.Run("Should return error when verify token fails", func(t *testing.T) {
@@ -58,14 +59,14 @@ func TestAuthMiddleware(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
-		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(nil, assert.AnError)
+		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(nil, resterrors.NewUnauthorizedError("an error occurred"))
 
 		err := middleware(func(c echo.Context) error {
 			return nil
 		})(c)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusUnauthorized, err.(*echo.HTTPError).Code)
+		assert.Equal(t, http.StatusUnauthorized, err.(resterrors.RestErr).StatusCode())
 	})
 
 	t.Run("Should return error when token is already invalid", func(t *testing.T) {
@@ -85,6 +86,6 @@ func TestAuthMiddleware(t *testing.T) {
 		})(c)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusUnauthorized, err.(*echo.HTTPError).Code)
+		assert.Equal(t, http.StatusUnauthorized, err.(resterrors.RestErr).StatusCode())
 	})
 }
