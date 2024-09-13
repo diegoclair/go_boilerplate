@@ -14,8 +14,9 @@ import (
 const GroupRouteName = "auth"
 
 const (
-	LoginRoute  = "/login"
-	LogoutRoute = "/logout"
+	LoginRoute        = "/login"
+	LogoutRoute       = "/logout"
+	RefreshTokenRoute = "/refresh-token"
 )
 
 type AuthRouter struct {

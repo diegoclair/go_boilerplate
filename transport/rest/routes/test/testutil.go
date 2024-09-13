@@ -45,6 +45,9 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 	}
 
 	server = goswag.NewEcho()
+	server.Echo().HTTPErrorHandler = func(err error, c echo.Context) {
+		_ = routeutils.HandleError(c, err)
+	}
 	appGroup := server.Group("/")
 	privateGroup := appGroup.Group("",
 		servermiddleware.AuthMiddlewarePrivateRoute(getTestTokenMaker(t), m.CacheMock),
