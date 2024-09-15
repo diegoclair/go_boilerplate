@@ -5,9 +5,9 @@ import (
 	"regexp"
 )
 
-func RoundFloat(val float64, precision uint) float64 {
+func RoundFloat[T float32 | float64](val T, precision uint) T {
 	ratio := math.Pow(10, float64(precision))
-	return math.Round(val*ratio) / ratio
+	return T(math.Round(float64(val)*ratio) / ratio)
 }
 
 var notNumberRE = regexp.MustCompile(`\D`)
