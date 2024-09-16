@@ -14,13 +14,13 @@ import (
 )
 
 var (
-	conn    *mysqlConn
+	conn    *MysqlConn
 	onceDB  sync.Once
 	connErr error
 )
 
-// mysqlConn is the database connection manager
-type mysqlConn struct {
+// MysqlConn is the database connection manager
+type MysqlConn struct {
 	db *sql.DB
 
 	accountRepo contract.AccountRepo
@@ -35,24 +35,21 @@ func getMysqlInstance(dataSourceName string) (*sql.DB, error) {
 }
 
 // Instance returns an instance of a MySQLRepo
-func Instance(ctx context.Context,
-	host, port, username, password, dbName string,
-	log logger.Logger, migrationsDir string,
-) (*mysqlConn, *sql.DB, error) {
-	return instance(ctx, host, port, username, password, dbName, log, migrationsDir, getMysqlInstance)
+func Instance(ctx context.Context, cfg contract.Config, dbName string, log logger.Logger,
+) (*MysqlConn, *sql.DB, error) {
+	return instance(ctx, cfg.GetMysqlDSN(), dbName, log, getMysqlInstance)
 }
 
 func instance(ctx context.Context,
-	host, port, username, password, dbName string,
-	log logger.Logger, migrationsDir string, getMysql getMysql) (*mysqlConn, *sql.DB, error) {
+	dsn, dbName string,
+	log logger.Logger,
+	getMysql getMysql,
+) (*MysqlConn, *sql.DB, error) {
 	var db *sql.DB
 	onceDB.Do(func() {
-		dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
-			username, password, host, port,
-		)
 
 		log.Info(ctx, "Connecting to database...")
-		db, connErr = getMysql(dataSourceName)
+		db, connErr = getMysql(dsn)
 		if connErr != nil {
 			return
 		}
@@ -81,15 +78,6 @@ func instance(ctx context.Context,
 		}
 		log.Info(ctx, "Database successfully configured")
 
-		log.Info(ctx, "Running the migrations")
-		connErr = migrate(db, migrationsDir)
-		if connErr != nil {
-			log.Errorf(ctx, "Migrate Error: %v", connErr)
-			return
-		}
-
-		log.Info(ctx, "Migrations executed")
-
 		conn = repoInstances(db)
 		conn.db = db
 	})
@@ -97,14 +85,14 @@ func instance(ctx context.Context,
 	return conn, db, connErr
 }
 
-func repoInstances(dbConn dbConn) *mysqlConn {
-	return &mysqlConn{
+func repoInstances(dbConn dbConn) *MysqlConn {
+	return &MysqlConn{
 		accountRepo: newAccountRepo(dbConn),
 		authRepo:    newAuthRepo(dbConn),
 	}
 }
 
-func (c *mysqlConn) WithTransaction(ctx context.Context, fn func(dm contract.DataManager) error) error {
+func (c *MysqlConn) WithTransaction(ctx context.Context, fn func(dm contract.DataManager) error) error {
 	tx, err := c.db.Begin()
 	if err != nil {
 		return err
@@ -124,14 +112,18 @@ func (c *mysqlConn) WithTransaction(ctx context.Context, fn func(dm contract.Dat
 	return tx.Commit()
 }
 
-func (c *mysqlConn) Close() (err error) {
+func (c *MysqlConn) DB() *sql.DB {
+	return c.db
+}
+
+func (c *MysqlConn) Close() (err error) {
 	return c.db.Close()
 }
 
-func (c *mysqlConn) Account() contract.AccountRepo {
+func (c *MysqlConn) Account() contract.AccountRepo {
 	return c.accountRepo
 }
 
-func (c *mysqlConn) Auth() contract.AuthRepo {
+func (c *MysqlConn) Auth() contract.AuthRepo {
 	return c.authRepo
 }

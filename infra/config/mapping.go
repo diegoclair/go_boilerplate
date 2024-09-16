@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -61,6 +62,12 @@ type MySQLConfig struct {
 	MaxLifeInMinutes   int    `mapstructure:"max-life-in-minutes"`
 	MaxIdleConnections int    `mapstructure:"max-idle-connections"`
 	MaxOpenConnections int    `mapstructure:"max-open-connections"`
+}
+
+func (c *Config) GetMysqlDSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
+		c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.Host, c.DB.MySQL.Port,
+	)
 }
 
 type LogConfig struct {

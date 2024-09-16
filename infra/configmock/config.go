@@ -63,6 +63,12 @@ func New() *ConfigMock {
 	}
 }
 
+func (c *ConfigMock) GetMysqlDSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
+		c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.Host, c.DB.MySQL.Port,
+	)
+}
+
 func (c *ConfigMock) GetLogger() logger.Logger {
 	return logger.NewNoop()
 }

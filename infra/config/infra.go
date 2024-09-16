@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/cache"
-	"github.com/diegoclair/go_boilerplate/infra/data"
+	"github.com/diegoclair/go_boilerplate/infra/data/mysql"
 	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
 	"github.com/diegoclair/go_utils/logger"
@@ -94,12 +93,12 @@ func (c *Config) GetCrypto() *crypto.Client {
 }
 
 var (
-	dataManager contract.DataManager
+	dataManager *mysql.MysqlConn
 	dataOnce    sync.Once
 )
 
 // GetDataManager returns a new data manager or panics if it fails
-func (c *Config) GetDataManager() contract.DataManager {
+func (c *Config) GetDataManager() *mysql.MysqlConn {
 	dataOnce.Do(func() {
 		var (
 			err     error
@@ -107,8 +106,8 @@ func (c *Config) GetDataManager() contract.DataManager {
 			log     logger.Logger = c.GetLogger()
 		)
 
-		dataManager, mysqlDB, err = data.Connect(c.ctx,
-			c.DB.MySQL.Host, c.DB.MySQL.Port, c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.DBName,
+		dataManager, mysqlDB, err = mysql.Instance(c.ctx,
+			c, c.DB.MySQL.DBName,
 			log,
 		)
 		if err != nil {

@@ -87,13 +87,9 @@ func Test_instance(t *testing.T) {
 
 			onceDB = sync.Once{}
 			mysql, db, err := instance(ctx,
-				cfg.DB.MySQL.Host,
-				cfg.DB.MySQL.Port,
-				cfg.DB.MySQL.Username,
-				cfg.DB.MySQL.Password,
+				cfg.GetMysqlDSN(),
 				cfg.DB.MySQL.DBName,
 				logger.NewNoop(),
-				"",
 				tt.args.testMysql,
 			)
 			if tt.wantErr && err != nil {

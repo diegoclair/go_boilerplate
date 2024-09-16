@@ -8,6 +8,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
+	"github.com/diegoclair/go_boilerplate/migrator/mysql"
 )
 
 var (
@@ -22,27 +23,17 @@ func TestMain(m *testing.M) {
 	close := setMysqlTestContainerConfig(ctx, cfg)
 	defer close()
 
-	rootDir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("error getting root dir: %v", err)
-	}
-
-	migrationsDir := rootDir + "/../migrations/mysql"
-
-	mysql, _, err := Instance(ctx,
-		cfg.DB.MySQL.Host,
-		cfg.DB.MySQL.Port,
-		cfg.DB.MySQL.Username,
-		cfg.DB.MySQL.Password,
-		cfg.DB.MySQL.DBName,
-		cfg.GetLogger(),
-		migrationsDir,
-	)
+	mysqlConn, db, err := Instance(ctx, cfg, cfg.DB.MySQL.DBName, cfg.GetLogger())
 	if err != nil {
 		log.Fatalf("cannot connect to mysql: %v", err)
 	}
 
-	testMysql = mysql
+	err = mysql.Migrate(db)
+	if err != nil {
+		log.Fatalf("cannot migrate mysql: %v", err)
+	}
+
+	testMysql = mysqlConn
 
 	os.Exit(m.Run())
 }

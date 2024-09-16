@@ -2,21 +2,25 @@ package mysql
 
 import (
 	"database/sql"
+	"embed"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/GuiaBolso/darwin"
 )
 
-// migrate applies database migrations to the provided SQL database.
+//go:embed sql/*.sql
+var SqlFiles embed.FS
+
+// Migrate applies database migrations to the provided SQL database.
 // It reads SQL migration files from the specified directory and executes them in order.
 // The function returns an error if any migration fails to execute.
-func migrate(db *sql.DB, migrationsDir string) error {
+func Migrate(db *sql.DB) error {
 	driver := darwin.NewGenericDriver(db, darwin.MySQLDialect{})
+	path := "sql"
 
-	files, err := os.ReadDir(migrationsDir)
+	files, err := SqlFiles.ReadDir(path)
 	if err != nil {
 		return err
 	}
@@ -24,16 +28,15 @@ func migrate(db *sql.DB, migrationsDir string) error {
 	migrations := []darwin.Migration{}
 
 	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".sql") {
-			migrationFile := migrationsDir + "/" + file.Name()
+		migrationFile := path + "/" + file.Name()
 
-			migration, err := os.ReadFile(migrationFile)
-			if err != nil {
-				return err
-			}
-
-			migrations = append(migrations, getMigrations(file.Name(), migration)...)
+		migration, err := SqlFiles.ReadFile(migrationFile)
+		if err != nil {
+			return err
 		}
+
+		migrations = append(migrations, getMigrations(file.Name(), migration)...)
+
 	}
 
 	d := darwin.New(driver, migrations, nil)

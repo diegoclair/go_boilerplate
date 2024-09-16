@@ -10,6 +10,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/service"
 	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/migrator/mysql"
 	"github.com/diegoclair/go_boilerplate/transport/rest"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/validator"
@@ -30,7 +31,6 @@ func main() {
 
 	log := cfg.GetLogger()
 	authToken := cfg.GetAuthToken()
-	data := cfg.GetDataManager()
 	cache := cfg.GetCacheManager()
 	c := cfg.GetCrypto()
 
@@ -39,6 +39,15 @@ func main() {
 		log.Errorf(ctx, "error to get validator: %v", err)
 		return
 	}
+	data := cfg.GetDataManager()
+
+	log.Info(ctx, "Running the migrations...")
+	err = mysql.Migrate(data.DB())
+	if err != nil {
+		log.Errorf(ctx, "error to migrate mysql: %v", err)
+		return
+	}
+	log.Info(ctx, "Migrations completed successfully")
 
 	services, err := service.New(
 		service.WithDataManager(data),
