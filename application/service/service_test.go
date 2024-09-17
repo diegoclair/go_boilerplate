@@ -2,10 +2,33 @@ package service
 
 import (
 	"testing"
+	"time"
 
 	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNew(t *testing.T) {
+	t.Run("Valid infrastructure", func(t *testing.T) {
+		m, ctrl := newServiceTestMock(t)
+		defer ctrl.Finish()
+
+		apps, err := New(m.mockInfra, time.Hour)
+		assert.NoError(t, err)
+		assert.NotNil(t, apps)
+	})
+
+	t.Run("Invalid infrastructure", func(t *testing.T) {
+		m, ctrl := newServiceTestMock(t)
+		m.mockInfra = infraMocks.NewMockInfrastructure(ctrl)
+		m.mockInfra.EXPECT().Logger().Return(nil)
+		defer ctrl.Finish()
+
+		apps, err := New(m.mockInfra, time.Hour)
+		assert.Error(t, err)
+		assert.Nil(t, apps)
+	})
+}
 
 func TestValidateInfrastructure(t *testing.T) {
 	m, ctrl := newServiceTestMock(t)
