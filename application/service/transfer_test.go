@@ -21,7 +21,7 @@ func Test_newTransferService(t *testing.T) {
 
 	want := &transferService{dm: m.mockDataManager, accountSvc: m.mockAccountSvc, log: m.mockLogger, validator: m.mockValidator}
 
-	if got := newTransferService(m.mockInfra, m.mockAccountSvc); !reflect.DeepEqual(got, want) {
+	if got := newTransferService(m.mockDomain, m.mockAccountSvc); !reflect.DeepEqual(got, want) {
 		t.Errorf("newTransferService() = %v, want %v", got, want)
 	}
 }
@@ -179,6 +179,25 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "Should return error if the destination account is not found",
+			args: args{
+				accountUUIDFromContext: "account-123",
+				transfer: dto.TransferInput{
+					AccountDestinationUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd",
+					Amount:                 2,
+				},
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				gomock.InOrder(
+					mocks.mockAccountSvc.EXPECT().GetLoggedAccount(ctx).
+						Return(entity.Account{ID: 1, Balance: 5}, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.transfer.AccountDestinationUUID).
+						Return(entity.Account{}, fmt.Errorf("no rows in result set")).Times(1),
+				)
+			},
+			wantErr: true,
+		},
+		{
 			name: "Should return error if the destination account is the same as the origin account",
 			args: args{
 				accountUUIDFromContext: "account-123",
@@ -316,7 +335,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newTransferService(m.mockInfra, m.mockAccountSvc)
+			s := newTransferService(m.mockDomain, m.mockAccountSvc)
 
 			if tt.args.accountUUIDFromContext != "" {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, tt.args.accountUUIDFromContext)
@@ -406,7 +425,7 @@ func Test_transferService_GetTransfers(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newTransferService(m.mockInfra, m.mockAccountSvc)
+			s := newTransferService(m.mockDomain, m.mockAccountSvc)
 
 			if tt.args.accountUUIDFromContext != "" {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, tt.args.accountUUIDFromContext)

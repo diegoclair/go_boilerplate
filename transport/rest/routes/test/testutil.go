@@ -30,7 +30,7 @@ type SvcMocks struct {
 	AccountAppMock  *mocks.MockAccountApp
 	AuthAppMock     *mocks.MockAuthApp
 	AuthTokenMock   *infraMocks.MockAuthToken
-	CacheMock       *infraMocks.MockCacheManager
+	CacheMock       *mocks.MockCacheManager
 	TransferAppMock *mocks.MockTransferApp
 }
 
@@ -42,7 +42,7 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 		AccountAppMock:  mocks.NewMockAccountApp(ctrl),
 		AuthAppMock:     mocks.NewMockAuthApp(ctrl),
 		AuthTokenMock:   infraMocks.NewMockAuthToken(ctrl),
-		CacheMock:       infraMocks.NewMockCacheManager(ctrl),
+		CacheMock:       mocks.NewMockCacheManager(ctrl),
 		TransferAppMock: mocks.NewMockTransferApp(ctrl),
 	}
 

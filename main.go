@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/application/service"
+	"github.com/diegoclair/go_boilerplate/domain"
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_boilerplate/infra/contract"
 	db "github.com/diegoclair/go_boilerplate/infra/data/mysql"
 	"github.com/diegoclair/go_boilerplate/migrator/mysql"
 	"github.com/diegoclair/go_boilerplate/transport/rest"
@@ -33,17 +33,16 @@ func main() {
 
 	log := cfg.GetLogger()
 
-	infra := contract.NewInfrastructureServices(
-		contract.WithAuthToken(cfg.GetAuthToken()),
-		contract.WithCacheManager(cfg.GetCacheManager()),
-		contract.WithDataManager(cfg.GetDataManager()),
-		contract.WithLogger(log),
-		contract.WithCrypto(cfg.GetCrypto()),
-		contract.WithValidator(cfg.GetValidator()),
+	infra := domain.NewInfrastructureServices(
+		domain.WithCacheManager(cfg.GetCacheManager()),
+		domain.WithDataManager(cfg.GetDataManager()),
+		domain.WithLogger(log),
+		domain.WithCrypto(cfg.GetCrypto()),
+		domain.WithValidator(cfg.GetValidator()),
 	)
 
 	log.Info(ctx, "Running the migrations...")
-	err = mysql.Migrate(infra.DataManager().(*db.MysqlConn).DB())
+	err = mysql.Migrate(cfg.GetDataManager().(*db.MysqlConn).DB())
 	if err != nil {
 		log.Errorf(ctx, "error to migrate mysql: %v", err)
 		return
@@ -56,7 +55,7 @@ func main() {
 		return
 	}
 
-	server := rest.StartRestServer(ctx, infra, apps, appName, cfg.GetHttpPort())
+	server := rest.StartRestServer(ctx, cfg, infra, apps, appName, cfg.GetHttpPort())
 
 	gracefulShutdown(server, log)
 }

@@ -25,7 +25,7 @@ func Test_newAuthApp(t *testing.T) {
 		accessTokenDuration: time.Minute,
 	}
 
-	if got := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute); !reflect.DeepEqual(got, want) {
+	if got := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute); !reflect.DeepEqual(got, want) {
 		t.Errorf("newAuthService() = %v, want %v", got, want)
 	}
 }
@@ -129,7 +129,7 @@ func Test_authService_Login(t *testing.T) {
 				tt.buildMock(ctx, m, tt.args)
 			}
 
-			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
+			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
 
 			input := dto.LoginInput{
 				CPF:      tt.args.cpf,
@@ -199,7 +199,7 @@ func Test_authService_CreateSession(t *testing.T) {
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
+			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
 			if err := s.CreateSession(ctx, tt.args.session); (err != nil) != tt.wantErr {
 				t.Errorf("authService.CreateSession() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -252,7 +252,7 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
+			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
 			gotSession, err := s.GetSessionByUUID(ctx, tt.args.sessionUUID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("authService.GetSessionByUUID() error = %v, wantErr %v", err, tt.wantErr)
@@ -330,7 +330,7 @@ func Test_authService_Logout(t *testing.T) {
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
+			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
 			if err := s.Logout(ctx, tt.args.accessToken); (err != nil) != tt.wantErr {
 				t.Errorf("authService.Logout() error = %v, wantErr %v", err, tt.wantErr)
 			}

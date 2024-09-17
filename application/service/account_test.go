@@ -20,7 +20,7 @@ func Test_newAccountService(t *testing.T) {
 
 	want := &accountService{dm: m.mockDataManager, crypto: m.mockCrypto, log: m.mockLogger, validator: m.mockValidator}
 
-	if got := newAccountService(m.mockInfra); !reflect.DeepEqual(got, want) {
+	if got := newAccountService(m.mockDomain); !reflect.DeepEqual(got, want) {
 		t.Errorf("newAccountService() = %v, want %v", got, want)
 	}
 }
@@ -124,7 +124,7 @@ func Test_accountService_CreateAccount(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newAccountService(m.mockInfra)
+			s := newAccountService(m.mockDomain)
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
@@ -203,7 +203,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newAccountService(m.mockInfra)
+			s := newAccountService(m.mockDomain)
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
@@ -263,7 +263,7 @@ func Test_accountService_GetAccounts(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newAccountService(m.mockInfra)
+			s := newAccountService(m.mockDomain)
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
@@ -327,7 +327,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newAccountService(m.mockInfra)
+			s := newAccountService(m.mockDomain)
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
@@ -387,7 +387,7 @@ func Test_accountService_GetLoggedAccountID(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newAccountService(m.mockInfra)
+			s := newAccountService(m.mockDomain)
 
 			if tt.buildMock != nil {
 				tt.buildMock(tt.args.ctx, m)
@@ -447,7 +447,7 @@ func Test_accountService_GetLoggedAccount(t *testing.T) {
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := newAccountService(m.mockInfra)
+			s := newAccountService(m.mockDomain)
 
 			if tt.buildMock != nil {
 				tt.buildMock(tt.args.ctx, m, tt.args)

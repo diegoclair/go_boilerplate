@@ -8,6 +8,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/contract"
 	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
+	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_utils/resterrors"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ import (
 func TestAuthMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockAuthToken := infraMocks.NewMockAuthToken(ctrl)
-	cacheMock := infraMocks.NewMockCacheManager(ctrl)
+	cacheMock := mocks.NewMockCacheManager(ctrl)
 	middleware := AuthMiddlewarePrivateRoute(mockAuthToken, cacheMock)
 
 	t.Run("Should complete the middleware without errors", func(t *testing.T) {

@@ -7,10 +7,10 @@ import (
 	"log/slog"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
+	"github.com/diegoclair/go_boilerplate/domain"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
-	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
@@ -23,8 +23,8 @@ const (
 )
 
 type authApp struct {
-	cache               infraContract.CacheManager
-	crypto              infraContract.Crypto
+	cache               contract.CacheManager
+	crypto              contract.Crypto
 	dm                  contract.DataManager
 	log                 logger.Logger
 	validator           validator.Validator
@@ -32,7 +32,7 @@ type authApp struct {
 	accessTokenDuration time.Duration
 }
 
-func newAuthApp(infra infraContract.Infrastructure, accountSvc contract.AccountApp, accessTokenDuration time.Duration) *authApp {
+func newAuthApp(infra domain.Infrastructure, accountSvc contract.AccountApp, accessTokenDuration time.Duration) *authApp {
 	return &authApp{
 		cache:               infra.CacheManager(),
 		crypto:              infra.Crypto(),

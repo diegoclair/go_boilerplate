@@ -1,4 +1,4 @@
-package contract
+package domain
 
 import (
 	"github.com/diegoclair/go_boilerplate/domain/contract"
@@ -7,32 +7,24 @@ import (
 )
 
 type Infrastructure interface {
-	AuthToken() AuthToken
-	CacheManager() CacheManager
+	CacheManager() contract.CacheManager
 	DataManager() contract.DataManager
 	Logger() logger.Logger
-	Crypto() Crypto
+	Crypto() contract.Crypto
 	Validator() validator.Validator
 }
 
 type infrastructureServices struct {
-	authToken    AuthToken
-	cacheManager CacheManager
+	cacheManager contract.CacheManager
 	dataManager  contract.DataManager
 	logger       logger.Logger
-	crypto       Crypto
+	crypto       contract.Crypto
 	validator    validator.Validator
 }
 
 type InfraOption func(*infrastructureServices)
 
-func WithAuthToken(authToken AuthToken) InfraOption {
-	return func(i *infrastructureServices) {
-		i.authToken = authToken
-	}
-}
-
-func WithCacheManager(cacheManager CacheManager) InfraOption {
+func WithCacheManager(cacheManager contract.CacheManager) InfraOption {
 	return func(i *infrastructureServices) {
 		i.cacheManager = cacheManager
 	}
@@ -50,7 +42,7 @@ func WithLogger(logger logger.Logger) InfraOption {
 	}
 }
 
-func WithCrypto(crypto Crypto) InfraOption {
+func WithCrypto(crypto contract.Crypto) InfraOption {
 	return func(i *infrastructureServices) {
 		i.crypto = crypto
 	}
@@ -70,11 +62,7 @@ func NewInfrastructureServices(options ...InfraOption) Infrastructure {
 	return infra
 }
 
-func (i *infrastructureServices) AuthToken() AuthToken {
-	return i.authToken
-}
-
-func (i *infrastructureServices) CacheManager() CacheManager {
+func (i *infrastructureServices) CacheManager() contract.CacheManager {
 	return i.cacheManager
 }
 
@@ -86,7 +74,7 @@ func (i *infrastructureServices) Logger() logger.Logger {
 	return i.logger
 }
 
-func (i *infrastructureServices) Crypto() Crypto {
+func (i *infrastructureServices) Crypto() contract.Crypto {
 	return i.crypto
 }
 

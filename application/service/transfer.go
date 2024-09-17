@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
+	"github.com/diegoclair/go_boilerplate/domain"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
-	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/twinj/uuid"
@@ -20,7 +21,7 @@ type transferService struct {
 	validator  validator.Validator
 }
 
-func newTransferService(infra infraContract.Infrastructure, accountSvc contract.AccountApp) *transferService {
+func newTransferService(infra domain.Infrastructure, accountSvc contract.AccountApp) *transferService {
 	return &transferService{
 		accountSvc: accountSvc,
 		dm:         infra.DataManager(),
@@ -51,6 +52,10 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 
 	destAccount, err := s.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
+		if mysqlutils.SQLNotFound(err.Error()) {
+			s.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
+			return resterrors.NewNotFoundError("Invalid destination account")
+		}
 		s.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
 		return err
 	}

@@ -5,7 +5,10 @@ import (
 	"fmt"
 
 	"github.com/diegoclair/go_boilerplate/application/service"
-	"github.com/diegoclair/go_boilerplate/infra/contract"
+	"github.com/diegoclair/go_boilerplate/domain"
+	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/infra/config"
+	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/accountroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/pingroute"
@@ -25,8 +28,8 @@ type Server struct {
 	cache  contract.CacheManager
 }
 
-func StartRestServer(ctx context.Context, infra contract.Infrastructure, services *service.Apps, appName, port string) *Server {
-	server := NewRestServer(services, infra.AuthToken(), infra.CacheManager(), appName)
+func StartRestServer(ctx context.Context, cfg *config.Config, infra domain.Infrastructure, services *service.Apps, appName, port string) *Server {
+	server := NewRestServer(services, cfg.GetAuthToken(), infra.CacheManager(), appName)
 	if port == "" {
 		port = "5000"
 	}
@@ -46,7 +49,7 @@ func StartRestServer(ctx context.Context, infra contract.Infrastructure, service
 	return server
 }
 
-func NewRestServer(services *service.Apps, authToken contract.AuthToken, cache contract.CacheManager, appName string) *Server {
+func NewRestServer(services *service.Apps, authToken infraContract.AuthToken, cache contract.CacheManager, appName string) *Server {
 	router := goswag.NewEcho(resterrors.GoSwagDefaultResponseErrors()...)
 	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	router.Echo().HTTPErrorHandler = func(err error, c echo.Context) {
@@ -79,7 +82,7 @@ func (r *Server) addRouters(router routeutils.IRoute) {
 	r.routes = append(r.routes, router)
 }
 
-func (r *Server) registerAppRouters(authToken contract.AuthToken) {
+func (r *Server) registerAppRouters(authToken infraContract.AuthToken) {
 	g := &routeutils.EchoGroups{}
 	g.AppGroup = r.Router.Group("/")
 	g.PrivateGroup = g.AppGroup.Group("",

@@ -45,12 +45,12 @@ func (c *Config) GetAuthToken() infraContract.AuthToken {
 }
 
 var (
-	cacheManager infraContract.CacheManager
+	cacheManager contract.CacheManager
 	cacheOnce    sync.Once
 )
 
 // GetCacheManager returns a new cache manager or panics if it fails
-func (c *Config) GetCacheManager() infraContract.CacheManager {
+func (c *Config) GetCacheManager() contract.CacheManager {
 	cacheOnce.Do(func() {
 		var (
 			client *redis.Client
@@ -81,12 +81,12 @@ func (c *Config) GetCacheManager() infraContract.CacheManager {
 }
 
 var (
-	cryptoClient infraContract.Crypto
+	cryptoClient contract.Crypto
 	cryptoOnce   sync.Once
 )
 
 // GetCrypto returns a new crypto or panics if it fails
-func (c *Config) GetCrypto() infraContract.Crypto {
+func (c *Config) GetCrypto() contract.Crypto {
 	cryptoOnce.Do(func() {
 		cryptoClient = crypto.NewCrypto()
 	})

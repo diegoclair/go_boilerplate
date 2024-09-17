@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
+	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,18 +13,18 @@ func TestNew(t *testing.T) {
 		m, ctrl := newServiceTestMock(t)
 		defer ctrl.Finish()
 
-		apps, err := New(m.mockInfra, time.Hour)
+		apps, err := New(m.mockDomain, time.Hour)
 		assert.NoError(t, err)
 		assert.NotNil(t, apps)
 	})
 
 	t.Run("Invalid infrastructure", func(t *testing.T) {
 		m, ctrl := newServiceTestMock(t)
-		m.mockInfra = infraMocks.NewMockInfrastructure(ctrl)
-		m.mockInfra.EXPECT().Logger().Return(nil)
+		m.mockDomain = mocks.NewMockInfrastructure(ctrl)
+		m.mockDomain.EXPECT().Logger().Return(nil)
 		defer ctrl.Finish()
 
-		apps, err := New(m.mockInfra, time.Hour)
+		apps, err := New(m.mockDomain, time.Hour)
 		assert.Error(t, err)
 		assert.Nil(t, apps)
 	})
@@ -33,7 +33,7 @@ func TestNew(t *testing.T) {
 func TestValidateInfrastructure(t *testing.T) {
 	m, ctrl := newServiceTestMock(t)
 	defer ctrl.Finish()
-	m.mockInfra = infraMocks.NewMockInfrastructure(ctrl)
+	m.mockDomain = mocks.NewMockInfrastructure(ctrl)
 	defer ctrl.Finish()
 
 	tests := []struct {
@@ -44,56 +44,56 @@ func TestValidateInfrastructure(t *testing.T) {
 		{
 			name: "Valid infrastructure",
 			setup: func(m allMocks) {
-				m.mockInfra.EXPECT().Logger().Return(m.mockLogger)
-				m.mockInfra.EXPECT().DataManager().Return(m.mockDataManager)
-				m.mockInfra.EXPECT().CacheManager().Return(m.mockCacheManager)
-				m.mockInfra.EXPECT().Crypto().Return(m.mockCrypto)
-				m.mockInfra.EXPECT().Validator().Return(m.mockValidator)
+				m.mockDomain.EXPECT().Logger().Return(m.mockLogger)
+				m.mockDomain.EXPECT().DataManager().Return(m.mockDataManager)
+				m.mockDomain.EXPECT().CacheManager().Return(m.mockCacheManager)
+				m.mockDomain.EXPECT().Crypto().Return(m.mockCrypto)
+				m.mockDomain.EXPECT().Validator().Return(m.mockValidator)
 			},
 			wantErr: "",
 		},
 		{
 			name: "Missing logger",
 			setup: func(m allMocks) {
-				m.mockInfra.EXPECT().Logger().Return(nil)
+				m.mockDomain.EXPECT().Logger().Return(nil)
 			},
 			wantErr: "logger is required",
 		},
 		{
 			name: "Missing data manager",
 			setup: func(m allMocks) {
-				m.mockInfra.EXPECT().Logger().Return(m.mockLogger)
-				m.mockInfra.EXPECT().DataManager().Return(nil)
+				m.mockDomain.EXPECT().Logger().Return(m.mockLogger)
+				m.mockDomain.EXPECT().DataManager().Return(nil)
 			},
 			wantErr: "data manager is required",
 		},
 		{
 			name: "Missing cache manager",
 			setup: func(m allMocks) {
-				m.mockInfra.EXPECT().Logger().Return(m.mockLogger)
-				m.mockInfra.EXPECT().DataManager().Return(m.mockDataManager)
-				m.mockInfra.EXPECT().CacheManager().Return(nil)
+				m.mockDomain.EXPECT().Logger().Return(m.mockLogger)
+				m.mockDomain.EXPECT().DataManager().Return(m.mockDataManager)
+				m.mockDomain.EXPECT().CacheManager().Return(nil)
 			},
 			wantErr: "cache manager is required",
 		},
 		{
 			name: "Missing crypto",
 			setup: func(m allMocks) {
-				m.mockInfra.EXPECT().Logger().Return(m.mockLogger)
-				m.mockInfra.EXPECT().DataManager().Return(m.mockDataManager)
-				m.mockInfra.EXPECT().CacheManager().Return(m.mockCacheManager)
-				m.mockInfra.EXPECT().Crypto().Return(nil)
+				m.mockDomain.EXPECT().Logger().Return(m.mockLogger)
+				m.mockDomain.EXPECT().DataManager().Return(m.mockDataManager)
+				m.mockDomain.EXPECT().CacheManager().Return(m.mockCacheManager)
+				m.mockDomain.EXPECT().Crypto().Return(nil)
 			},
 			wantErr: "crypto is required",
 		},
 		{
 			name: "Missing validator",
 			setup: func(m allMocks) {
-				m.mockInfra.EXPECT().Logger().Return(m.mockLogger)
-				m.mockInfra.EXPECT().DataManager().Return(m.mockDataManager)
-				m.mockInfra.EXPECT().CacheManager().Return(m.mockCacheManager)
-				m.mockInfra.EXPECT().Crypto().Return(m.mockCrypto)
-				m.mockInfra.EXPECT().Validator().Return(nil)
+				m.mockDomain.EXPECT().Logger().Return(m.mockLogger)
+				m.mockDomain.EXPECT().DataManager().Return(m.mockDataManager)
+				m.mockDomain.EXPECT().CacheManager().Return(m.mockCacheManager)
+				m.mockDomain.EXPECT().Crypto().Return(m.mockCrypto)
+				m.mockDomain.EXPECT().Validator().Return(nil)
 			},
 			wantErr: "validator is required",
 		},
@@ -106,7 +106,7 @@ func TestValidateInfrastructure(t *testing.T) {
 				tt.setup(m)
 			}
 
-			err := validateInfrastructure(m.mockInfra)
+			err := validateInfrastructure(m.mockDomain)
 
 			if tt.wantErr == "" {
 				assert.NoError(t, err)

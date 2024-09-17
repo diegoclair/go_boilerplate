@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/domain"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
-	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 )
 
 type Apps struct {
@@ -15,7 +15,7 @@ type Apps struct {
 }
 
 // New to get instance of all services
-func New(infra infraContract.Infrastructure, accessTokenDuration time.Duration) (*Apps, error) {
+func New(infra domain.Infrastructure, accessTokenDuration time.Duration) (*Apps, error) {
 	if err := validateInfrastructure(infra); err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func New(infra infraContract.Infrastructure, accessTokenDuration time.Duration) 
 }
 
 // validateInfrastructure validate the dependencies needed to initialize the services
-func validateInfrastructure(infra infraContract.Infrastructure) error {
+func validateInfrastructure(infra domain.Infrastructure) error {
 	if infra.Logger() == nil {
 		return errors.New("logger is required")
 	}

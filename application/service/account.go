@@ -5,10 +5,10 @@ import (
 	"errors"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
+	"github.com/diegoclair/go_boilerplate/domain"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
-	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
@@ -17,13 +17,13 @@ import (
 )
 
 type accountService struct {
-	crypto    infraContract.Crypto
+	crypto    contract.Crypto
 	dm        contract.DataManager
 	log       logger.Logger
 	validator validator.Validator
 }
 
-func newAccountService(infra infraContract.Infrastructure) *accountService {
+func newAccountService(infra domain.Infrastructure) *accountService {
 	return &accountService{
 		crypto:    infra.Crypto(),
 		dm:        infra.DataManager(),

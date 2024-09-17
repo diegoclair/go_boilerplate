@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
-	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/validator"
@@ -19,14 +18,14 @@ type allMocks struct {
 	mockAuthRepo    *mocks.MockAuthRepo
 	mockAccountRepo *mocks.MockAccountRepo
 
-	mockCacheManager *infraMocks.MockCacheManager
-	mockCrypto       *infraMocks.MockCrypto
+	mockCacheManager *mocks.MockCacheManager
+	mockCrypto       *mocks.MockCrypto
 	mockValidator    validator.Validator
 	mockLogger       logger.Logger
 
 	mockAccountSvc *mocks.MockAccountApp
 
-	mockInfra *infraMocks.MockInfrastructure
+	mockDomain *mocks.MockInfrastructure
 }
 
 func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
@@ -50,12 +49,12 @@ func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
 
 	accountSvc := mocks.NewMockAccountApp(ctrl)
 
-	infraMock := infraMocks.NewMockInfrastructure(ctrl)
-	infraMock.EXPECT().DataManager().Return(dm).AnyTimes()
-	infraMock.EXPECT().Logger().Return(log).AnyTimes()
-	infraMock.EXPECT().CacheManager().Return(cm).AnyTimes()
-	infraMock.EXPECT().Crypto().Return(crypto).AnyTimes()
-	infraMock.EXPECT().Validator().Return(v).AnyTimes()
+	domainMock := mocks.NewMockInfrastructure(ctrl)
+	domainMock.EXPECT().DataManager().Return(dm).AnyTimes()
+	domainMock.EXPECT().Logger().Return(log).AnyTimes()
+	domainMock.EXPECT().CacheManager().Return(cm).AnyTimes()
+	domainMock.EXPECT().Crypto().Return(crypto).AnyTimes()
+	domainMock.EXPECT().Validator().Return(v).AnyTimes()
 
 	m = allMocks{
 		mockDataManager:  dm,
@@ -64,13 +63,13 @@ func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
 		mockAuthRepo:     authRepo,
 		mockCrypto:       crypto,
 		mockAccountSvc:   accountSvc,
-		mockInfra:        infraMock,
+		mockDomain:       domainMock,
 		mockValidator:    v,
 		mockLogger:       log,
 	}
 
 	// validate func New
-	s, err := New(infraMock, time.Minute)
+	s, err := New(domainMock, time.Minute)
 	require.NoError(t, err)
 	require.NotNil(t, s)
 
