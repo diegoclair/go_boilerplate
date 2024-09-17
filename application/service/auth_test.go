@@ -5,19 +5,27 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"go.uber.org/mock/gomock"
 )
 
-func Test_newAuthService(t *testing.T) {
-	m, svc, ctrl := newServiceTestMock(t)
+func Test_newAuthApp(t *testing.T) {
+	m, ctrl := newServiceTestMock(t)
 	defer ctrl.Finish()
 
-	want := &authService{svc: svc, accountSvc: m.mockAccountSvc}
+	want := &authApp{cache: m.mockCacheManager,
+		crypto:              m.mockCrypto,
+		dm:                  m.mockDataManager,
+		log:                 m.mockLogger,
+		validator:           m.mockValidator,
+		accountSvc:          m.mockAccountSvc,
+		accessTokenDuration: time.Minute,
+	}
 
-	if got := newAuthService(svc, m.mockAccountSvc); !reflect.DeepEqual(got, want) {
+	if got := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute); !reflect.DeepEqual(got, want) {
 		t.Errorf("newAuthService() = %v, want %v", got, want)
 	}
 }
@@ -114,14 +122,14 @@ func Test_authService_Login(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			m, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
 
-			s := newAuthService(svc, m.mockAccountSvc)
+			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
 
 			input := dto.LoginInput{
 				CPF:      tt.args.cpf,
@@ -185,13 +193,13 @@ func Test_authService_CreateSession(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			m, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthService(svc, m.mockAccountSvc)
+			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
 			if err := s.CreateSession(ctx, tt.args.session); (err != nil) != tt.wantErr {
 				t.Errorf("authService.CreateSession() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -238,13 +246,13 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			m, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthService(svc, m.mockAccountSvc)
+			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
 			gotSession, err := s.GetSessionByUUID(ctx, tt.args.sessionUUID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("authService.GetSessionByUUID() error = %v, wantErr %v", err, tt.wantErr)
@@ -316,13 +324,13 @@ func Test_authService_Logout(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMocks, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMocks, tt.args)
+				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthService(svc, allMocks.mockAccountSvc)
+			s := newAuthApp(m.mockInfra, m.mockAccountSvc, time.Minute)
 			if err := s.Logout(ctx, tt.args.accessToken); (err != nil) != tt.wantErr {
 				t.Errorf("authService.Logout() error = %v, wantErr %v", err, tt.wantErr)
 			}

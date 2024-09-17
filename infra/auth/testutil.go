@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
+	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/stretchr/testify/require"
 )
 
 type utilArgs struct {
 	emptyToken           bool
-	payload              TokenPayloadInput
+	payload              contract.TokenPayloadInput
 	accessTokenDuration  time.Duration
 	refreshTokenDuration time.Duration
 	expiredToken         bool
@@ -43,21 +44,21 @@ func getConfig(t *testing.T, args utilArgs) *configmock.ConfigMock {
 	return cfg
 }
 
-func createTestAccessToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
+func createTestAccessToken(ctx context.Context, t *testing.T, maker contract.AuthToken, args utilArgs) (token string, tokenPayload contract.TokenPayload) {
 	var err error
 	token, tokenPayload, err = maker.CreateAccessToken(ctx, args.payload)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
 
-func createTestRefreshToken(ctx context.Context, t *testing.T, maker AuthToken, args utilArgs) (token string, tokenPayload *TokenPayload) {
+func createTestRefreshToken(ctx context.Context, t *testing.T, maker contract.AuthToken, args utilArgs) (token string, tokenPayload contract.TokenPayload) {
 	var err error
 	token, tokenPayload, err = maker.CreateRefreshToken(ctx, args.payload)
 	validateTokenCreation(t, args, token, tokenPayload, err)
 	return
 }
 
-func validateTokenCreation(t *testing.T, args utilArgs, token string, tokenPayload *TokenPayload, err error) {
+func validateTokenCreation(t *testing.T, args utilArgs, token string, tokenPayload contract.TokenPayload, err error) {
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotNil(t, tokenPayload)
@@ -86,7 +87,7 @@ func validateTokenMaker(t *testing.T, args utilArgs) {
 	createTestRefreshToken(ctx, t, maker, args)
 }
 
-func getTokenAuth(cfg *configmock.ConfigMock) (AuthToken, error) {
+func getTokenAuth(cfg *configmock.ConfigMock) (contract.AuthToken, error) {
 	return NewAuthToken(cfg.Auth.AccessTokenDuration,
 		cfg.Auth.RefreshTokenDuration,
 		cfg.Auth.PasetoSymmetricKey,

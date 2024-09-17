@@ -10,59 +10,53 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/application/service"
 	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/contract"
+	db "github.com/diegoclair/go_boilerplate/infra/data/mysql"
 	"github.com/diegoclair/go_boilerplate/migrator/mysql"
 	"github.com/diegoclair/go_boilerplate/transport/rest"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/validator"
 )
 
 const (
 	gracefulShutdownTimeout = 10 * time.Second
+	appName                 = "boilerplate"
 )
 
 func main() {
 	ctx := context.Background()
 
-	cfg, err := config.GetConfigEnvironment(ctx, "boilerplate")
+	cfg, err := config.GetConfigEnvironment(ctx, appName)
 	if err != nil {
 		log.Fatalf("Error to load config: %v", err)
 	}
 	defer cfg.Close()
 
 	log := cfg.GetLogger()
-	authToken := cfg.GetAuthToken()
-	cache := cfg.GetCacheManager()
-	c := cfg.GetCrypto()
 
-	v, err := validator.NewValidator()
-	if err != nil {
-		log.Errorf(ctx, "error to get validator: %v", err)
-		return
-	}
-	data := cfg.GetDataManager()
+	infra := contract.NewInfrastructureServices(
+		contract.WithAuthToken(cfg.GetAuthToken()),
+		contract.WithCacheManager(cfg.GetCacheManager()),
+		contract.WithDataManager(cfg.GetDataManager()),
+		contract.WithLogger(log),
+		contract.WithCrypto(cfg.GetCrypto()),
+		contract.WithValidator(cfg.GetValidator()),
+	)
 
 	log.Info(ctx, "Running the migrations...")
-	err = mysql.Migrate(data.DB())
+	err = mysql.Migrate(infra.DataManager().(*db.MysqlConn).DB())
 	if err != nil {
 		log.Errorf(ctx, "error to migrate mysql: %v", err)
 		return
 	}
 	log.Info(ctx, "Migrations completed successfully")
 
-	services, err := service.New(
-		service.WithDataManager(data),
-		service.WithConfig(cfg),
-		service.WithCacheManager(cache),
-		service.WithLogger(log),
-		service.WithCrypto(c),
-		service.WithValidator(v),
-	)
+	apps, err := service.New(infra, cfg.App.Auth.AccessTokenDuration)
 	if err != nil {
 		log.Errorf(ctx, "error to get domain services: %v", err)
 		return
 	}
 
-	server := rest.StartRestServer(ctx, cfg, services, log, authToken, cache)
+	server := rest.StartRestServer(ctx, infra, apps, appName, cfg.GetHttpPort())
 
 	gracefulShutdown(server, log)
 }

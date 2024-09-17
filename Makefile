@@ -4,9 +4,6 @@ tests:
 
 .PHONY: mocks
 mocks:
-# examples before:
-# mockgen -package mocks -source=domain/contract/repo.go -destination=mocks/repo.go
-# mockgen -package mocks -destination mocks/repo.go github.com/diegoclair/go_boilerplate/domain/contract DataManager,AccountRepo,AuthRepo
 	@echo "=====> Generating mocks"
 
 	@go install go.uber.org/mock/mockgen@latest
@@ -16,7 +13,11 @@ mocks:
 		mockgen -package mocks -source=$$file -destination=mocks/$$filename; \
 	done
 
-	@mockgen -package mocks -source=infra/auth/instance.go -destination=mocks/auth.go
+	@for file in infra/contract/*.go; do \
+		filename=$$(basename $$file); \
+		mockgen -package mocks -source=$$file -destination=infra/mocks/$$filename; \
+	done
+	
 	@mockgen -package mocks -source=infra/cache/redis.go -destination=mocks/redis.go
 	
 	@echo "=====> Mocks generated"

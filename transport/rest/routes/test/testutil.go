@@ -11,6 +11,8 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
+	"github.com/diegoclair/go_boilerplate/infra/contract"
+	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/accountroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/authroute"
@@ -25,11 +27,11 @@ import (
 )
 
 type SvcMocks struct {
-	AccountSvcMock  *mocks.MockAccountService
-	AuthSvcMock     *mocks.MockAuthService
-	AuthTokenMock   *mocks.MockAuthToken
-	CacheMock       *mocks.MockCacheManager
-	TransferSvcMock *mocks.MockTransferService
+	AccountAppMock  *mocks.MockAccountApp
+	AuthAppMock     *mocks.MockAuthApp
+	AuthTokenMock   *infraMocks.MockAuthToken
+	CacheMock       *infraMocks.MockCacheManager
+	TransferAppMock *mocks.MockTransferApp
 }
 
 func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.Controller) {
@@ -37,11 +39,11 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 
 	ctrl = gomock.NewController(t)
 	m = SvcMocks{
-		AccountSvcMock:  mocks.NewMockAccountService(ctrl),
-		AuthSvcMock:     mocks.NewMockAuthService(ctrl),
-		AuthTokenMock:   mocks.NewMockAuthToken(ctrl),
-		CacheMock:       mocks.NewMockCacheManager(ctrl),
-		TransferSvcMock: mocks.NewMockTransferService(ctrl),
+		AccountAppMock:  mocks.NewMockAccountApp(ctrl),
+		AuthAppMock:     mocks.NewMockAuthApp(ctrl),
+		AuthTokenMock:   infraMocks.NewMockAuthToken(ctrl),
+		CacheMock:       infraMocks.NewMockCacheManager(ctrl),
+		TransferAppMock: mocks.NewMockTransferApp(ctrl),
 	}
 
 	server = goswag.NewEcho()
@@ -58,11 +60,11 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 		PrivateGroup: privateGroup,
 	}
 
-	accountHandler := accountroute.NewHandler(m.AccountSvcMock)
+	accountHandler := accountroute.NewHandler(m.AccountAppMock)
 	accountRoute := accountroute.NewRouter(accountHandler)
-	authHandler := authroute.NewHandler(m.AuthSvcMock, m.AuthTokenMock)
+	authHandler := authroute.NewHandler(m.AuthAppMock, m.AuthTokenMock)
 	authRoute := authroute.NewRouter(authHandler)
-	transferHandler := transferroute.NewHandler(m.TransferSvcMock)
+	transferHandler := transferroute.NewHandler(m.TransferAppMock)
 	transferRoute := transferroute.NewRouter(transferHandler)
 
 	accountRoute.RegisterRoutes(g)
@@ -72,11 +74,11 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 }
 
 var (
-	tokenMaker auth.AuthToken
+	tokenMaker contract.AuthToken
 	onceToken  sync.Once
 )
 
-func getTestTokenMaker(t *testing.T) auth.AuthToken {
+func getTestTokenMaker(t *testing.T) contract.AuthToken {
 	t.Helper()
 
 	onceToken.Do(func() {
@@ -114,7 +116,7 @@ func addAuthorizationWithNoCache(ctx context.Context, t *testing.T, req *http.Re
 
 	tokenMaker := getTestTokenMaker(t)
 
-	token, _, err := tokenMaker.CreateAccessToken(ctx, auth.TokenPayloadInput{AccountUUID: accountUUID, SessionUUID: sessionUUID})
+	token, _, err := tokenMaker.CreateAccessToken(ctx, contract.TokenPayloadInput{AccountUUID: accountUUID, SessionUUID: sessionUUID})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	req.Header.Set(infra.TokenKey.String(), token)

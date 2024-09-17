@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/o1egl/paseto"
@@ -29,37 +30,47 @@ func newPasetoAuth(symmetricKey string, log logger.Logger) (*pasetoAuth, error) 
 	}, nil
 }
 
-func (a *pasetoAuth) CreateAccessToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error) {
-	return a.createToken(ctx, input, accessTokenDurationTime)
-}
-
-func (a *pasetoAuth) CreateRefreshToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error) {
-	return a.createToken(ctx, input, refreshTokenDurationTime)
-}
-
-func (a *pasetoAuth) VerifyToken(ctx context.Context, token string) (*TokenPayload, error) {
-	if strings.TrimSpace(token) == "" {
-		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+func (p *pasetoAuth) CreateAccessToken(ctx context.Context, input contract.TokenPayloadInput) (tokenString string, resp contract.TokenPayload, err error) {
+	tokenString, payload, err := p.createToken(ctx, fromContractTokenPayloadInput(input), accessTokenDurationTime)
+	if err != nil {
+		return tokenString, resp, err
 	}
 
-	payload := &TokenPayload{}
+	return tokenString, payload.toContract(), nil
+}
 
-	err := a.paseto.Decrypt(token, a.symmetricKey, payload, nil)
+func (p *pasetoAuth) CreateRefreshToken(ctx context.Context, input contract.TokenPayloadInput) (tokenString string, resp contract.TokenPayload, err error) {
+	tokenString, payload, err := p.createToken(ctx, fromContractTokenPayloadInput(input), refreshTokenDurationTime)
 	if err != nil {
-		a.log.Errorf(ctx, "error to decrypt token: %v", err)
-		return nil, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+		return tokenString, resp, err
+	}
+
+	return tokenString, payload.toContract(), nil
+}
+
+func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contract.TokenPayload, err error) {
+	if strings.TrimSpace(token) == "" {
+		return resp, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+	}
+
+	payload := &tokenPayload{}
+
+	err = p.paseto.Decrypt(token, p.symmetricKey, payload, nil)
+	if err != nil {
+		p.log.Errorf(ctx, "error to decrypt token: %v", err)
+		return resp, resterrors.NewUnauthorizedError(errInvalidToken.Error())
 	}
 
 	err = payload.Valid()
 	if err != nil {
-		a.log.Errorf(ctx, "error to validate token: %v", err)
-		return nil, resterrors.NewUnauthorizedError(err.Error())
+		p.log.Errorf(ctx, "error to validate token: %v", err)
+		return resp, resterrors.NewUnauthorizedError(err.Error())
 	}
 
-	return payload, nil
+	return payload.toContract(), nil
 }
 
-func (a *pasetoAuth) createToken(ctx context.Context, input TokenPayloadInput, duration time.Duration) (tokenString string, payload *TokenPayload, err error) {
+func (a *pasetoAuth) createToken(ctx context.Context, input tokenPayloadInput, duration time.Duration) (tokenString string, payload *tokenPayload, err error) {
 	payload = newPayload(input, duration)
 
 	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)

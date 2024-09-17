@@ -1,14 +1,13 @@
 package servermiddleware
 
 import (
-	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_utils/resterrors"
 	echo "github.com/labstack/echo/v4"
 )
 
-func AuthMiddlewarePrivateRoute(authToken auth.AuthToken, cache contract.CacheManager) echo.MiddlewareFunc {
+func AuthMiddlewarePrivateRoute(authToken contract.AuthToken, cache contract.CacheManager) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 

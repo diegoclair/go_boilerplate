@@ -44,7 +44,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				m.AccountSvcMock.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(nil)
+				m.AccountAppMock.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -72,7 +72,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock test.SvcMocks, args args) {
 				body := args.body.(viewmodel.AddAccount)
-				mock.AccountSvcMock.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(errors.New("some error"))
+				mock.AccountAppMock.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -143,7 +143,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock test.SvcMocks, args args) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				mock.AccountSvcMock.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
+				mock.AccountAppMock.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(2), nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock test.SvcMocks, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
@@ -170,7 +170,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock test.SvcMocks, args args) {
 				accounts := buildAccountsByQuantity(args.accountsToBuild)
-				mock.AccountSvcMock.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
+				mock.AccountAppMock.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock test.SvcMocks, args args) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -223,7 +223,7 @@ func TestHandler_GetAccountByID(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, mock test.SvcMocks, args args) {
 				account := buildAccountByID(1)
-				mock.AccountSvcMock.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(account, nil)
+				mock.AccountAppMock.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(account, nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock test.SvcMocks, args args) {
 				require.Equal(t, http.StatusOK, resp.Code)
@@ -243,7 +243,7 @@ func TestHandler_GetAccountByID(t *testing.T) {
 				accountUUID: "random",
 			},
 			buildMocks: func(ctx context.Context, mock test.SvcMocks, args args) {
-				mock.AccountSvcMock.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, fmt.Errorf("some service error"))
+				mock.AccountAppMock.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, fmt.Errorf("some service error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock test.SvcMocks, args args) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -310,7 +310,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 			buildMocks: func(ctx context.Context, mock test.SvcMocks, args args) {
 				body := args.body.(viewmodel.AddBalance)
 
-				mock.AccountSvcMock.EXPECT().AddBalance(ctx, body.ToDto(args.accountUUID)).Times(1).Return(nil)
+				mock.AccountAppMock.EXPECT().AddBalance(ctx, body.ToDto(args.accountUUID)).Times(1).Return(nil)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, resp.Code)
@@ -352,7 +352,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 					AccountUUID: "random",
 					Amount:      args.body.(viewmodel.AddBalance).Amount,
 				}
-				mock.AccountSvcMock.EXPECT().AddBalance(ctx, input).Times(1).Return(errors.New("some error"))
+				mock.AccountAppMock.EXPECT().AddBalance(ctx, input).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)

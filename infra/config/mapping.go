@@ -64,10 +64,8 @@ type MySQLConfig struct {
 	MaxOpenConnections int    `mapstructure:"max-open-connections"`
 }
 
-func (c *Config) GetMysqlDSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
-		c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.Host, c.DB.MySQL.Port,
-	)
+func (c *Config) GetMysqlDsn() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.Host, c.DB.MySQL.Port, c.DB.MySQL.DBName)
 }
 
 type LogConfig struct {

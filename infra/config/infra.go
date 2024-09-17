@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/infra/cache"
+	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/infra/data/mysql"
 	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/util/crypto"
@@ -16,12 +18,12 @@ import (
 )
 
 var (
-	authToken auth.AuthToken
+	authToken infraContract.AuthToken
 	authOnce  sync.Once
 )
 
 // GetAuthToken returns a new auth token or panics if it fails
-func (c *Config) GetAuthToken() auth.AuthToken {
+func (c *Config) GetAuthToken() infraContract.AuthToken {
 	authOnce.Do(func() {
 		var (
 			err error
@@ -43,12 +45,12 @@ func (c *Config) GetAuthToken() auth.AuthToken {
 }
 
 var (
-	cacheManager *cache.CacheManager
+	cacheManager infraContract.CacheManager
 	cacheOnce    sync.Once
 )
 
 // GetCacheManager returns a new cache manager or panics if it fails
-func (c *Config) GetCacheManager() *cache.CacheManager {
+func (c *Config) GetCacheManager() infraContract.CacheManager {
 	cacheOnce.Do(func() {
 		var (
 			client *redis.Client
@@ -79,12 +81,12 @@ func (c *Config) GetCacheManager() *cache.CacheManager {
 }
 
 var (
-	cryptoClient *crypto.Client
+	cryptoClient infraContract.Crypto
 	cryptoOnce   sync.Once
 )
 
 // GetCrypto returns a new crypto or panics if it fails
-func (c *Config) GetCrypto() *crypto.Client {
+func (c *Config) GetCrypto() infraContract.Crypto {
 	cryptoOnce.Do(func() {
 		cryptoClient = crypto.NewCrypto()
 	})
@@ -93,12 +95,12 @@ func (c *Config) GetCrypto() *crypto.Client {
 }
 
 var (
-	dataManager *mysql.MysqlConn
+	dataManager contract.DataManager
 	dataOnce    sync.Once
 )
 
 // GetDataManager returns a new data manager or panics if it fails
-func (c *Config) GetDataManager() *mysql.MysqlConn {
+func (c *Config) GetDataManager() contract.DataManager {
 	dataOnce.Do(func() {
 		var (
 			err     error
@@ -107,7 +109,8 @@ func (c *Config) GetDataManager() *mysql.MysqlConn {
 		)
 
 		dataManager, mysqlDB, err = mysql.Instance(c.ctx,
-			c, c.DB.MySQL.DBName,
+			c.GetMysqlDsn(),
+			c.DB.MySQL.DBName,
 			log,
 		)
 		if err != nil {
@@ -159,4 +162,8 @@ func (c *Config) GetValidator() validator.Validator {
 	})
 
 	return v
+}
+
+func (c *Config) GetHttpPort() string {
+	return c.App.Port
 }

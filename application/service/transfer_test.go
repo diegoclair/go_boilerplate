@@ -16,12 +16,12 @@ import (
 )
 
 func Test_newTransferService(t *testing.T) {
-	m, svc, ctrl := newServiceTestMock(t)
+	m, ctrl := newServiceTestMock(t)
 	defer ctrl.Finish()
 
-	want := &transferService{svc: svc, accountSvc: m.mockAccountSvc}
+	want := &transferService{dm: m.mockDataManager, accountSvc: m.mockAccountSvc, log: m.mockLogger, validator: m.mockValidator}
 
-	if got := newTransferService(svc, m.mockAccountSvc); !reflect.DeepEqual(got, want) {
+	if got := newTransferService(m.mockInfra, m.mockAccountSvc); !reflect.DeepEqual(got, want) {
 		t.Errorf("newTransferService() = %v, want %v", got, want)
 	}
 }
@@ -313,13 +313,10 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			m, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &transferService{
-				svc:        svc,
-				accountSvc: m.mockAccountSvc,
-			}
+			s := newTransferService(m.mockInfra, m.mockAccountSvc)
 
 			if tt.args.accountUUIDFromContext != "" {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, tt.args.accountUUIDFromContext)
@@ -406,13 +403,10 @@ func Test_transferService_GetTransfers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			m, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &transferService{
-				svc:        svc,
-				accountSvc: m.mockAccountSvc,
-			}
+			s := newTransferService(m.mockInfra, m.mockAccountSvc)
 
 			if tt.args.accountUUIDFromContext != "" {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, tt.args.accountUUIDFromContext)

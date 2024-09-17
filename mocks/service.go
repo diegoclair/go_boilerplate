@@ -18,31 +18,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockAccountService is a mock of AccountService interface.
-type MockAccountService struct {
+// MockAccountApp is a mock of AccountApp interface.
+type MockAccountApp struct {
 	ctrl     *gomock.Controller
-	recorder *MockAccountServiceMockRecorder
+	recorder *MockAccountAppMockRecorder
 }
 
-// MockAccountServiceMockRecorder is the mock recorder for MockAccountService.
-type MockAccountServiceMockRecorder struct {
-	mock *MockAccountService
+// MockAccountAppMockRecorder is the mock recorder for MockAccountApp.
+type MockAccountAppMockRecorder struct {
+	mock *MockAccountApp
 }
 
-// NewMockAccountService creates a new mock instance.
-func NewMockAccountService(ctrl *gomock.Controller) *MockAccountService {
-	mock := &MockAccountService{ctrl: ctrl}
-	mock.recorder = &MockAccountServiceMockRecorder{mock}
+// NewMockAccountApp creates a new mock instance.
+func NewMockAccountApp(ctrl *gomock.Controller) *MockAccountApp {
+	mock := &MockAccountApp{ctrl: ctrl}
+	mock.recorder = &MockAccountAppMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAccountService) EXPECT() *MockAccountServiceMockRecorder {
+func (m *MockAccountApp) EXPECT() *MockAccountAppMockRecorder {
 	return m.recorder
 }
 
 // AddBalance mocks base method.
-func (m *MockAccountService) AddBalance(ctx context.Context, input dto.AddBalanceInput) error {
+func (m *MockAccountApp) AddBalance(ctx context.Context, input dto.AddBalanceInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddBalance", ctx, input)
 	ret0, _ := ret[0].(error)
@@ -50,13 +50,13 @@ func (m *MockAccountService) AddBalance(ctx context.Context, input dto.AddBalanc
 }
 
 // AddBalance indicates an expected call of AddBalance.
-func (mr *MockAccountServiceMockRecorder) AddBalance(ctx, input any) *gomock.Call {
+func (mr *MockAccountAppMockRecorder) AddBalance(ctx, input any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBalance", reflect.TypeOf((*MockAccountService)(nil).AddBalance), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBalance", reflect.TypeOf((*MockAccountApp)(nil).AddBalance), ctx, input)
 }
 
 // CreateAccount mocks base method.
-func (m *MockAccountService) CreateAccount(ctx context.Context, input dto.AccountInput) error {
+func (m *MockAccountApp) CreateAccount(ctx context.Context, input dto.AccountInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", ctx, input)
 	ret0, _ := ret[0].(error)
@@ -64,13 +64,13 @@ func (m *MockAccountService) CreateAccount(ctx context.Context, input dto.Accoun
 }
 
 // CreateAccount indicates an expected call of CreateAccount.
-func (mr *MockAccountServiceMockRecorder) CreateAccount(ctx, input any) *gomock.Call {
+func (mr *MockAccountAppMockRecorder) CreateAccount(ctx, input any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockAccountService)(nil).CreateAccount), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockAccountApp)(nil).CreateAccount), ctx, input)
 }
 
 // GetAccountByUUID mocks base method.
-func (m *MockAccountService) GetAccountByUUID(ctx context.Context, accountUUID string) (entity.Account, error) {
+func (m *MockAccountApp) GetAccountByUUID(ctx context.Context, accountUUID string) (entity.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccountByUUID", ctx, accountUUID)
 	ret0, _ := ret[0].(entity.Account)
@@ -79,13 +79,13 @@ func (m *MockAccountService) GetAccountByUUID(ctx context.Context, accountUUID s
 }
 
 // GetAccountByUUID indicates an expected call of GetAccountByUUID.
-func (mr *MockAccountServiceMockRecorder) GetAccountByUUID(ctx, accountUUID any) *gomock.Call {
+func (mr *MockAccountAppMockRecorder) GetAccountByUUID(ctx, accountUUID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountByUUID", reflect.TypeOf((*MockAccountService)(nil).GetAccountByUUID), ctx, accountUUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountByUUID", reflect.TypeOf((*MockAccountApp)(nil).GetAccountByUUID), ctx, accountUUID)
 }
 
 // GetAccounts mocks base method.
-func (m *MockAccountService) GetAccounts(ctx context.Context, take, skip int64) ([]entity.Account, int64, error) {
+func (m *MockAccountApp) GetAccounts(ctx context.Context, take, skip int64) ([]entity.Account, int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccounts", ctx, take, skip)
 	ret0, _ := ret[0].([]entity.Account)
@@ -95,13 +95,13 @@ func (m *MockAccountService) GetAccounts(ctx context.Context, take, skip int64) 
 }
 
 // GetAccounts indicates an expected call of GetAccounts.
-func (mr *MockAccountServiceMockRecorder) GetAccounts(ctx, take, skip any) *gomock.Call {
+func (mr *MockAccountAppMockRecorder) GetAccounts(ctx, take, skip any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockAccountService)(nil).GetAccounts), ctx, take, skip)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockAccountApp)(nil).GetAccounts), ctx, take, skip)
 }
 
 // GetLoggedAccount mocks base method.
-func (m *MockAccountService) GetLoggedAccount(ctx context.Context) (entity.Account, error) {
+func (m *MockAccountApp) GetLoggedAccount(ctx context.Context) (entity.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLoggedAccount", ctx)
 	ret0, _ := ret[0].(entity.Account)
@@ -110,13 +110,13 @@ func (m *MockAccountService) GetLoggedAccount(ctx context.Context) (entity.Accou
 }
 
 // GetLoggedAccount indicates an expected call of GetLoggedAccount.
-func (mr *MockAccountServiceMockRecorder) GetLoggedAccount(ctx any) *gomock.Call {
+func (mr *MockAccountAppMockRecorder) GetLoggedAccount(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoggedAccount", reflect.TypeOf((*MockAccountService)(nil).GetLoggedAccount), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoggedAccount", reflect.TypeOf((*MockAccountApp)(nil).GetLoggedAccount), ctx)
 }
 
 // GetLoggedAccountID mocks base method.
-func (m *MockAccountService) GetLoggedAccountID(ctx context.Context) (int64, error) {
+func (m *MockAccountApp) GetLoggedAccountID(ctx context.Context) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLoggedAccountID", ctx)
 	ret0, _ := ret[0].(int64)
@@ -125,36 +125,36 @@ func (m *MockAccountService) GetLoggedAccountID(ctx context.Context) (int64, err
 }
 
 // GetLoggedAccountID indicates an expected call of GetLoggedAccountID.
-func (mr *MockAccountServiceMockRecorder) GetLoggedAccountID(ctx any) *gomock.Call {
+func (mr *MockAccountAppMockRecorder) GetLoggedAccountID(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoggedAccountID", reflect.TypeOf((*MockAccountService)(nil).GetLoggedAccountID), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoggedAccountID", reflect.TypeOf((*MockAccountApp)(nil).GetLoggedAccountID), ctx)
 }
 
-// MockAuthService is a mock of AuthService interface.
-type MockAuthService struct {
+// MockAuthApp is a mock of AuthApp interface.
+type MockAuthApp struct {
 	ctrl     *gomock.Controller
-	recorder *MockAuthServiceMockRecorder
+	recorder *MockAuthAppMockRecorder
 }
 
-// MockAuthServiceMockRecorder is the mock recorder for MockAuthService.
-type MockAuthServiceMockRecorder struct {
-	mock *MockAuthService
+// MockAuthAppMockRecorder is the mock recorder for MockAuthApp.
+type MockAuthAppMockRecorder struct {
+	mock *MockAuthApp
 }
 
-// NewMockAuthService creates a new mock instance.
-func NewMockAuthService(ctrl *gomock.Controller) *MockAuthService {
-	mock := &MockAuthService{ctrl: ctrl}
-	mock.recorder = &MockAuthServiceMockRecorder{mock}
+// NewMockAuthApp creates a new mock instance.
+func NewMockAuthApp(ctrl *gomock.Controller) *MockAuthApp {
+	mock := &MockAuthApp{ctrl: ctrl}
+	mock.recorder = &MockAuthAppMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthService) EXPECT() *MockAuthServiceMockRecorder {
+func (m *MockAuthApp) EXPECT() *MockAuthAppMockRecorder {
 	return m.recorder
 }
 
 // CreateSession mocks base method.
-func (m *MockAuthService) CreateSession(ctx context.Context, session dto.Session) error {
+func (m *MockAuthApp) CreateSession(ctx context.Context, session dto.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSession", ctx, session)
 	ret0, _ := ret[0].(error)
@@ -162,13 +162,13 @@ func (m *MockAuthService) CreateSession(ctx context.Context, session dto.Session
 }
 
 // CreateSession indicates an expected call of CreateSession.
-func (mr *MockAuthServiceMockRecorder) CreateSession(ctx, session any) *gomock.Call {
+func (mr *MockAuthAppMockRecorder) CreateSession(ctx, session any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockAuthService)(nil).CreateSession), ctx, session)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockAuthApp)(nil).CreateSession), ctx, session)
 }
 
 // GetSessionByUUID mocks base method.
-func (m *MockAuthService) GetSessionByUUID(ctx context.Context, sessionUUID string) (dto.Session, error) {
+func (m *MockAuthApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (dto.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSessionByUUID", ctx, sessionUUID)
 	ret0, _ := ret[0].(dto.Session)
@@ -177,13 +177,13 @@ func (m *MockAuthService) GetSessionByUUID(ctx context.Context, sessionUUID stri
 }
 
 // GetSessionByUUID indicates an expected call of GetSessionByUUID.
-func (mr *MockAuthServiceMockRecorder) GetSessionByUUID(ctx, sessionUUID any) *gomock.Call {
+func (mr *MockAuthAppMockRecorder) GetSessionByUUID(ctx, sessionUUID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionByUUID", reflect.TypeOf((*MockAuthService)(nil).GetSessionByUUID), ctx, sessionUUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionByUUID", reflect.TypeOf((*MockAuthApp)(nil).GetSessionByUUID), ctx, sessionUUID)
 }
 
 // Login mocks base method.
-func (m *MockAuthService) Login(ctx context.Context, input dto.LoginInput) (entity.Account, error) {
+func (m *MockAuthApp) Login(ctx context.Context, input dto.LoginInput) (entity.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, input)
 	ret0, _ := ret[0].(entity.Account)
@@ -192,13 +192,13 @@ func (m *MockAuthService) Login(ctx context.Context, input dto.LoginInput) (enti
 }
 
 // Login indicates an expected call of Login.
-func (mr *MockAuthServiceMockRecorder) Login(ctx, input any) *gomock.Call {
+func (mr *MockAuthAppMockRecorder) Login(ctx, input any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockAuthService)(nil).Login), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockAuthApp)(nil).Login), ctx, input)
 }
 
 // Logout mocks base method.
-func (m *MockAuthService) Logout(ctx context.Context, accessToken string) error {
+func (m *MockAuthApp) Logout(ctx context.Context, accessToken string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Logout", ctx, accessToken)
 	ret0, _ := ret[0].(error)
@@ -206,36 +206,36 @@ func (m *MockAuthService) Logout(ctx context.Context, accessToken string) error 
 }
 
 // Logout indicates an expected call of Logout.
-func (mr *MockAuthServiceMockRecorder) Logout(ctx, accessToken any) *gomock.Call {
+func (mr *MockAuthAppMockRecorder) Logout(ctx, accessToken any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockAuthService)(nil).Logout), ctx, accessToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockAuthApp)(nil).Logout), ctx, accessToken)
 }
 
-// MockTransferService is a mock of TransferService interface.
-type MockTransferService struct {
+// MockTransferApp is a mock of TransferApp interface.
+type MockTransferApp struct {
 	ctrl     *gomock.Controller
-	recorder *MockTransferServiceMockRecorder
+	recorder *MockTransferAppMockRecorder
 }
 
-// MockTransferServiceMockRecorder is the mock recorder for MockTransferService.
-type MockTransferServiceMockRecorder struct {
-	mock *MockTransferService
+// MockTransferAppMockRecorder is the mock recorder for MockTransferApp.
+type MockTransferAppMockRecorder struct {
+	mock *MockTransferApp
 }
 
-// NewMockTransferService creates a new mock instance.
-func NewMockTransferService(ctrl *gomock.Controller) *MockTransferService {
-	mock := &MockTransferService{ctrl: ctrl}
-	mock.recorder = &MockTransferServiceMockRecorder{mock}
+// NewMockTransferApp creates a new mock instance.
+func NewMockTransferApp(ctrl *gomock.Controller) *MockTransferApp {
+	mock := &MockTransferApp{ctrl: ctrl}
+	mock.recorder = &MockTransferAppMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockTransferService) EXPECT() *MockTransferServiceMockRecorder {
+func (m *MockTransferApp) EXPECT() *MockTransferAppMockRecorder {
 	return m.recorder
 }
 
 // CreateTransfer mocks base method.
-func (m *MockTransferService) CreateTransfer(ctx context.Context, transfer dto.TransferInput) error {
+func (m *MockTransferApp) CreateTransfer(ctx context.Context, transfer dto.TransferInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTransfer", ctx, transfer)
 	ret0, _ := ret[0].(error)
@@ -243,13 +243,13 @@ func (m *MockTransferService) CreateTransfer(ctx context.Context, transfer dto.T
 }
 
 // CreateTransfer indicates an expected call of CreateTransfer.
-func (mr *MockTransferServiceMockRecorder) CreateTransfer(ctx, transfer any) *gomock.Call {
+func (mr *MockTransferAppMockRecorder) CreateTransfer(ctx, transfer any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockTransferService)(nil).CreateTransfer), ctx, transfer)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockTransferApp)(nil).CreateTransfer), ctx, transfer)
 }
 
 // GetTransfers mocks base method.
-func (m *MockTransferService) GetTransfers(ctx context.Context, take, skip int64) ([]entity.Transfer, int64, error) {
+func (m *MockTransferApp) GetTransfers(ctx context.Context, take, skip int64) ([]entity.Transfer, int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransfers", ctx, take, skip)
 	ret0, _ := ret[0].([]entity.Transfer)
@@ -259,7 +259,7 @@ func (m *MockTransferService) GetTransfers(ctx context.Context, take, skip int64
 }
 
 // GetTransfers indicates an expected call of GetTransfers.
-func (mr *MockTransferServiceMockRecorder) GetTransfers(ctx, take, skip any) *gomock.Call {
+func (mr *MockTransferAppMockRecorder) GetTransfers(ctx, take, skip any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfers", reflect.TypeOf((*MockTransferService)(nil).GetTransfers), ctx, take, skip)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfers", reflect.TypeOf((*MockTransferApp)(nil).GetTransfers), ctx, take, skip)
 }

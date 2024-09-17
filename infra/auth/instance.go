@@ -1,24 +1,13 @@
 package auth
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_utils/logger"
 )
-
-type TokenPayloadInput struct {
-	AccountUUID string
-	SessionUUID string
-}
-
-type AuthToken interface {
-	CreateAccessToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error)
-	CreateRefreshToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload *TokenPayload, err error)
-	VerifyToken(ctx context.Context, token string) (*TokenPayload, error)
-}
 
 const (
 	minSecretKeySize = 32
@@ -35,7 +24,7 @@ var (
 	errInvalidPrivateKey = fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 )
 
-func NewAuthToken(accessTokenDuration, refreshTokenDuration time.Duration, pasetoSymmetricKey string, log logger.Logger) (AuthToken, error) {
+func NewAuthToken(accessTokenDuration, refreshTokenDuration time.Duration, pasetoSymmetricKey string, log logger.Logger) (contract.AuthToken, error) {
 	accessTokenDurationTime = accessTokenDuration
 	refreshTokenDurationTime = refreshTokenDuration
 

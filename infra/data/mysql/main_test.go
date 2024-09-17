@@ -23,7 +23,11 @@ func TestMain(m *testing.M) {
 	close := setMysqlTestContainerConfig(ctx, cfg)
 	defer close()
 
-	mysqlConn, db, err := Instance(ctx, cfg, cfg.DB.MySQL.DBName, cfg.GetLogger())
+	mysqlConn, db, err := Instance(ctx,
+		cfg.GetMysqlDNS(),
+		cfg.DB.MySQL.DBName,
+		cfg.GetLogger(),
+	)
 	if err != nil {
 		log.Fatalf("cannot connect to mysql: %v", err)
 	}

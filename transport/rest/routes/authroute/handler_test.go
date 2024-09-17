@@ -14,7 +14,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/entity"
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/test"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
@@ -45,10 +45,10 @@ func TestHandler_handleLogin(t *testing.T) {
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
-				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
-				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
-				m.AuthTokenMock.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
-				m.AuthSvcMock.EXPECT().CreateSession(ctx, gomock.Any()).DoAndReturn(
+				m.AuthAppMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &contract.TokenPayload{}, nil).Times(1)
+				m.AuthTokenMock.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("r123", &contract.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
+				m.AuthAppMock.EXPECT().CreateSession(ctx, gomock.Any()).DoAndReturn(
 					func(ctx context.Context, req dto.Session) error {
 						require.NotEmpty(t, req.SessionUUID)
 						require.Equal(t, int64(1), req.AccountID)
@@ -85,7 +85,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
-				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{}, fmt.Errorf("error to login")).Times(1)
+				m.AuthAppMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{}, fmt.Errorf("error to login")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -103,7 +103,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
-				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				m.AuthAppMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
 				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("", nil, fmt.Errorf("error to create access token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -122,8 +122,8 @@ func TestHandler_handleLogin(t *testing.T) {
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
-				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
-				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
+				m.AuthAppMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &contract.TokenPayload{}, nil).Times(1)
 				m.AuthTokenMock.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("", nil, fmt.Errorf("error to create refresh token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -142,10 +142,10 @@ func TestHandler_handleLogin(t *testing.T) {
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				body := args.body.(viewmodel.Login)
 
-				m.AuthSvcMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
-				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &auth.TokenPayload{}, nil).Times(1)
-				m.AuthTokenMock.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("r123", &auth.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
-				m.AuthSvcMock.EXPECT().CreateSession(ctx, gomock.Any()).Return(fmt.Errorf("error to create session")).Times(1)
+				m.AuthAppMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{ID: 1, UUID: "uuid"}, nil).Times(1)
+				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("a123", &contract.TokenPayload{}, nil).Times(1)
+				m.AuthTokenMock.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("r123", &contract.TokenPayload{ExpiredAt: time.Now()}, nil).Times(1)
+				m.AuthAppMock.EXPECT().CreateSession(ctx, gomock.Any()).Return(fmt.Errorf("error to create session")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
@@ -210,7 +210,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				input := args.body.(viewmodel.RefreshTokenRequest)
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, input.RefreshToken).
-					Return(&auth.TokenPayload{
+					Return(&contract.TokenPayload{
 						SessionUUID: args.sessionUUID,
 						AccountUUID: args.accountUUID,
 					}, nil).Times(1)
@@ -218,18 +218,18 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, args.accountUUID)
 				ctx = context.WithValue(ctx, infra.SessionKey, args.sessionUUID)
 
-				m.AuthSvcMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
+				m.AuthAppMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
 					Return(dto.Session{
 						RefreshTokenExpiredAt: time.Now().Add(2 * time.Hour),
 						RefreshToken:          "r123",
 					}, nil).Times(1)
 
-				req := auth.TokenPayloadInput{
+				req := contract.TokenPayloadInput{
 					AccountUUID: args.accountUUID,
 					SessionUUID: args.sessionUUID,
 				}
 				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, req).
-					Return("a123", &auth.TokenPayload{}, nil).Times(1)
+					Return("a123", &contract.TokenPayload{}, nil).Times(1)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -271,7 +271,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				input := args.body.(viewmodel.RefreshTokenRequest)
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, input.RefreshToken).
-					Return(&auth.TokenPayload{
+					Return(&contract.TokenPayload{
 						SessionUUID: args.sessionUUID,
 						AccountUUID: args.accountUUID,
 					}, nil).Times(1)
@@ -279,7 +279,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, args.accountUUID)
 				ctx = context.WithValue(ctx, infra.SessionKey, args.sessionUUID)
 
-				m.AuthSvcMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
+				m.AuthAppMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
 					Return(dto.Session{}, fmt.Errorf("error to get session by uuid")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
@@ -296,7 +296,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
-					Return(&auth.TokenPayload{
+					Return(&contract.TokenPayload{
 						SessionUUID: args.sessionUUID,
 						AccountUUID: args.accountUUID,
 					}, nil).Times(1)
@@ -304,7 +304,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, args.accountUUID)
 				ctx = context.WithValue(ctx, infra.SessionKey, args.sessionUUID)
 
-				m.AuthSvcMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
+				m.AuthAppMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
 					Return(dto.Session{
 						RefreshToken: "r456",
 					}, nil).Times(1)
@@ -323,7 +323,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
-					Return(&auth.TokenPayload{
+					Return(&contract.TokenPayload{
 						SessionUUID: args.sessionUUID,
 						AccountUUID: args.accountUUID,
 					}, nil).Times(1)
@@ -331,7 +331,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, args.accountUUID)
 				ctx = context.WithValue(ctx, infra.SessionKey, args.sessionUUID)
 
-				m.AuthSvcMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
+				m.AuthAppMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
 					Return(dto.Session{
 						RefreshTokenExpiredAt: time.Now().Add(-2 * time.Hour),
 						RefreshToken:          "r123",
@@ -351,7 +351,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			},
 			buildMocks: func(ctx context.Context, m test.SvcMocks, args args) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).
-					Return(&auth.TokenPayload{
+					Return(&contract.TokenPayload{
 						SessionUUID: args.sessionUUID,
 						AccountUUID: args.accountUUID,
 					}, nil).Times(1)
@@ -359,13 +359,13 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 				ctx = context.WithValue(ctx, infra.AccountUUIDKey, args.accountUUID)
 				ctx = context.WithValue(ctx, infra.SessionKey, args.sessionUUID)
 
-				m.AuthSvcMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
+				m.AuthAppMock.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).
 					Return(dto.Session{
 						RefreshTokenExpiredAt: time.Now().Add(2 * time.Hour),
 						RefreshToken:          "r123",
 					}, nil).Times(1)
 
-				req := auth.TokenPayloadInput{
+				req := contract.TokenPayloadInput{
 					AccountUUID: args.accountUUID,
 					SessionUUID: args.sessionUUID,
 				}
@@ -419,7 +419,7 @@ func TestHandler_handleLogout(t *testing.T) {
 				test.AddAuthorization(ctx, t, req, m)
 			},
 			BuildMocks: func(ctx context.Context, m test.SvcMocks, body any) {
-				m.AuthSvcMock.EXPECT().Logout(ctx, gomock.Any()).Return(nil).Times(1)
+				m.AuthAppMock.EXPECT().Logout(ctx, gomock.Any()).Return(nil).Times(1)
 			},
 			CheckResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -431,7 +431,7 @@ func TestHandler_handleLogout(t *testing.T) {
 				test.AddAuthorization(ctx, t, req, m)
 			},
 			BuildMocks: func(ctx context.Context, m test.SvcMocks, body any) {
-				m.AuthSvcMock.EXPECT().Logout(ctx, gomock.Any()).Return(fmt.Errorf("error to logout")).Times(1)
+				m.AuthAppMock.EXPECT().Logout(ctx, gomock.Any()).Return(fmt.Errorf("error to logout")).Times(1)
 			},
 			CheckResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusServiceUnavailable, recorder.Code)

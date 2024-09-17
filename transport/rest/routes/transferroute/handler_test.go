@@ -36,7 +36,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			},
 			BuildMocks: func(ctx context.Context, m test.SvcMocks, body any) {
 				b := body.(viewmodel.TransferReq)
-				m.TransferSvcMock.EXPECT().CreateTransfer(ctx,
+				m.TransferAppMock.EXPECT().CreateTransfer(ctx,
 					dto.TransferInput{AccountDestinationUUID: b.AccountDestinationUUID, Amount: b.Amount}).
 					Return(nil).MinTimes(1)
 			},
@@ -64,7 +64,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			},
 			BuildMocks: func(ctx context.Context, m test.SvcMocks, body any) {
 				b := body.(viewmodel.TransferReq)
-				m.TransferSvcMock.EXPECT().CreateTransfer(ctx,
+				m.TransferAppMock.EXPECT().CreateTransfer(ctx,
 					dto.TransferInput{AccountDestinationUUID: b.AccountDestinationUUID, Amount: b.Amount}).
 					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
@@ -116,7 +116,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		test.PrivateEndpointTest{
 			Name: "Should pass with success",
 			BuildMocks: func(ctx context.Context, m test.SvcMocks, _ any) {
-				m.TransferSvcMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]entity.Transfer{
+				m.TransferAppMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]entity.Transfer{
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 5.55, CreatedAt: time.Now()},
 					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 7.77, CreatedAt: time.Now()},
 				}, int64(0), nil).Times(1)
@@ -134,7 +134,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 		test.PrivateEndpointTest{
 			Name: "Should return error if service get transfer returns error",
 			BuildMocks: func(ctx context.Context, m test.SvcMocks, _ any) {
-				m.TransferSvcMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return(nil, int64(0), fmt.Errorf("error to get transfers")).Times(1)
+				m.TransferAppMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return(nil, int64(0), fmt.Errorf("error to get transfers")).Times(1)
 			},
 			SetupAuth: func(ctx context.Context, t *testing.T, req *http.Request, m test.SvcMocks) {
 				test.AddAuthorization(ctx, t, req, m)

@@ -15,12 +15,12 @@ import (
 )
 
 func Test_newAccountService(t *testing.T) {
-	_, svc, ctrl := newServiceTestMock(t)
+	m, ctrl := newServiceTestMock(t)
 	defer ctrl.Finish()
 
-	want := &accountService{svc: svc}
+	want := &accountService{dm: m.mockDataManager, crypto: m.mockCrypto, log: m.mockLogger, validator: m.mockValidator}
 
-	if got := newAccountService(svc); !reflect.DeepEqual(got, want) {
+	if got := newAccountService(m.mockInfra); !reflect.DeepEqual(got, want) {
 		t.Errorf("newAccountService() = %v, want %v", got, want)
 	}
 }
@@ -121,15 +121,13 @@ func Test_accountService_CreateAccount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMocks, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &accountService{
-				svc: svc,
-			}
+			s := newAccountService(m.mockInfra)
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMocks, tt.args)
+				tt.buildMock(ctx, m, tt.args)
 			}
 			if err := s.CreateAccount(ctx, tt.args.account); (err != nil) != tt.wantErr {
 				t.Errorf("CreateAccount() error = %v, wantErr %v", err, tt.wantErr)
@@ -202,15 +200,13 @@ func Test_accountService_AddBalance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMocks, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &accountService{
-				svc: svc,
-			}
+			s := newAccountService(m.mockInfra)
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMocks, tt.args)
+				tt.buildMock(ctx, m, tt.args)
 			}
 
 			input := dto.AddBalanceInput{
@@ -264,15 +260,13 @@ func Test_accountService_GetAccounts(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMocks, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &accountService{
-				svc: svc,
-			}
+			s := newAccountService(m.mockInfra)
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMocks, tt.args)
+				tt.buildMock(ctx, m, tt.args)
 			}
 
 			got, got1, err := s.GetAccounts(ctx, tt.args.take, tt.args.skip)
@@ -330,15 +324,13 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := context.Background()
-			allMocks, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &accountService{
-				svc: svc,
-			}
+			s := newAccountService(m.mockInfra)
 
 			if tt.buildMock != nil {
-				tt.buildMock(ctx, allMocks, tt.args)
+				tt.buildMock(ctx, m, tt.args)
 			}
 
 			gotAccount, err := s.GetAccountByUUID(ctx, tt.args.accountUUID)
@@ -392,12 +384,10 @@ func Test_accountService_GetLoggedAccountID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			m, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &accountService{
-				svc: svc,
-			}
+			s := newAccountService(m.mockInfra)
 
 			if tt.buildMock != nil {
 				tt.buildMock(tt.args.ctx, m)
@@ -454,12 +444,10 @@ func Test_accountService_GetLoggedAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			m, svc, ctrl := newServiceTestMock(t)
+			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 
-			s := &accountService{
-				svc: svc,
-			}
+			s := newAccountService(m.mockInfra)
 
 			if tt.buildMock != nil {
 				tt.buildMock(tt.args.ctx, m, tt.args)

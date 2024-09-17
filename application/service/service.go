@@ -1,78 +1,55 @@
 package service
 
 import (
+	"errors"
+	"time"
+
 	"github.com/diegoclair/go_boilerplate/domain/contract"
-	"github.com/diegoclair/go_boilerplate/infra/config"
-	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/validator"
+	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 )
 
-type Services struct {
-	AccountService  contract.AccountService
-	AuthService     contract.AuthService
-	TransferService contract.TransferService
+type Apps struct {
+	AccountService  contract.AccountApp
+	AuthService     contract.AuthApp
+	TransferService contract.TransferApp
 }
 
-type ServiceOptions func(*service)
-
 // New to get instance of all services
-func New(svcOptions ...ServiceOptions) (*Services, error) {
-
-	svc := &service{}
-	for _, opt := range svcOptions {
-		opt(svc)
+func New(infra infraContract.Infrastructure, accessTokenDuration time.Duration) (*Apps, error) {
+	if err := validateInfrastructure(infra); err != nil {
+		return nil, err
 	}
 
-	accSvc := newAccountService(svc)
+	accSvc := newAccountService(infra)
 
-	return &Services{
+	return &Apps{
 		AccountService:  accSvc,
-		AuthService:     newAuthService(svc, accSvc),
-		TransferService: newTransferService(svc, accSvc),
+		AuthService:     newAuthApp(infra, accSvc, accessTokenDuration),
+		TransferService: newTransferService(infra, accSvc),
 	}, nil
 }
 
-type service struct {
-	dm        contract.DataManager
-	cfg       *config.Config
-	cache     contract.CacheManager
-	log       logger.Logger
-	crypto    contract.Crypto
-	validator validator.Validator
-}
-
-func WithDataManager(dm contract.DataManager) ServiceOptions {
-	return func(s *service) {
-		s.dm = dm
+// validateInfrastructure validate the dependencies needed to initialize the services
+func validateInfrastructure(infra infraContract.Infrastructure) error {
+	if infra.Logger() == nil {
+		return errors.New("logger is required")
 	}
-}
 
-func WithConfig(cfg *config.Config) ServiceOptions {
-	return func(s *service) {
-		s.cfg = cfg
+	if infra.DataManager() == nil {
+		return errors.New("data manager is required")
 	}
-}
 
-func WithCacheManager(cache contract.CacheManager) ServiceOptions {
-	return func(s *service) {
-		s.cache = cache
+	if infra.CacheManager() == nil {
+		return errors.New("cache manager is required")
 	}
-}
 
-func WithLogger(log logger.Logger) ServiceOptions {
-	return func(s *service) {
-		s.log = log
+	if infra.Crypto() == nil {
+		return errors.New("crypto is required")
 	}
-}
 
-func WithCrypto(crypto contract.Crypto) ServiceOptions {
-	return func(s *service) {
-		s.crypto = crypto
+	if infra.Validator() == nil {
+		return errors.New("validator is required")
 	}
-}
 
-func WithValidator(v validator.Validator) ServiceOptions {
-	return func(s *service) {
-		s.validator = v
-	}
+	return nil
 }

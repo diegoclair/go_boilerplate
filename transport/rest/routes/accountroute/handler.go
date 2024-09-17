@@ -16,10 +16,10 @@ var (
 )
 
 type Handler struct {
-	accountService contract.AccountService
+	accountService contract.AccountApp
 }
 
-func NewHandler(accountService contract.AccountService) *Handler {
+func NewHandler(accountService contract.AccountApp) *Handler {
 	Once.Do(func() {
 		instance = &Handler{
 			accountService: accountService,

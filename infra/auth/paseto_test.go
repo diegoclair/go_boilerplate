@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,7 @@ func TestPasetoTokenMaker(t *testing.T) {
 		{
 			name: "Should create token without error",
 			args: utilArgs{
-				payload: TokenPayloadInput{
+				payload: contract.TokenPayloadInput{
 					AccountUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd",
 					SessionUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd",
 				},

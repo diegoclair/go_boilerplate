@@ -1,10 +1,11 @@
 package service
 
 import (
-	"context"
 	"testing"
+	"time"
 
-	"github.com/diegoclair/go_boilerplate/infra/config"
+	"github.com/diegoclair/go_boilerplate/infra/configmock"
+	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/validator"
@@ -18,19 +19,21 @@ type allMocks struct {
 	mockAuthRepo    *mocks.MockAuthRepo
 	mockAccountRepo *mocks.MockAccountRepo
 
-	mockCacheManager *mocks.MockCacheManager
-	mockCrypto       *mocks.MockCrypto
+	mockCacheManager *infraMocks.MockCacheManager
+	mockCrypto       *infraMocks.MockCrypto
+	mockValidator    validator.Validator
+	mockLogger       logger.Logger
 
-	mockAccountSvc *mocks.MockAccountService
+	mockAccountSvc *mocks.MockAccountApp
+
+	mockInfra *infraMocks.MockInfrastructure
 }
 
-func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Controller) {
+func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
 	t.Helper()
-	cfg, err := config.GetConfigEnvironment(context.Background(), "test")
-	require.NoError(t, err)
+	cfg := configmock.New()
 
 	ctrl = gomock.NewController(t)
-	log := logger.NewNoop()
 
 	dm := mocks.NewMockDataManager(ctrl)
 
@@ -40,10 +43,19 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 	authRepo := mocks.NewMockAuthRepo(ctrl)
 	dm.EXPECT().Auth().Return(authRepo).AnyTimes()
 
-	cm := mocks.NewMockCacheManager(ctrl)
-	crypto := mocks.NewMockCrypto(ctrl)
+	cm := cfg.GetCacheManager(ctrl)
+	crypto := cfg.GetCrypto(ctrl)
+	log := cfg.GetLogger()
+	v := cfg.GetValidator(t)
 
-	accountSvc := mocks.NewMockAccountService(ctrl)
+	accountSvc := mocks.NewMockAccountApp(ctrl)
+
+	infraMock := infraMocks.NewMockInfrastructure(ctrl)
+	infraMock.EXPECT().DataManager().Return(dm).AnyTimes()
+	infraMock.EXPECT().Logger().Return(log).AnyTimes()
+	infraMock.EXPECT().CacheManager().Return(cm).AnyTimes()
+	infraMock.EXPECT().Crypto().Return(crypto).AnyTimes()
+	infraMock.EXPECT().Validator().Return(v).AnyTimes()
 
 	m = allMocks{
 		mockDataManager:  dm,
@@ -52,21 +64,13 @@ func newServiceTestMock(t *testing.T) (m allMocks, svc *service, ctrl *gomock.Co
 		mockAuthRepo:     authRepo,
 		mockCrypto:       crypto,
 		mockAccountSvc:   accountSvc,
+		mockInfra:        infraMock,
+		mockValidator:    v,
+		mockLogger:       log,
 	}
 
-	v, err := validator.NewValidator()
-	require.NoError(t, err)
-
-	svc = &service{}
-	WithDataManager(dm)(svc)
-	WithConfig(cfg)(svc)
-	WithCacheManager(cm)(svc)
-	WithLogger(log)(svc)
-	WithCrypto(crypto)(svc)
-	WithValidator(v)(svc)
-
 	// validate func New
-	s, err := New(WithDataManager(dm))
+	s, err := New(infraMock, time.Minute)
 	require.NoError(t, err)
 	require.NotNil(t, s)
 

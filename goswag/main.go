@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/diegoclair/go_boilerplate/application/service"
-	"github.com/diegoclair/go_boilerplate/infra/config"
 	"github.com/diegoclair/go_boilerplate/transport/rest"
 )
 
@@ -19,10 +18,6 @@ func main() {
 	//	@schemes		http
 	//	@servers.url http://localhost:5000
 
-	cfg := &config.Config{
-		Log: config.LogConfig{},
-	}
-
-	server := rest.NewRestServer(&service.Services{}, nil, cfg, nil)
+	server := rest.NewRestServer(&service.Apps{}, nil, nil, "")
 	server.Router.GenerateSwagger()
 }

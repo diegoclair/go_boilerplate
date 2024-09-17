@@ -35,16 +35,11 @@ func getMysqlInstance(dataSourceName string) (*sql.DB, error) {
 }
 
 // Instance returns an instance of a MySQLRepo
-func Instance(ctx context.Context, cfg contract.Config, dbName string, log logger.Logger,
-) (*MysqlConn, *sql.DB, error) {
-	return instance(ctx, cfg.GetMysqlDSN(), dbName, log, getMysqlInstance)
+func Instance(ctx context.Context, dns, dbName string, log logger.Logger) (*MysqlConn, *sql.DB, error) {
+	return instance(ctx, dns, dbName, log, getMysqlInstance)
 }
 
-func instance(ctx context.Context,
-	dsn, dbName string,
-	log logger.Logger,
-	getMysql getMysql,
-) (*MysqlConn, *sql.DB, error) {
+func instance(ctx context.Context, dsn, dbName string, log logger.Logger, getMysql getMysql) (*MysqlConn, *sql.DB, error) {
 	var db *sql.DB
 	onceDB.Do(func() {
 

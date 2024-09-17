@@ -8,7 +8,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_boilerplate/infra/auth"
+	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
 	"github.com/twinj/uuid"
@@ -22,11 +22,11 @@ var (
 )
 
 type Handler struct {
-	authService contract.AuthService
-	authToken   auth.AuthToken
+	authService contract.AuthApp
+	authToken   infraContract.AuthToken
 }
 
-func NewHandler(authService contract.AuthService, authToken auth.AuthToken) *Handler {
+func NewHandler(authService contract.AuthApp, authToken infraContract.AuthToken) *Handler {
 	Once.Do(func() {
 		instance = &Handler{
 			authService: authService,
@@ -52,7 +52,7 @@ func (s *Handler) handleLogin(c echo.Context) error {
 	}
 
 	sessionUUID := uuid.NewV4().String()
-	req := auth.TokenPayloadInput{
+	req := infraContract.TokenPayloadInput{
 		AccountUUID: account.UUID,
 		SessionUUID: sessionUUID,
 	}
@@ -125,7 +125,7 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 		return routeutils.ResponseUnauthorizedError(c, "expired session")
 	}
 
-	req := auth.TokenPayloadInput{
+	req := infraContract.TokenPayloadInput{
 		AccountUUID: refreshPayload.AccountUUID,
 		SessionUUID: refreshPayload.SessionUUID,
 	}
