@@ -26,7 +26,7 @@ func TestAuthMiddleware(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
-		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(&contract.TokenPayload{
+		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{
 			AccountUUID: "uuid",
 			SessionUUID: "session",
 		}, nil)
@@ -59,7 +59,7 @@ func TestAuthMiddleware(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
-		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(nil, resterrors.NewUnauthorizedError("an error occurred"))
+		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{}, resterrors.NewUnauthorizedError("an error occurred"))
 
 		err := middleware(func(c echo.Context) error {
 			return nil
@@ -75,7 +75,7 @@ func TestAuthMiddleware(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
-		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(&contract.TokenPayload{
+		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{
 			AccountUUID: "uuid",
 			SessionUUID: "session",
 		}, nil)
