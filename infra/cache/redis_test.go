@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
