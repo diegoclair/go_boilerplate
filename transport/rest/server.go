@@ -12,6 +12,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/accountroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/pingroute"
+	"github.com/diegoclair/go_boilerplate/transport/rest/routes/swaggerroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routes/transferroute"
 	"github.com/diegoclair/go_boilerplate/transport/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/transport/rest/serverMiddleware"
@@ -66,11 +67,14 @@ func NewRestServer(services *service.Apps, authToken infraContract.AuthToken, ca
 	authRoute := authroute.NewRouter(authHandler)
 	transferRoute := transferroute.NewRouter(transferHandler)
 
+	swaggerRoute := swaggerroute.NewRouter()
+
 	server := &Server{Router: router, cache: cache}
 	server.addRouters(accountRoute)
 	server.addRouters(authRoute)
 	server.addRouters(pingRoute)
 	server.addRouters(transferRoute)
+	server.addRouters(swaggerRoute)
 	server.registerAppRouters(authToken)
 
 	server.setupPrometheus(appName)
