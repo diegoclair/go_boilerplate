@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/diegoclair/go_boilerplate/application/service"
 	"github.com/diegoclair/go_boilerplate/domain"
@@ -37,13 +38,13 @@ func StartRestServer(ctx context.Context, cfg *config.Config, infra domain.Infra
 
 	infra.Logger().Infof(ctx, "About to start the application on port: %s...", port)
 
-	if err := server.Start(port); err != nil {
-		panic(err)
-	}
-
 	go func() {
 		if err := server.Start(port); err != nil {
-			panic(err)
+			if err == http.ErrServerClosed {
+				infra.Logger().Infof(ctx, "Server stopped")
+			} else {
+				infra.Logger().Errorf(ctx, "Server error: %v", err)
+			}
 		}
 	}()
 

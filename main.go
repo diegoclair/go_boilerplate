@@ -60,6 +60,7 @@ func main() {
 	gracefulShutdown(server, log)
 }
 
+// TODO: move this code to a infra package
 // will wait for a SIGTERM or SIGINT signal and wait the server to finish processing requests or timeout after 10 seconds
 func gracefulShutdown(server *rest.Server, log logger.Logger) {
 	stop := make(chan os.Signal, 1)
