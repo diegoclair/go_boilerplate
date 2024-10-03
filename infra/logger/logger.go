@@ -16,15 +16,15 @@ func NewLogger(appName string, debugLevel bool) logger.Logger {
 	return logger.New(params)
 }
 
-func addDefaultAttributesToLogger(ctx context.Context) []any {
-	args := []any{}
+func addDefaultAttributesToLogger(ctx context.Context) []logger.LogField {
+	args := []logger.LogField{}
 
 	if sessionCode, ok := getSession(ctx); ok {
-		args = append(args, "session", sessionCode)
+		args = append(args, logger.String("session", sessionCode))
 	}
 
 	if accountUUID, ok := getAccountUUID(ctx); ok {
-		args = append(args, "account_uuid", accountUUID)
+		args = append(args, logger.String("account_uuid", accountUUID))
 	}
 
 	return args

@@ -52,18 +52,18 @@ func instance(ctx context.Context, dsn, dbName string, log logger.Logger, getMys
 		log.Info(ctx, "Database Ping...")
 		connErr = db.PingContext(ctx)
 		if connErr != nil {
-			log.Errorf(ctx, "Database Ping error: %v", connErr)
+			log.Errorw(ctx, "Database Ping error", logger.Err(connErr))
 			return
 		}
 
 		log.Info(ctx, "Creating database if not exists...")
 		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", dbName)); connErr != nil {
-			log.Errorf(ctx, "Create Database error: %v", connErr)
+			log.Errorw(ctx, "Create Database error", logger.Err(connErr))
 			return
 		}
 
 		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", dbName)); connErr != nil {
-			log.Errorf(ctx, "Default Database error: %v", connErr)
+			log.Errorw(ctx, "Default Database error", logger.Err(connErr))
 			return
 		}
 

@@ -37,7 +37,7 @@ func (c *Config) GetAuthToken() infraContract.AuthToken {
 			log,
 		)
 		if err != nil {
-			log.Fatalf(c.ctx, "Failed to create auth token", err)
+			log.Fatalw(c.ctx, "Failed to create auth token", logger.Err(err))
 		}
 	})
 
@@ -66,13 +66,13 @@ func (c *Config) GetCacheManager() contract.CacheManager {
 			c.Cache.Redis.DefaultExpiration,
 			log)
 		if err != nil {
-			log.Fatalf(c.ctx, "Failed to create cache manager", err)
+			log.Fatalw(c.ctx, "Failed to create cache manager", logger.Err(err))
 		}
 
 		c.AddCloser(func() {
 			log.Info(c.ctx, "Closing redis connection...")
 			if err := client.Close(); err != nil {
-				log.Errorf(c.ctx, "Error closing redis connection: %v", err)
+				log.Errorw(c.ctx, "Error closing redis connection", logger.Err(err))
 			}
 		})
 	})
@@ -114,13 +114,13 @@ func (c *Config) GetDataManager() contract.DataManager {
 			log,
 		)
 		if err != nil {
-			log.Fatalf(c.ctx, "Failed to create data manager", err)
+			log.Fatalw(c.ctx, "Failed to create data manager", logger.Err(err))
 		}
 
 		c.AddCloser(func() {
 			log.Info(c.ctx, "Closing mysql connection...")
 			if err := mysqlDB.Close(); err != nil {
-				log.Errorf(c.ctx, "Error closing mysql connection: %v", err)
+				log.Errorw(c.ctx, "Error closing mysql connection", logger.Err(err))
 			}
 		})
 	})
@@ -157,7 +157,7 @@ func (c *Config) GetValidator() validator.Validator {
 
 		v, err = validator.NewValidator()
 		if err != nil {
-			log.Fatalf(c.ctx, "Failed to create validator", err)
+			log.Fatalw(c.ctx, "Failed to create validator", logger.Err(err))
 		}
 	})
 

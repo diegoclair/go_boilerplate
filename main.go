@@ -44,14 +44,14 @@ func main() {
 	log.Info(ctx, "Running the migrations...")
 	err = mysql.Migrate(cfg.GetDataManager().(*db.MysqlConn).DB())
 	if err != nil {
-		log.Errorf(ctx, "error to migrate mysql: %v", err)
+		log.Errorw(ctx, "error to migrate mysql", logger.Err(err))
 		return
 	}
 	log.Info(ctx, "Migrations completed successfully")
 
 	apps, err := service.New(infra, cfg.App.Auth.AccessTokenDuration)
 	if err != nil {
-		log.Errorf(ctx, "error to get domain services: %v", err)
+		log.Errorw(ctx, "error to get domain services", logger.Err(err))
 		return
 	}
 
@@ -73,6 +73,6 @@ func gracefulShutdown(server *rest.Server, log logger.Logger) {
 	log.Info(ctx, "Shutting down...")
 
 	if err := server.Router.Echo().Shutdown(ctx); err != nil {
-		log.Errorf(ctx, "Error to shutdown rest server: %v", err)
+		log.Errorw(ctx, "Error to shutdown rest server", logger.Err(err))
 	}
 }

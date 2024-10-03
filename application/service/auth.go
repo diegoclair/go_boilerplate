@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"log/slog"
-
 	"github.com/diegoclair/go_boilerplate/application/dto"
 	"github.com/diegoclair/go_boilerplate/domain"
 	"github.com/diegoclair/go_boilerplate/domain/contract"
@@ -50,13 +48,13 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 
 	err = input.Validate(ctx, s.validator)
 	if err != nil {
-		s.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
 		return account, err
 	}
 
 	account, err = s.dm.Account().GetAccountByDocument(ctx, input.CPF)
 	if err != nil {
-		s.log.Errorf(ctx, "error getting account by document: %s", err.Error())
+		s.log.Errorw(ctx, "error getting account by document", logger.Err(err))
 		return account, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
@@ -68,10 +66,9 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 	}
 
 	s.log.Infow(ctx, "account information used to login",
-		slog.Group("accountInfo",
-			slog.Int64("account_id", account.ID),
-			slog.String("name", account.Name),
-		))
+		logger.Int64("account_id", account.ID),
+		logger.String("name", account.Name),
+	)
 
 	err = s.crypto.CheckPassword(input.Password, account.Password)
 	if err != nil {
@@ -88,13 +85,13 @@ func (s *authApp) CreateSession(ctx context.Context, session dto.Session) (err e
 
 	err = session.Validate(ctx, s.validator)
 	if err != nil {
-		s.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
 		return err
 	}
 
 	_, err = s.dm.Auth().CreateSession(ctx, session)
 	if err != nil {
-		s.log.Errorf(ctx, "error creating session: %s", err.Error())
+		s.log.Errorw(ctx, "error creating session", logger.Err(err))
 		return err
 	}
 
@@ -110,7 +107,7 @@ func (s *authApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (ses
 		if mysqlutils.SQLNotFound(err.Error()) {
 			return session, resterrors.NewUnauthorizedError("session not found")
 		}
-		s.log.Errorf(ctx, "error getting session: %s", err.Error())
+		s.log.Errorw(ctx, "error getting session", logger.Err(err))
 		return session, err
 	}
 
@@ -129,13 +126,13 @@ func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
 	// access token will be on cache for 3 minutes after it duration
 	err = s.cache.SetStringWithExpiration(ctx, accessToken, "true", s.accessTokenDuration+3*time.Minute)
 	if err != nil {
-		s.log.Errorf(ctx, "error logging out: %s", err.Error())
+		s.log.Errorw(ctx, "error logging out", logger.Err(err))
 		return err
 	}
 
 	err = s.dm.Auth().SetSessionAsBlocked(ctx, loggedAccountID)
 	if err != nil {
-		s.log.Errorf(ctx, "error logging out: %s", err.Error())
+		s.log.Errorw(ctx, "error logging out", logger.Err(err))
 		return err
 	}
 

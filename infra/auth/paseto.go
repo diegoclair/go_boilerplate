@@ -57,13 +57,13 @@ func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contra
 
 	err = p.paseto.Decrypt(token, p.symmetricKey, payload, nil)
 	if err != nil {
-		p.log.Errorf(ctx, "error to decrypt token: %v", err)
+		p.log.Errorw(ctx, "error to decrypt token", logger.Err(err))
 		return resp, resterrors.NewUnauthorizedError(errInvalidToken.Error())
 	}
 
 	err = payload.Valid()
 	if err != nil {
-		p.log.Errorf(ctx, "error to validate token: %v", err)
+		p.log.Errorw(ctx, "error to validate token", logger.Err(err))
 		return resp, resterrors.NewUnauthorizedError(err.Error())
 	}
 
@@ -75,7 +75,7 @@ func (a *pasetoAuth) createToken(ctx context.Context, input tokenPayloadInput, d
 
 	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)
 	if err != nil {
-		a.log.Errorf(ctx, "error to encrypt token: %v", err)
+		a.log.Errorw(ctx, "error to encrypt token", logger.Err(err))
 		return tokenString, payload, resterrors.NewUnauthorizedError(err.Error())
 	}
 

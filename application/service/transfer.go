@@ -36,13 +36,13 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 
 	transfer, err := input.ToEntityValidate(ctx, s.validator)
 	if err != nil {
-		s.log.Errorf(ctx, "error or invalid input: %s", err.Error())
+		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
 		return err
 	}
 
 	fromAccount, err := s.accountSvc.GetLoggedAccount(ctx)
 	if err != nil {
-		s.log.Errorf(ctx, "error to get logged account: %s", err.Error())
+		s.log.Errorw(ctx, "error to get logged account", logger.Err(err))
 		return err
 	}
 
@@ -53,10 +53,10 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 	destAccount, err := s.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
 		if mysqlutils.SQLNotFound(err.Error()) {
-			s.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
+			s.log.Errorw(ctx, "error to get destination account by uuid", logger.Err(err))
 			return resterrors.NewNotFoundError("Invalid destination account")
 		}
-		s.log.Errorf(ctx, "error to get destination account by uuid: %s", err.Error())
+		s.log.Errorw(ctx, "error to get destination account by uuid", logger.Err(err))
 		return err
 	}
 
@@ -70,7 +70,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 
 		_, err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
 		if err != nil {
-			s.log.Errorf(ctx, "error to add transfer: %s", err.Error())
+			s.log.Errorw(ctx, "error to add transfer", logger.Err(err))
 			return err
 		}
 
@@ -78,7 +78,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 
 		err = tx.Account().UpdateAccountBalance(ctx, fromAccount.ID, fromAccount.Balance)
 		if err != nil {
-			s.log.Errorf(ctx, "error to update origin account balance: %s", err.Error())
+			s.log.Errorw(ctx, "error to update origin account balance", logger.Err(err))
 			return err
 		}
 
@@ -86,7 +86,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 
 		err = tx.Account().UpdateAccountBalance(ctx, destAccount.ID, destAccount.Balance)
 		if err != nil {
-			s.log.Errorf(ctx, "error to update destination account balance: %s", err.Error())
+			s.log.Errorw(ctx, "error to update destination account balance", logger.Err(err))
 			return err
 		}
 		return nil
@@ -99,13 +99,13 @@ func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (t
 
 	accountID, err := s.accountSvc.GetLoggedAccountID(ctx)
 	if err != nil {
-		s.log.Errorf(ctx, "error to get logged account: %s", err.Error())
+		s.log.Errorw(ctx, "error to get logged account", logger.Err(err))
 		return transfers, totalRecords, err
 	}
 
 	madeTransfers, madeTotalRecords, err := s.dm.Account().GetTransfersByAccountID(ctx, accountID, take, skip, true)
 	if err != nil {
-		s.log.Errorf(ctx, "error to get made transfers: %s", err.Error())
+		s.log.Errorw(ctx, "error to get made transfers", logger.Err(err))
 		return transfers, totalRecords, err
 	}
 
@@ -113,7 +113,7 @@ func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (t
 
 	receivedTransfers, receivedTotalRecords, err := s.dm.Account().GetTransfersByAccountID(ctx, accountID, take, skip, false)
 	if err != nil {
-		s.log.Errorf(ctx, "error to get received transfers: %s", err.Error())
+		s.log.Errorw(ctx, "error to get received transfers", logger.Err(err))
 		return transfers, totalRecords, err
 	}
 
