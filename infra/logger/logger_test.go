@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/infra"
+	"github.com/diegoclair/go_utils/logger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,10 +19,10 @@ func TestAddDefaultAttributesToLogger(t *testing.T) {
 	ctx = context.WithValue(ctx, infra.AccountUUIDKey, "accountUUID")
 
 	args := addDefaultAttributesToLogger(ctx)
-	require.Equal(t, "session", args[0])
-	require.Equal(t, "sessionCode", args[1])
-	require.Equal(t, "account_uuid", args[2])
-	require.Equal(t, "accountUUID", args[3])
+	require.Equal(t, "session", args[0].(logger.StringField).Key)
+	require.Equal(t, "sessionCode", args[0].(logger.StringField).Value)
+	require.Equal(t, "account_uuid", args[1].(logger.StringField).Key)
+	require.Equal(t, "accountUUID", args[1].(logger.StringField).Value)
 }
 
 func TestGetContextValue(t *testing.T) {
