@@ -68,7 +68,7 @@ func NewRestServer(services *service.Apps, authToken infraContract.AuthToken, ca
 	authRoute := authroute.NewRouter(authHandler)
 	transferRoute := transferroute.NewRouter(transferHandler)
 
-	swaggerRoute := swaggerroute.NewRouter()
+	swaggerRoute := swaggerroute.NewRouter(router.Echo())
 
 	server := &Server{Router: router, cache: cache}
 	server.addRouters(accountRoute)
