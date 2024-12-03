@@ -15,12 +15,36 @@ import (
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel"
+	sResource "go.opentelemetry.io/otel/sdk/resource"
+	sTrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
 	authToken infraContract.AuthToken
 	authOnce  sync.Once
 )
+
+func (c *Config) setupTracer() {
+	r := sResource.NewWithAttributes(
+		semconv.SchemaURL,
+		semconv.ServiceNameKey.String(c.appName),
+	)
+
+	tracer := sTrace.NewTracerProvider(
+		sTrace.WithResource(r),
+	)
+
+	otel.SetTracerProvider(tracer)
+
+	c.AddCloser(func() {
+		if err := tracer.Shutdown(c.ctx); err != nil {
+			c.GetLogger().Errorw(c.ctx, "Failed to shutdown tracer", logger.Err(err))
+		}
+	})
+}
 
 // GetAuthToken returns a new auth token or panics if it fails
 func (c *Config) GetAuthToken() infraContract.AuthToken {
@@ -142,6 +166,10 @@ func (c *Config) GetLogger() logger.Logger {
 	return l
 }
 
+func (c *Config) GetHttpPort() string {
+	return c.App.Port
+}
+
 var (
 	v             validator.Validator
 	validatorOnce sync.Once
@@ -164,6 +192,16 @@ func (c *Config) GetValidator() validator.Validator {
 	return v
 }
 
-func (c *Config) GetHttpPort() string {
-	return c.App.Port
+var (
+	tracer     trace.Tracer
+	tracerOnce sync.Once
+)
+
+// GetTracer returns a new tracer
+func (c *Config) GetTracer() trace.Tracer {
+	tracerOnce.Do(func() {
+		tracer = otel.Tracer(c.appName)
+	})
+
+	return tracer
 }

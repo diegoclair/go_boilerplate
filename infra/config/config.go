@@ -75,6 +75,8 @@ func GetConfigEnvironment(ctx context.Context, appName string) (*Config, error) 
 				}
 			}
 		})
+
+		config.setupTracer()
 	})
 
 	return config, configError
