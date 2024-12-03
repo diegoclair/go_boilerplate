@@ -45,7 +45,7 @@ docs:
 	@cd goswag && \
 	go run main.go && \
 	cd .. && \
-	swag init --pd -g ./goswag/main.go && \
+	swag init --pdl=2 --parseInternal -g ./goswag/main.go -o ./docs && \
 	swag fmt -d ./goswag/
 
 	@echo "=====> Docs generated"

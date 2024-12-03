@@ -1,6 +1,6 @@
 module github.com/diegoclair/go_boilerplate
 
-go 1.23.0
+go 1.23.1
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -24,6 +24,7 @@ require (
 	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.26.0
 	golang.org/x/net v0.28.0
+	google.golang.org/grpc v1.66.2
 )
 
 require (
@@ -143,7 +144,6 @@ require (
 	golang.org/x/time v0.6.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240827150818-7e3bb234dfed // indirect
-	google.golang.org/grpc v1.66.2 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect

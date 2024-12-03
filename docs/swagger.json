@@ -42,7 +42,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.PaginatedResponse-array_viewmodel_AccountResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_AccountResponse"
                         }
                     },
                     "400": {
@@ -102,7 +102,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.AddAccount"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddAccount"
                         }
                     }
                 ],
@@ -172,7 +172,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.AccountResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse"
                         }
                     },
                     "400": {
@@ -234,7 +234,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.AddBalance"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddBalance"
                         }
                     },
                     {
@@ -308,7 +308,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.Login"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.Login"
                         }
                     }
                 ],
@@ -316,7 +316,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.LoginResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.LoginResponse"
                         }
                     },
                     "400": {
@@ -443,7 +443,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.RefreshTokenRequest"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenRequest"
                         }
                     }
                 ],
@@ -451,7 +451,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.RefreshTokenResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenResponse"
                         }
                     },
                     "400": {
@@ -507,7 +507,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pingroute.pingResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_routes_pingroute.pingResponse"
                         }
                     },
                     "400": {
@@ -572,7 +572,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.PaginatedResponse-array_viewmodel_TransferResp"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_TransferResp"
                         }
                     },
                     "400": {
@@ -632,7 +632,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.TransferReq"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferReq"
                         }
                     },
                     {
@@ -688,7 +688,7 @@
         }
     },
     "definitions": {
-        "pingroute.pingResponse": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_routes_pingroute.pingResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -696,22 +696,7 @@
                 }
             }
         },
-        "resterrors.restErr": {
-            "type": "object",
-            "properties": {
-                "causes": {},
-                "error": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "viewmodel.AccountResponse": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse": {
             "type": "object",
             "properties": {
                 "balance": {
@@ -731,7 +716,7 @@
                 }
             }
         },
-        "viewmodel.AddAccount": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddAccount": {
             "type": "object",
             "required": [
                 "cpf",
@@ -754,7 +739,7 @@
                 }
             }
         },
-        "viewmodel.AddBalance": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddBalance": {
             "type": "object",
             "required": [
                 "amount"
@@ -765,7 +750,7 @@
                 }
             }
         },
-        "viewmodel.Login": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.Login": {
             "type": "object",
             "required": [
                 "cpf",
@@ -783,7 +768,7 @@
                 }
             }
         },
-        "viewmodel.LoginResponse": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.LoginResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -800,35 +785,35 @@
                 }
             }
         },
-        "viewmodel.PaginatedResponse-array_viewmodel_AccountResponse": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_AccountResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/viewmodel.AccountResponse"
+                        "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse"
                     }
                 },
                 "pagination": {
-                    "$ref": "#/definitions/viewmodel.ReturnPagination"
+                    "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination"
                 }
             }
         },
-        "viewmodel.PaginatedResponse-array_viewmodel_TransferResp": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_TransferResp": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/viewmodel.TransferResp"
+                        "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferResp"
                     }
                 },
                 "pagination": {
-                    "$ref": "#/definitions/viewmodel.ReturnPagination"
+                    "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination"
                 }
             }
         },
-        "viewmodel.RefreshTokenRequest": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -839,7 +824,7 @@
                 }
             }
         },
-        "viewmodel.RefreshTokenResponse": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -850,7 +835,7 @@
                 }
             }
         },
-        "viewmodel.ReturnPagination": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination": {
             "type": "object",
             "properties": {
                 "current_page": {
@@ -867,7 +852,7 @@
                 }
             }
         },
-        "viewmodel.TransferReq": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferReq": {
             "type": "object",
             "required": [
                 "account_destination_id",
@@ -882,7 +867,7 @@
                 }
             }
         },
-        "viewmodel.TransferResp": {
+        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferResp": {
             "type": "object",
             "properties": {
                 "account_destination_id": {
@@ -899,6 +884,21 @@
                 },
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "resterrors.restErr": {
+            "type": "object",
+            "properties": {
+                "causes": {},
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         }
