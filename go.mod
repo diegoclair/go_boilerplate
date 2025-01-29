@@ -1,6 +1,6 @@
 module github.com/diegoclair/go_boilerplate
 
-go 1.23.1
+go 1.23.5
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
