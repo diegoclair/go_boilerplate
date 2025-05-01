@@ -22,6 +22,7 @@ import (
 type MockIRedisCache struct {
 	ctrl     *gomock.Controller
 	recorder *MockIRedisCacheMockRecorder
+	isgomock struct{}
 }
 
 // MockIRedisCacheMockRecorder is the mock recorder for MockIRedisCache.

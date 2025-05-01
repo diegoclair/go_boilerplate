@@ -5,13 +5,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/application/service"
-	"github.com/diegoclair/go_boilerplate/domain"
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	db "github.com/diegoclair/go_boilerplate/infra/data/mysql"
 	"github.com/diegoclair/go_boilerplate/infra/shutdown"
+	"github.com/diegoclair/go_boilerplate/internal/application/service"
+	"github.com/diegoclair/go_boilerplate/internal/domain"
+	"github.com/diegoclair/go_boilerplate/internal/transport/rest"
 	"github.com/diegoclair/go_boilerplate/migrator/mysql"
-	"github.com/diegoclair/go_boilerplate/transport/rest"
 	"github.com/diegoclair/go_utils/logger"
 )
 

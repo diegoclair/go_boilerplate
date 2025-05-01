@@ -21,6 +21,7 @@ import (
 type MockAuthToken struct {
 	ctrl     *gomock.Controller
 	recorder *MockAuthTokenMockRecorder
+	isgomock struct{}
 }
 
 // MockAuthTokenMockRecorder is the mock recorder for MockAuthToken.

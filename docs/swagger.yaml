@@ -1,10 +1,10 @@
 definitions:
-  github_com_diegoclair_go_boilerplate_transport_rest_routes_pingroute.pingResponse:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_routes_pingroute.pingResponse:
     properties:
       message:
         type: string
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AccountResponse:
     properties:
       balance:
         type: number
@@ -17,7 +17,7 @@ definitions:
       name:
         type: string
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddAccount:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddAccount:
     properties:
       cpf:
         maxLength: 11
@@ -34,14 +34,14 @@ definitions:
     - name
     - password
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddBalance:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddBalance:
     properties:
       amount:
         type: number
     required:
     - amount
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.Login:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.Login:
     properties:
       cpf:
         maxLength: 11
@@ -54,7 +54,7 @@ definitions:
     - cpf
     - password
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.LoginResponse:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.LoginResponse:
     properties:
       access_token:
         type: string
@@ -65,39 +65,39 @@ definitions:
       refresh_token_expires_at:
         type: string
     type: object
-  ? github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_AccountResponse
+  ? github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_AccountResponse
   : properties:
       data:
         items:
-          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse'
+          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AccountResponse'
         type: array
       pagination:
-        $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination'
+        $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.ReturnPagination'
     type: object
-  ? github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_TransferResp
+  ? github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_TransferResp
   : properties:
       data:
         items:
-          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferResp'
+          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferResp'
         type: array
       pagination:
-        $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination'
+        $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.ReturnPagination'
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenRequest:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenRequest:
     properties:
       refresh_token:
         type: string
     required:
     - refresh_token
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenResponse:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenResponse:
     properties:
       access_token:
         type: string
       access_token_expires_at:
         type: string
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.ReturnPagination:
     properties:
       current_page:
         type: integer
@@ -108,7 +108,7 @@ definitions:
       total_records:
         type: integer
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferReq:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferReq:
     properties:
       account_destination_id:
         type: string
@@ -118,7 +118,7 @@ definitions:
     - account_destination_id
     - amount
     type: object
-  github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferResp:
+  github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferResp:
     properties:
       account_destination_id:
         type: string
@@ -168,7 +168,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_AccountResponse'
+            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_AccountResponse'
         "400":
           description: Bad Request
           schema:
@@ -206,7 +206,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddAccount'
+          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddAccount'
       produces:
       - application/json
       responses:
@@ -254,7 +254,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse'
+            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AccountResponse'
         "400":
           description: Bad Request
           schema:
@@ -293,7 +293,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddBalance'
+          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddBalance'
       - description: account uuid
         in: path
         name: account_uuid
@@ -342,14 +342,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.Login'
+          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.Login'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.LoginResponse'
+            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -431,14 +431,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenRequest'
+          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenResponse'
+            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenResponse'
         "400":
           description: Bad Request
           schema:
@@ -475,7 +475,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_routes_pingroute.pingResponse'
+            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_routes_pingroute.pingResponse'
         "400":
           description: Bad Request
           schema:
@@ -518,7 +518,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_TransferResp'
+            $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_TransferResp'
         "400":
           description: Bad Request
           schema:
@@ -556,7 +556,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferReq'
+          $ref: '#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferReq'
       - description: User access token
         in: header
         name: user-token

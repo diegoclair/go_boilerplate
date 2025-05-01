@@ -3,8 +3,8 @@ package mysql
 import (
 	"context"
 
-	"github.com/diegoclair/go_boilerplate/application/dto"
-	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/internal/application/dto"
+	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_utils/mysqlutils"
 )
 

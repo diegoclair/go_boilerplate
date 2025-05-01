@@ -15,12 +15,12 @@ domain-mocks:
 	@echo "=====> Generating domain mocks"
 
 	@rm -rf mocks
-	@for file in domain/contract/*.go; do \
+	@for file in internal/domain/contract/*.go; do \
 		filename=$$(basename $$file); \
 		mockgen -package mocks -source=$$file -destination=mocks/$$filename; \
 	done
 
-	@mockgen -package mocks -source=domain/infrastructure.go -destination=mocks/infrastructure.go
+	@mockgen -package mocks -source=internal/domain/infrastructure.go -destination=mocks/infrastructure.go
 
 .PHONY: infra-mocks
 infra-mocks:
@@ -50,3 +50,6 @@ docs:
 
 	@echo "=====> Docs generated"
 
+.PHONY: start
+start:
+	docker compose up --build

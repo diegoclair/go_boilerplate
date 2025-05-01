@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
+	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/migrator/mysql"
 )
 

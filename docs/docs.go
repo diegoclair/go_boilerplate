@@ -46,7 +46,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_AccountResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_AccountResponse"
                         }
                     },
                     "400": {
@@ -106,7 +106,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddAccount"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddAccount"
                         }
                     }
                 ],
@@ -176,7 +176,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AccountResponse"
                         }
                     },
                     "400": {
@@ -238,7 +238,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddBalance"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddBalance"
                         }
                     },
                     {
@@ -312,7 +312,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.Login"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.Login"
                         }
                     }
                 ],
@@ -320,7 +320,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.LoginResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.LoginResponse"
                         }
                     },
                     "400": {
@@ -447,7 +447,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenRequest"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenRequest"
                         }
                     }
                 ],
@@ -455,7 +455,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenResponse"
                         }
                     },
                     "400": {
@@ -511,7 +511,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_routes_pingroute.pingResponse"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_routes_pingroute.pingResponse"
                         }
                     },
                     "400": {
@@ -576,7 +576,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_TransferResp"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_TransferResp"
                         }
                     },
                     "400": {
@@ -636,7 +636,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferReq"
+                            "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferReq"
                         }
                     },
                     {
@@ -692,7 +692,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_diegoclair_go_boilerplate_transport_rest_routes_pingroute.pingResponse": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_routes_pingroute.pingResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -700,7 +700,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AccountResponse": {
             "type": "object",
             "properties": {
                 "balance": {
@@ -720,7 +720,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddAccount": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddAccount": {
             "type": "object",
             "required": [
                 "cpf",
@@ -743,7 +743,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AddBalance": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AddBalance": {
             "type": "object",
             "required": [
                 "amount"
@@ -754,7 +754,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.Login": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.Login": {
             "type": "object",
             "required": [
                 "cpf",
@@ -772,7 +772,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.LoginResponse": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.LoginResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -789,35 +789,35 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_AccountResponse": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_AccountResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.AccountResponse"
+                        "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.AccountResponse"
                     }
                 },
                 "pagination": {
-                    "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination"
+                    "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.ReturnPagination"
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_transport_rest_viewmodel_TransferResp": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.PaginatedResponse-array_github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel_TransferResp": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferResp"
+                        "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferResp"
                     }
                 },
                 "pagination": {
-                    "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination"
+                    "$ref": "#/definitions/github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.ReturnPagination"
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenRequest": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -828,7 +828,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.RefreshTokenResponse": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.RefreshTokenResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -839,7 +839,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.ReturnPagination": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.ReturnPagination": {
             "type": "object",
             "properties": {
                 "current_page": {
@@ -856,7 +856,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferReq": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferReq": {
             "type": "object",
             "required": [
                 "account_destination_id",
@@ -871,7 +871,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_diegoclair_go_boilerplate_transport_rest_viewmodel.TransferResp": {
+        "github_com_diegoclair_go_boilerplate_internal_transport_rest_viewmodel.TransferResp": {
             "type": "object",
             "properties": {
                 "account_destination_id": {

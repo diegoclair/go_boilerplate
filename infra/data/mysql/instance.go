@@ -7,7 +7,7 @@ import (
 
 	"sync"
 
-	"github.com/diegoclair/go_boilerplate/domain/contract"
+	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/resterrors"
 	mysqlDriver "github.com/go-sql-driver/mysql"

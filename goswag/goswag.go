@@ -2,8 +2,8 @@ package main
 
 import (
 	_ "github.com/diegoclair/go_utils/resterrors"
-	_ "github.com/diegoclair/go_boilerplate/transport/rest/viewmodel"
-	_ "github.com/diegoclair/go_boilerplate/transport/rest/routes/pingroute"
+	_ "github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
+	_ "github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/pingroute"
 )
 
 //	@Summary		Logout

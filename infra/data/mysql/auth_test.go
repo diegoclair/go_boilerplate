@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/diegoclair/go_boilerplate/application/dto"
+	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/stretchr/testify/require"
 	"github.com/twinj/uuid"
 )
