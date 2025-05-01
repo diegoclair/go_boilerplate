@@ -1,6 +1,6 @@
 module github.com/diegoclair/go_boilerplate
 
-go 1.23.5
+go 1.24.2
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -13,7 +13,7 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
 	github.com/o1egl/paseto v1.0.0
-	github.com/redis/go-redis/v9 v9.6.1
+	github.com/redis/go-redis/v9 v9.7.3
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/echo-swagger v1.4.1
