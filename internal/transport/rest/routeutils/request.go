@@ -126,6 +126,11 @@ func IntConverter(value string) (int, error) {
 	return strconv.Atoi(value)
 }
 
+// Bool converter
+func BoolConverter(value string) (bool, error) {
+	return strconv.ParseBool(value)
+}
+
 // Convenience functions using the generic base function
 func GetStringArrayQueryParam(c echo.Context, paramName, separator string) []string {
 	result, _ := GetArrayParam(c.QueryParam(paramName), separator, StringConverter)
@@ -138,4 +143,10 @@ func GetInt64ArrayQueryParam(c echo.Context, paramName, separator string) ([]int
 
 func GetIntArrayQueryParam(c echo.Context, paramName, separator string) ([]int, error) {
 	return GetArrayParam(c.QueryParam(paramName), separator, IntConverter)
+}
+
+func GetBoolQueryParam(c echo.Context, paramName string) bool {
+	param := c.QueryParam(paramName)
+	result, _ := BoolConverter(param)
+	return result
 }

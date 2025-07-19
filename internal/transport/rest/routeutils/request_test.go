@@ -659,6 +659,59 @@ func TestGetIntArrayQueryParam(t *testing.T) {
 	}
 }
 
+func TestGetBoolQueryParam(t *testing.T) {
+	tests := []struct {
+		name       string
+		paramValue string
+		wantResult bool
+	}{
+		{
+			name:       "Valid true",
+			paramValue: "true",
+			wantResult: true,
+		},
+		{
+			name:       "Valid false",
+			paramValue: "false",
+			wantResult: false,
+		},
+		{
+			name:       "Valid 1 (true)",
+			paramValue: "1",
+			wantResult: true,
+		},
+		{
+			name:       "Valid 0 (false)",
+			paramValue: "0",
+			wantResult: false,
+		},
+		{
+			name:       "Invalid value defaults to false",
+			paramValue: "invalid",
+			wantResult: false,
+		},
+		{
+			name:       "Empty parameter defaults to false",
+			paramValue: "",
+			wantResult: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			queryParams := map[string]string{}
+			if tt.paramValue != "" {
+				queryParams["test"] = tt.paramValue
+			}
+
+			c := setupEchoContext(queryParams)
+
+			got := routeutils.GetBoolQueryParam(c, "test")
+			assert.Equal(t, tt.wantResult, got)
+		})
+	}
+}
+
 func TestGetArrayParam(t *testing.T) {
 	// String converter for testing
 	stringConverter := func(s string) (string, error) {
