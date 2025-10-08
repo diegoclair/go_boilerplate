@@ -32,8 +32,8 @@ const querySelectBase string = `
 		FROM tab_account 				ta
 		`
 
-func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err error) {
-	err = row.Scan(
+func (r *accountRepo) parseAccount(row scanner, total ...*int64) (account entity.Account, err error) {
+	dests := []any{
 		&account.ID,
 		&account.UUID,
 		&account.Name,
@@ -42,8 +42,13 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 		&account.Password,
 		&account.CreatedAT,
 		&account.Active,
-	)
+	}
 
+	if len(total) > 0 && total[0] != nil {
+		dests = append(dests, total[0])
+	}
+
+	err = row.Scan(dests...)
 	if err != nil {
 		return account, err
 	}
@@ -144,16 +149,7 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 	var params = []any{}
 
-	query := querySelectBase
-
-	totalRecords, err = getTotalRecordsFromQuery(ctx, r.db, query, params...)
-	if err != nil {
-		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
-	}
-
-	if totalRecords < 1 {
-		return accounts, totalRecords, nil
-	}
+	query := withCount(querySelectBase)
 
 	if take > 0 {
 		query += `
@@ -181,9 +177,8 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
 
-	var account entity.Account
 	for rows.Next() {
-		account, err = r.parseAccount(rows)
+		account, err := r.parseAccount(rows, &totalRecords)
 		if err != nil {
 			return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
 		}
@@ -246,24 +241,24 @@ func (r *accountRepo) GetAccountIDByUUID(ctx context.Context, accountUUID string
 func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) (transfers []entity.Transfer, totalRecords int64, err error) {
 	var params = []any{}
 
-	query := ` 
-		SELECT 
+	query := withCount(`
+		SELECT
 			tt.transfer_id,
 			tt.transfer_uuid,
 			origin.account_uuid AS account_origin_uuid,
 			dest.account_uuid AS account_destination_uuid,
 			tt.amount,
 			tt.created_at
-		
+
 		FROM 	tab_transfer 			tt
 
 		INNER JOIN tab_account origin
 			ON origin.account_id = tt.account_origin_id
-		
+
 		INNER JOIN tab_account dest
 			ON dest.account_id = tt.account_destination_id
 
-	`
+	`)
 
 	if origin {
 		query += `WHERE	tt.account_origin_id 		= 	? `
@@ -272,15 +267,6 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 	}
 
 	params = append(params, accountID)
-
-	totalRecords, err = getTotalRecordsFromQuery(ctx, r.db, query, params...)
-	if err != nil {
-		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
-	}
-
-	if totalRecords < 1 {
-		return transfers, totalRecords, nil
-	}
 
 	query += `
 		ORDER BY tt.created_at desc
@@ -312,8 +298,8 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
 	}
 
-	transfer := entity.Transfer{}
 	for rows.Next() {
+		var transfer entity.Transfer
 		err = rows.Scan(
 			&transfer.ID,
 			&transfer.TransferUUID,
@@ -321,6 +307,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 			&transfer.AccountDestinationUUID,
 			&transfer.Amount,
 			&transfer.CreatedAt,
+			&totalRecords,
 		)
 		if err != nil {
 			return transfers, totalRecords, err

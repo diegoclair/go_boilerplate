@@ -182,34 +182,8 @@ func testForPaginatedSelectErrorsWithMock(t *testing.T, tableID string, f func(d
 		wantErr    bool
 	}{
 		{
-			name: "Should not return error when the count returns 0",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(0),
-				)
-			},
-		},
-		{
-			name: "Should return error when the count prepare fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Should return error when the count query fails",
-			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
-			},
-			wantErr: true,
-		},
-		{
 			name: "Should return error when the prepare fails",
 			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
 				dbMock.ExpectPrepare("").WillReturnError(assert.AnError)
 			},
 			wantErr: true,
@@ -217,20 +191,13 @@ func testForPaginatedSelectErrorsWithMock(t *testing.T, tableID string, f func(d
 		{
 			name: "Should return error when the query fails",
 			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
-
 				dbMock.ExpectPrepare("").ExpectQuery().WillReturnError(assert.AnError)
 			},
 			wantErr: true,
 		},
 		{
-			name: "Should return error when the address scan fails",
+			name: "Should return error when the scan fails",
 			setupMocks: func(dbMock sqlmock.Sqlmock) {
-				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
-					sqlmock.NewRows([]string{"count"}).AddRow(1),
-				)
 				dbMock.ExpectPrepare("").ExpectQuery().WillReturnRows(
 					sqlmock.NewRows([]string{tableID}).
 						AddRow("invalid"), // id of table should be an integer

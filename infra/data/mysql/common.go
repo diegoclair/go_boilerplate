@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"regexp"
 )
 
 type dbConn interface {
@@ -13,24 +14,22 @@ type scanner interface {
 	Scan(dest ...any) error
 }
 
-func getTotalRecordsFromQuery(ctx context.Context, db dbConn, query string, args ...any) (totalRecords int64, err error) {
-	var queryCount = `
-		SELECT COUNT(*) FROM (
-	` + query + `) as count`
+// withCount adds COUNT(*) OVER() to a base query for pagination
+// It searches for the first "FROM" keyword (case-insensitive, word boundary) and inserts the count column before it
+func withCount(baseQuery string) string {
+	// \b = word boundary, ensures FROM is a complete word (not from_id, perform, etc.)
+	// (?i) = case-insensitive
+	re := regexp.MustCompile(`(?i)\bFROM\b`)
 
-	stmt, err := db.PrepareContext(ctx, queryCount)
-	if err != nil {
-		return totalRecords, err
+	// Find first match
+	loc := re.FindStringIndex(baseQuery)
+	if loc == nil {
+		return baseQuery
 	}
 
-	defer stmt.Close()
+	// Insert COUNT(*) OVER() before FROM
+	beforeFrom := baseQuery[:loc[0]]
+	fromAndAfter := baseQuery[loc[0]:]
 
-	row := stmt.QueryRowContext(ctx, args...)
-
-	err = row.Scan(&totalRecords)
-	if err != nil {
-		return totalRecords, err
-	}
-
-	return totalRecords, nil
+	return beforeFrom + ",\n\t\tCOUNT(*) OVER() as total_count\n\t\t" + fromAndAfter
 }
