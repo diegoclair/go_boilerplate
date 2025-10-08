@@ -3,14 +3,16 @@ package mysql
 import (
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestWithCount(t *testing.T) {
 	tests := []struct {
 		name          string
 		inputQuery    string
-		expectedCount string // What we expect to find in the output
-		shouldContain bool   // Should contain COUNT(*) OVER()
+		expectedCount string
+		shouldContain bool
 	}{
 		{
 			name: "Should add COUNT to query with tabs formatting",
@@ -90,40 +92,70 @@ func TestWithCount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := withCount(tt.inputQuery)
 
-			// Check if COUNT(*) OVER() was added
-			if tt.shouldContain && !strings.Contains(result, tt.expectedCount) {
-				t.Errorf("withCount() should contain %q, but got:\n%s", tt.expectedCount, result)
-			}
+			if tt.shouldContain {
+				require.Contains(t, result, tt.expectedCount)
 
-			// For queries without FROM, ensure it returns the original query unchanged
-			if !tt.shouldContain {
-				if result != tt.inputQuery {
-					t.Errorf("withCount() should return original query unchanged when no FROM found, but got:\n%s", result)
-				}
-				return // Skip remaining checks for this test case
-			}
+				// Verify COUNT appears before FROM
+				countIndex := strings.Index(strings.ToLower(result), "count(*) over()")
+				fromIndex := strings.Index(strings.ToLower(result), "from")
+				require.NotEqual(t, -1, countIndex, "COUNT(*) OVER() should be present")
+				require.NotEqual(t, -1, fromIndex, "FROM should be present")
+				require.Less(t, countIndex, fromIndex, "COUNT should appear before FROM")
 
-			// Verify COUNT appears before FROM
-			countIndex := strings.Index(strings.ToLower(result), "count(*) over()")
-			fromIndex := strings.Index(strings.ToLower(result), "from")
-
-			if countIndex == -1 {
-				t.Error("withCount() did not add COUNT(*) OVER()")
-			}
-
-			if fromIndex == -1 {
-				t.Error("withCount() result does not contain FROM keyword")
-			}
-
-			if countIndex >= fromIndex {
-				t.Errorf("COUNT(*) OVER() should appear before FROM, but got:\n%s", result)
-			}
-
-			// Verify only one COUNT was added (should not add multiple)
-			countOccurrences := strings.Count(strings.ToLower(result), "count(*) over()")
-			if countOccurrences != 1 {
-				t.Errorf("Expected exactly 1 COUNT(*) OVER(), but found %d in:\n%s", countOccurrences, result)
+				// Verify only one COUNT was added
+				countOccurrences := strings.Count(strings.ToLower(result), "count(*) over()")
+				require.Equal(t, 1, countOccurrences, "Should add exactly one COUNT")
+			} else {
+				require.Equal(t, tt.inputQuery, result, "Should return original query unchanged")
+				require.NotContains(t, result, "COUNT(*) OVER()")
 			}
 		})
 	}
+}
+
+func TestBuildInPlaceholders(t *testing.T) {
+	t.Run("String slices", func(t *testing.T) {
+		t.Run("Multiple strings", func(t *testing.T) {
+			placeholders, newArgs := buildInPlaceholders([]any{1, "test"}, []string{"a", "b", "c"})
+
+			require.Equal(t, "?, ?, ?", placeholders)
+			require.Len(t, newArgs, 5)
+			require.Equal(t, []any{1, "test", "a", "b", "c"}, newArgs)
+		})
+
+		t.Run("Single string", func(t *testing.T) {
+			placeholders, newArgs := buildInPlaceholders([]any{42}, []string{"single"})
+
+			require.Equal(t, "?", placeholders)
+			require.Equal(t, []any{42, "single"}, newArgs)
+		})
+
+		t.Run("Empty slice", func(t *testing.T) {
+			placeholders, newArgs := buildInPlaceholders([]any{1, 2}, []string{})
+
+			require.Empty(t, placeholders)
+			require.Equal(t, []any{1, 2}, newArgs)
+		})
+	})
+
+	t.Run("Int slices", func(t *testing.T) {
+		placeholders, newArgs := buildInPlaceholders([]any{"test"}, []int{10, 20, 30})
+
+		require.Equal(t, "?, ?, ?", placeholders)
+		require.Equal(t, []any{"test", 10, 20, 30}, newArgs)
+	})
+
+	t.Run("Int64 slices", func(t *testing.T) {
+		placeholders, newArgs := buildInPlaceholders([]any{}, []int64{100, 200})
+
+		require.Equal(t, "?, ?", placeholders)
+		require.Equal(t, []any{int64(100), int64(200)}, newArgs)
+	})
+
+	t.Run("Preserves initial args", func(t *testing.T) {
+		initial := []any{"preserved", 123}
+		_, newArgs := buildInPlaceholders(initial, []string{"new"})
+
+		require.Equal(t, []any{"preserved", 123, "new"}, newArgs)
+	})
 }

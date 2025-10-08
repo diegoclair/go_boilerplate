@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"regexp"
+	"strings"
 )
 
 type dbConn interface {
@@ -32,4 +33,23 @@ func withCount(baseQuery string) string {
 	fromAndAfter := baseQuery[loc[0]:]
 
 	return beforeFrom + ",\n\t\tCOUNT(*) OVER() as total_count\n\t\t" + fromAndAfter
+}
+
+// buildInPlaceholders creates SQL IN clause placeholders and appends values to args
+// Example: buildInPlaceholders([]any{1}, []string{"a", "b"}) returns ("?, ?", []any{1, "a", "b"})
+func buildInPlaceholders[T any](args []any, values []T) (placeholders string, newArgs []any) {
+	if len(values) == 0 {
+		return "", args
+	}
+
+	// Build placeholders and append values in a single loop
+	parts := make([]string, len(values))
+	newArgs = args
+	for i := range values {
+		parts[i] = "?"
+		newArgs = append(newArgs, values[i])
+	}
+
+	placeholders = strings.Join(parts, ", ")
+	return placeholders, newArgs
 }
