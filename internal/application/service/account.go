@@ -13,7 +13,7 @@ import (
 	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 )
 
 type accountService struct {
@@ -56,7 +56,7 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 		s.log.Errorw(ctx, "error to hash password", logger.Err(err))
 		return err
 	}
-	account.UUID = uuid.NewV4().String()
+	account.UUID = uuid.Must(uuid.NewV7()).String()
 
 	_, err = s.dm.Account().CreateAccount(ctx, account)
 	if err != nil {

@@ -10,12 +10,12 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/random"
 	"github.com/stretchr/testify/require"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 )
 
 func createRandomAccount(t *testing.T) entity.Account {
 	args := entity.Account{
-		UUID: uuid.NewV4().String(),
+		UUID: uuid.Must(uuid.NewV7()).String(),
 		Name: random.RandomName(),
 		CPF:  random.RandomCPF(),
 	}
@@ -161,7 +161,7 @@ func TestAddTransfer(t *testing.T) {
 	account := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 
-	transferUUID := uuid.NewV4().String()
+	transferUUID := uuid.Must(uuid.NewV7()).String()
 	transferID, err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
 	require.NotZero(t, transferID)
@@ -200,11 +200,11 @@ func TestGetTransfersByAccountID(t *testing.T) {
 	account2 := createRandomAccount(t)
 	account3 := createRandomAccount(t)
 
-	transferUUID := uuid.NewV4().String()
+	transferUUID := uuid.Must(uuid.NewV7()).String()
 	_, err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
 
-	transferUUID = uuid.NewV4().String()
+	transferUUID = uuid.Must(uuid.NewV7()).String()
 
 	_, err = testMysql.Account().AddTransfer(context.Background(), transferUUID, account3.ID, account2.ID, 50)
 	require.NoError(t, err)

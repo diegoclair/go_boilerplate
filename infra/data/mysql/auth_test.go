@@ -8,7 +8,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/stretchr/testify/require"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 )
 
 func validateTwoSessions(t *testing.T, sessionExpected dto.Session, sessionToCompare dto.Session) {
@@ -26,9 +26,9 @@ func TestCreateAndGetSession(t *testing.T) {
 	account := createRandomAccount(t)
 
 	session := dto.Session{
-		SessionUUID:           uuid.NewV4().String(),
+		SessionUUID:           uuid.Must(uuid.NewV7()).String(),
 		AccountID:             account.ID,
-		RefreshToken:          uuid.NewV4().String(),
+		RefreshToken:          uuid.Must(uuid.NewV7()).String(),
 		UserAgent:             "user-agent",
 		ClientIP:              "client-ip",
 		IsBlocked:             false,
@@ -64,9 +64,9 @@ func TestSetSessionAsBlocked(t *testing.T) {
 	account := createRandomAccount(t)
 
 	session := dto.Session{
-		SessionUUID:           uuid.NewV4().String(),
+		SessionUUID:           uuid.Must(uuid.NewV7()).String(),
 		AccountID:             account.ID,
-		RefreshToken:          uuid.NewV4().String(),
+		RefreshToken:          uuid.Must(uuid.NewV7()).String(),
 		UserAgent:             "user-agent",
 		ClientIP:              "client-ip",
 		IsBlocked:             false,

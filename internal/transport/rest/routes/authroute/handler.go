@@ -11,7 +11,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -51,7 +51,7 @@ func (s *Handler) handleLogin(c echo.Context) error {
 		return routeutils.HandleError(c, err)
 	}
 
-	sessionUUID := uuid.NewV4().String()
+	sessionUUID := uuid.Must(uuid.NewV7()).String()
 	req := infraContract.TokenPayloadInput{
 		AccountUUID: account.UUID,
 		SessionUUID: sessionUUID,

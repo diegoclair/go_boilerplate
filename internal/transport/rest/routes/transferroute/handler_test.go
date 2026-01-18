@@ -18,7 +18,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 )
 
 func TestHandler_handleAddTransfer(t *testing.T) {
@@ -117,8 +117,8 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 			Name: "Should pass with success",
 			BuildMocks: func(ctx context.Context, m test.SvcMocks, _ any) {
 				m.TransferAppMock.EXPECT().GetTransfers(ctx, int64(10), int64(0)).Return([]entity.Transfer{
-					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 5.55, CreatedAt: time.Now()},
-					{TransferUUID: uuid.NewV4().String(), AccountOriginUUID: uuid.NewV4().String(), AccountDestinationUUID: uuid.NewV4().String(), Amount: 7.77, CreatedAt: time.Now()},
+					{TransferUUID: uuid.Must(uuid.NewV7()).String(), AccountOriginUUID: uuid.Must(uuid.NewV7()).String(), AccountDestinationUUID: uuid.Must(uuid.NewV7()).String(), Amount: 5.55, CreatedAt: time.Now()},
+					{TransferUUID: uuid.Must(uuid.NewV7()).String(), AccountOriginUUID: uuid.Must(uuid.NewV7()).String(), AccountDestinationUUID: uuid.Must(uuid.NewV7()).String(), Amount: 7.77, CreatedAt: time.Now()},
 				}, int64(0), nil).Times(1)
 			},
 			SetupAuth: func(ctx context.Context, t *testing.T, req *http.Request, m test.SvcMocks) {

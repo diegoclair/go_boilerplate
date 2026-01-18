@@ -11,7 +11,7 @@ import (
 	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 )
 
 type transferService struct {
@@ -64,7 +64,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 		return resterrors.NewConflictError("You can't transfer to yourself")
 	}
 
-	transfer.TransferUUID = uuid.NewV4().String()
+	transfer.TransferUUID = uuid.Must(uuid.NewV7()).String()
 
 	return s.dm.WithTransaction(ctx, func(tx contract.DataManager) error {
 

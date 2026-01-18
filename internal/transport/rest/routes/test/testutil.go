@@ -22,7 +22,7 @@ import (
 	"github.com/diegoclair/goswag"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 	"go.uber.org/mock/gomock"
 )
 
@@ -100,8 +100,8 @@ func getTestTokenMaker(t *testing.T) contract.AuthToken {
 }
 
 var (
-	accountUUID = uuid.NewV4().String()
-	sessionUUID = uuid.NewV4().String()
+	accountUUID = uuid.Must(uuid.NewV7()).String()
+	sessionUUID = uuid.Must(uuid.NewV7()).String()
 )
 
 func AddAuthorization(ctx context.Context, t *testing.T, req *http.Request, m SvcMocks) {
