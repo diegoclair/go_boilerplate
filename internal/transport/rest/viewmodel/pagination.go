@@ -10,11 +10,11 @@ type ReturnPagination struct {
 }
 
 type PaginatedResponse[T any] struct {
-	Pagination ReturnPagination `json:"pagination,omitempty"`
-	List       T                `json:"data,omitempty"`
+	Pagination ReturnPagination `json:"pagination"`
+	List       T                `json:"data"`
 }
 
-// BuildPaginatedResponse is a function that builds a paginated result based on the given parameters.
+// BuildPaginatedResponse builds a paginated result based on the given parameters.
 // It takes a list of type T, the number of records to skip, the number of records to take,
 // and the total number of records available.
 // It returns a PaginatedResult of type T, which contains the paginated list and pagination information.
