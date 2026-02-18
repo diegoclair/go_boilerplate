@@ -282,7 +282,7 @@ func Test_authService_Logout(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountSvc.EXPECT().GetLoggedAccountID(ctx).Return(int64(1), nil).Times(1)
-				mocks.mockCacheManager.EXPECT().SetStringWithExpiration(ctx, args.accessToken, "true", gomock.Any()).Return(nil).Times(1)
+				mocks.mockCacheManager.EXPECT().Set(ctx, args.accessToken, "true", gomock.Any()).Return(nil).Times(1)
 				mocks.mockAuthRepo.EXPECT().SetSessionAsBlocked(ctx, int64(1)).Return(nil).Times(1)
 			},
 		},
@@ -303,7 +303,7 @@ func Test_authService_Logout(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountSvc.EXPECT().GetLoggedAccountID(ctx).Return(int64(1), nil).Times(1)
-				mocks.mockCacheManager.EXPECT().SetStringWithExpiration(ctx, args.accessToken, "true", gomock.Any()).Return(errors.New("some error")).Times(1)
+				mocks.mockCacheManager.EXPECT().Set(ctx, args.accessToken, "true", gomock.Any()).Return(errors.New("some error")).Times(1)
 			},
 			wantErr: true,
 		},
@@ -314,7 +314,7 @@ func Test_authService_Logout(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				mocks.mockAccountSvc.EXPECT().GetLoggedAccountID(ctx).Return(int64(1), nil).Times(1)
-				mocks.mockCacheManager.EXPECT().SetStringWithExpiration(ctx, args.accessToken, "true", gomock.Any()).Return(nil).Times(1)
+				mocks.mockCacheManager.EXPECT().Set(ctx, args.accessToken, "true", gomock.Any()).Return(nil).Times(1)
 				mocks.mockAuthRepo.EXPECT().SetSessionAsBlocked(ctx, int64(1)).Return(errors.New("some error")).Times(1)
 			},
 			wantErr: true,

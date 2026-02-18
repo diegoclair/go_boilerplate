@@ -74,6 +74,21 @@ func (mr *MockCacheManagerMockRecorder) Delete(ctx any, keys ...any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCacheManager)(nil).Delete), varargs...)
 }
 
+// Get mocks base method.
+func (m *MockCacheManager) Get(ctx context.Context, key string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, key)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockCacheManagerMockRecorder) Get(ctx, key any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCacheManager)(nil).Get), ctx, key)
+}
+
 // GetAllKeys mocks base method.
 func (m *MockCacheManager) GetAllKeys(ctx context.Context, pattern string) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -119,21 +134,6 @@ func (mr *MockCacheManagerMockRecorder) GetInt(ctx, key any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInt", reflect.TypeOf((*MockCacheManager)(nil).GetInt), ctx, key)
 }
 
-// GetItem mocks base method.
-func (m *MockCacheManager) GetItem(ctx context.Context, key string) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetItem", ctx, key)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetItem indicates an expected call of GetItem.
-func (mr *MockCacheManagerMockRecorder) GetItem(ctx, key any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetItem", reflect.TypeOf((*MockCacheManager)(nil).GetItem), ctx, key)
-}
-
 // GetString mocks base method.
 func (m *MockCacheManager) GetString(ctx context.Context, key string) (string, error) {
 	m.ctrl.T.Helper()
@@ -177,6 +177,25 @@ func (mr *MockCacheManagerMockRecorder) Increase(ctx, key any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Increase", reflect.TypeOf((*MockCacheManager)(nil).Increase), ctx, key)
 }
 
+// Set mocks base method.
+func (m *MockCacheManager) Set(ctx context.Context, key string, data any, expiration ...time.Duration) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, key, data}
+	for _, a := range expiration {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Set", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Set indicates an expected call of Set.
+func (mr *MockCacheManagerMockRecorder) Set(ctx, key, data any, expiration ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, key, data}, expiration...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockCacheManager)(nil).Set), varargs...)
+}
+
 // SetExpiration mocks base method.
 func (m *MockCacheManager) SetExpiration(ctx context.Context, key string, expiration time.Duration) error {
 	m.ctrl.T.Helper()
@@ -189,88 +208,4 @@ func (m *MockCacheManager) SetExpiration(ctx context.Context, key string, expira
 func (mr *MockCacheManagerMockRecorder) SetExpiration(ctx, key, expiration any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetExpiration", reflect.TypeOf((*MockCacheManager)(nil).SetExpiration), ctx, key, expiration)
-}
-
-// SetItem mocks base method.
-func (m *MockCacheManager) SetItem(ctx context.Context, key string, data []byte) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetItem", ctx, key, data)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetItem indicates an expected call of SetItem.
-func (mr *MockCacheManagerMockRecorder) SetItem(ctx, key, data any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetItem", reflect.TypeOf((*MockCacheManager)(nil).SetItem), ctx, key, data)
-}
-
-// SetItemWithExpiration mocks base method.
-func (m *MockCacheManager) SetItemWithExpiration(ctx context.Context, key string, data []byte, expiration time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetItemWithExpiration", ctx, key, data, expiration)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetItemWithExpiration indicates an expected call of SetItemWithExpiration.
-func (mr *MockCacheManagerMockRecorder) SetItemWithExpiration(ctx, key, data, expiration any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetItemWithExpiration", reflect.TypeOf((*MockCacheManager)(nil).SetItemWithExpiration), ctx, key, data, expiration)
-}
-
-// SetString mocks base method.
-func (m *MockCacheManager) SetString(ctx context.Context, key, data string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetString", ctx, key, data)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetString indicates an expected call of SetString.
-func (mr *MockCacheManagerMockRecorder) SetString(ctx, key, data any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetString", reflect.TypeOf((*MockCacheManager)(nil).SetString), ctx, key, data)
-}
-
-// SetStringWithExpiration mocks base method.
-func (m *MockCacheManager) SetStringWithExpiration(ctx context.Context, key, data string, expiration time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetStringWithExpiration", ctx, key, data, expiration)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetStringWithExpiration indicates an expected call of SetStringWithExpiration.
-func (mr *MockCacheManagerMockRecorder) SetStringWithExpiration(ctx, key, data, expiration any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStringWithExpiration", reflect.TypeOf((*MockCacheManager)(nil).SetStringWithExpiration), ctx, key, data, expiration)
-}
-
-// SetStruct mocks base method.
-func (m *MockCacheManager) SetStruct(ctx context.Context, key string, data any) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetStruct", ctx, key, data)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetStruct indicates an expected call of SetStruct.
-func (mr *MockCacheManagerMockRecorder) SetStruct(ctx, key, data any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStruct", reflect.TypeOf((*MockCacheManager)(nil).SetStruct), ctx, key, data)
-}
-
-// SetStructWithExpiration mocks base method.
-func (m *MockCacheManager) SetStructWithExpiration(ctx context.Context, key string, data any, expiration time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetStructWithExpiration", ctx, key, data, expiration)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetStructWithExpiration indicates an expected call of SetStructWithExpiration.
-func (mr *MockCacheManagerMockRecorder) SetStructWithExpiration(ctx, key, data, expiration any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStructWithExpiration", reflect.TypeOf((*MockCacheManager)(nil).SetStructWithExpiration), ctx, key, data, expiration)
 }

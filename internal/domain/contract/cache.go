@@ -6,22 +6,18 @@ import (
 )
 
 // CacheManager defines the main caching interface
-//   - Get methods can return domain.ErrCacheMiss
+//   - Get methods can return cache.ErrCacheMiss
+//   - Set accepts string, []byte, int, int64 or struct (JSON marshaled internally)
+//   - Set expiration is variadic: omit for default, pass for custom
 type CacheManager interface {
-	GetItem(ctx context.Context, key string) ([]byte, error)
-	SetItem(ctx context.Context, key string, data []byte) error
-	SetItemWithExpiration(ctx context.Context, key string, data []byte, expiration time.Duration) error
+	Set(ctx context.Context, key string, data any, expiration ...time.Duration) error
 
+	Get(ctx context.Context, key string) ([]byte, error)
 	GetString(ctx context.Context, key string) (string, error)
-	SetString(ctx context.Context, key string, data string) error
-	SetStringWithExpiration(ctx context.Context, key string, data string, expiration time.Duration) error
-
 	GetInt(ctx context.Context, key string) (data int64, err error)
-	Increase(ctx context.Context, key string) error
-
 	GetStruct(ctx context.Context, key string, data any) error
-	SetStruct(ctx context.Context, key string, data any) error
-	SetStructWithExpiration(ctx context.Context, key string, data any, expiration time.Duration) error
+
+	Increase(ctx context.Context, key string) error
 
 	GetExpiration(ctx context.Context, key string) (time.Duration, error)
 	SetExpiration(ctx context.Context, key string, expiration time.Duration) error

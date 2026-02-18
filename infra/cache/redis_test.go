@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -32,7 +31,7 @@ func TestNewRedisCache(t *testing.T) {
 	require.NotNil(t, client)
 }
 
-func TestRedisCache_GetItem(t *testing.T) {
+func TestRedisCache_Get(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -51,9 +50,9 @@ func TestRedisCache_GetItem(t *testing.T) {
 	}{
 		{
 			name: "Cache hit",
-			args: args{key: "getItem_key", cache: testRedis},
+			args: args{key: "get_key", cache: testRedis},
 			setupTest: func(args args, _ *mocks.MockIRedisCache) {
-				err := testRedis.SetItem(ctx, args.key, []byte("test_value"))
+				err := testRedis.Set(ctx, args.key, []byte("test_value"))
 				require.NoError(t, err)
 			},
 			want:    []byte("test_value"),
@@ -61,7 +60,7 @@ func TestRedisCache_GetItem(t *testing.T) {
 		},
 		{
 			name:    "Cache miss",
-			args:    args{key: "getItem_other_key", cache: testRedis},
+			args:    args{key: "get_other_key", cache: testRedis},
 			want:    nil,
 			wantErr: ErrCacheMiss,
 		},
@@ -82,23 +81,24 @@ func TestRedisCache_GetItem(t *testing.T) {
 				tt.setupTest(tt.args, redisMock)
 			}
 
-			got, err := tt.args.cache.GetItem(ctx, tt.args.key)
+			got, err := tt.args.cache.Get(ctx, tt.args.key)
 			require.Equal(t, tt.want, got)
 			require.Equal(t, tt.wantErr, err)
 		})
 	}
 }
 
-func TestRedisCache_SetItem(t *testing.T) {
+func TestRedisCache_Set(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockedRedis, redisMock := getRedisCacheMock(ctrl)
 
 	type args struct {
-		key   string
-		data  []byte
-		cache *CacheManager
+		key        string
+		data       any
+		expiration []time.Duration
+		cache      *CacheManager
 	}
 	tests := []struct {
 		name       string
@@ -107,17 +107,42 @@ func TestRedisCache_SetItem(t *testing.T) {
 		wantErr    error
 	}{
 		{
-			name:    "Success",
-			args:    args{key: "setItem_test_key", data: []byte("test_value"), cache: testRedis},
+			name:    "Set string with default expiration",
+			args:    args{key: "set_string_key", data: "test_value", cache: testRedis},
 			wantErr: nil,
 		},
 		{
-			name: "Error",
-			args: args{key: "test_key", data: []byte("test_value"), cache: mockedRedis},
+			name:    "Set string with custom expiration",
+			args:    args{key: "set_string_exp_key", data: "test_value", expiration: []time.Duration{10 * time.Second}, cache: testRedis},
+			wantErr: nil,
+		},
+		{
+			name:    "Set bytes with default expiration",
+			args:    args{key: "set_bytes_key", data: []byte("test_value"), cache: testRedis},
+			wantErr: nil,
+		},
+		{
+			name:    "Set struct via JSON",
+			args:    args{key: "set_struct_key", data: struct{ Name string }{Name: "test"}, cache: testRedis},
+			wantErr: nil,
+		},
+		{
+			name:    "Set struct with custom expiration",
+			args:    args{key: "set_struct_exp_key", data: struct{ Name string }{Name: "test"}, expiration: []time.Duration{time.Minute}, cache: testRedis},
+			wantErr: nil,
+		},
+		{
+			name:    "Should return error when fail to marshal data",
+			args:    args{key: "set_marshal_error_key", data: make(chan int), cache: testRedis},
+			wantErr: errors.New("json: unsupported type: chan int"),
+		},
+		{
+			name: "Should return error when redis fails",
+			args: args{key: "test_key", data: "test_value", cache: mockedRedis},
 			setupCache: func(args args, m *mocks.MockIRedisCache) {
 				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
 				cmd.SetErr(errors.New("some error"))
-				m.EXPECT().Set(gomock.Any(), args.key, args.data, gomock.Any()).
+				m.EXPECT().Set(gomock.Any(), args.key, []byte(args.data.(string)), gomock.Any()).
 					Return(cmd)
 			},
 			wantErr: errors.New("some error"),
@@ -130,7 +155,11 @@ func TestRedisCache_SetItem(t *testing.T) {
 				tt.setupCache(tt.args, redisMock)
 			}
 
-			err := tt.args.cache.SetItem(ctx, tt.args.key, tt.args.data)
+			err := tt.args.cache.Set(ctx, tt.args.key, tt.args.data, tt.args.expiration...)
+			if tt.wantErr != nil {
+				require.EqualError(t, err, tt.wantErr.Error())
+				return
+			}
 			require.Equal(t, tt.wantErr, err)
 		})
 	}
@@ -215,7 +244,7 @@ func TestRedisCache_GetString(t *testing.T) {
 			name: "Cache hit",
 			args: args{key: "getString_test_key", cache: testRedis},
 			setupCache: func(args args, _ *mocks.MockIRedisCache) {
-				err := testRedis.SetItem(ctx, args.key, []byte("test_value"))
+				err := testRedis.Set(ctx, args.key, "test_value")
 				require.NoError(t, err)
 			},
 			want:    "test_value",
@@ -246,152 +275,6 @@ func TestRedisCache_GetString(t *testing.T) {
 
 			got, err := tt.args.cache.GetString(ctx, tt.args.key)
 			require.Equal(t, tt.want, got)
-			require.Equal(t, tt.wantErr, err)
-		})
-	}
-}
-
-func TestRedisCache_SetString(t *testing.T) {
-	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockedRedis, redisMock := getRedisCacheMock(ctrl)
-
-	type args struct {
-		key   string
-		data  string
-		cache *CacheManager
-	}
-	tests := []struct {
-		name       string
-		args       args
-		setupCache func(args args, m *mocks.MockIRedisCache)
-		wantErr    error
-	}{
-		{
-			name:    "Success",
-			args:    args{key: "setString_test_key", data: "test_value", cache: testRedis},
-			wantErr: nil,
-		},
-		{
-			name: "Error",
-			args: args{key: "test_key", data: "test_value", cache: mockedRedis},
-			setupCache: func(args args, m *mocks.MockIRedisCache) {
-				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
-				cmd.SetErr(errors.New("some error"))
-				m.EXPECT().Set(ctx, args.key, []byte(args.data), gomock.Any()).
-					Return(cmd)
-			},
-			wantErr: errors.New("some error"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setupCache != nil {
-				tt.setupCache(tt.args, redisMock)
-			}
-
-			err := tt.args.cache.SetString(ctx, tt.args.key, tt.args.data)
-			require.Equal(t, tt.wantErr, err)
-		})
-	}
-}
-
-func TestRedisCache_SetStringWithExpiration(t *testing.T) {
-	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockedRedis, redisMock := getRedisCacheMock(ctrl)
-
-	type args struct {
-		key        string
-		data       string
-		expiration time.Duration
-		cache      *CacheManager
-	}
-	tests := []struct {
-		name       string
-		args       args
-		setupCache func(args args, m *mocks.MockIRedisCache)
-		wantErr    error
-	}{
-		{
-			name:    "Success",
-			args:    args{key: "setStringWithExpiration_test_key", data: "test_value", expiration: 10, cache: testRedis},
-			wantErr: nil,
-		},
-		{
-			name: "Error",
-			args: args{key: "test_key", data: "test_value", expiration: 10, cache: mockedRedis},
-			setupCache: func(args args, m *mocks.MockIRedisCache) {
-				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
-				cmd.SetErr(errors.New("some error"))
-				m.EXPECT().Set(gomock.Any(), args.key, []byte(args.data), gomock.Any()).
-					Return(cmd)
-			},
-			wantErr: errors.New("some error"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setupCache != nil {
-				tt.setupCache(tt.args, redisMock)
-			}
-
-			err := tt.args.cache.SetStringWithExpiration(ctx, tt.args.key, tt.args.data, tt.args.expiration)
-			require.Equal(t, tt.wantErr, err)
-		})
-	}
-}
-
-func TestRedisCache_SetItemWithExpiration(t *testing.T) {
-	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockedRedis, redisMock := getRedisCacheMock(ctrl)
-
-	type args struct {
-		key        string
-		data       []byte
-		expiration time.Duration
-		cache      *CacheManager
-	}
-	tests := []struct {
-		name       string
-		args       args
-		setupCache func(args args, m *mocks.MockIRedisCache)
-		wantErr    error
-	}{
-		{
-			name: "Success",
-			args: args{
-				key: "setItemWithExpiration_test_key", data: []byte("test_value"),
-				expiration: time.Minute, cache: testRedis,
-			},
-			wantErr: nil,
-		},
-		{
-			name: "Error",
-			args: args{key: "test_key", data: []byte("test_value"), expiration: time.Minute, cache: mockedRedis},
-			setupCache: func(args args, m *mocks.MockIRedisCache) {
-				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
-				cmd.SetErr(errors.New("some error"))
-				m.EXPECT().Set(gomock.Any(), args.key, args.data, gomock.Any()).
-					Return(cmd)
-			},
-			wantErr: errors.New("some error"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setupCache != nil {
-				tt.setupCache(tt.args, redisMock)
-			}
-
-			err := tt.args.cache.SetItemWithExpiration(ctx, tt.args.key, tt.args.data, tt.args.expiration)
 			require.Equal(t, tt.wantErr, err)
 		})
 	}
@@ -465,127 +348,6 @@ func Test_redisCache_Increase(t *testing.T) {
 	})
 }
 
-func TestRedisCache_SetStruct(t *testing.T) {
-	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockedRedis, redisMock := getRedisCacheMock(ctrl)
-
-	type args struct {
-		key   string
-		data  any
-		cache *CacheManager
-	}
-	tests := []struct {
-		name       string
-		args       args
-		setupCache func(args args, m *mocks.MockIRedisCache)
-		wantErr    error
-	}{
-		{
-			name:    "Success",
-			args:    args{key: "setStruct_test_key", data: "test_value", cache: testRedis},
-			wantErr: nil,
-		},
-		{
-			name: "Error",
-			args: args{key: "test_key", data: "test_value", cache: mockedRedis},
-			setupCache: func(args args, m *mocks.MockIRedisCache) {
-				dataString, err := json.Marshal(args.data)
-				require.NoError(t, err)
-
-				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
-				cmd.SetErr(errors.New("some error"))
-				m.EXPECT().Set(ctx, args.key, dataString, gomock.Any()).Return(cmd)
-			},
-			wantErr: errors.New("some error"),
-		},
-		{
-			name:    "Should set with default expiration",
-			args:    args{key: "setStruct_default_key", data: "test_value", cache: testRedis},
-			wantErr: nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setupCache != nil {
-				tt.setupCache(tt.args, redisMock)
-			}
-
-			err := tt.args.cache.SetStruct(ctx, tt.args.key, tt.args.data)
-			require.Equal(t, tt.wantErr, err)
-		})
-	}
-}
-
-func TestRedisCache_SetStructWithExpiration(t *testing.T) {
-	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockedRedis, redisMock := getRedisCacheMock(ctrl)
-
-	type args struct {
-		key        string
-		data       interface{}
-		expiration time.Duration
-		cache      *CacheManager
-	}
-	tests := []struct {
-		name       string
-		args       args
-		setupCache func(args args, m *mocks.MockIRedisCache)
-		wantErr    error
-	}{
-		{
-			name:    "Success",
-			args:    args{key: "setStructWithExpiration_test_key", data: "test_value", expiration: time.Minute, cache: testRedis},
-			wantErr: nil,
-		},
-		{
-			name: "Error",
-			args: args{key: "test_key", data: "test_value", expiration: time.Minute, cache: mockedRedis},
-			setupCache: func(args args, m *mocks.MockIRedisCache) {
-				dataString, err := json.Marshal(args.data)
-				require.NoError(t, err)
-
-				cmd := redis.NewStatusCmd(ctx, args.key, "OK")
-				cmd.SetErr(errors.New("some error"))
-				m.EXPECT().Set(ctx, args.key, dataString, args.expiration).Return(cmd)
-			},
-			wantErr: errors.New("some error"),
-		},
-		{
-			name:    "Should set with default expiration",
-			args:    args{key: "setStructWithExpiration_default_key", data: "test_value", expiration: 0, cache: testRedis},
-			wantErr: nil,
-		},
-		{
-			name: "Should return error when fail to marshal data",
-			args: args{
-				key: "setStructWithExpiration_error_key", data: make(chan int),
-				expiration: 0, cache: testRedis,
-			},
-			wantErr: errors.New("json: unsupported type: chan int"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setupCache != nil {
-				tt.setupCache(tt.args, redisMock)
-			}
-
-			err := tt.args.cache.SetStructWithExpiration(ctx, tt.args.key, tt.args.data, tt.args.expiration)
-			if tt.wantErr != nil {
-				require.Equal(t, tt.wantErr.Error(), err.Error())
-				return
-			}
-			require.Equal(t, tt.wantErr, err)
-		})
-	}
-}
-
 func TestRedisCache_GetStruct(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
@@ -612,7 +374,7 @@ func TestRedisCache_GetStruct(t *testing.T) {
 			args: args{key: "getStruct_test_key", cache: testRedis},
 			setupCache: func(args args, _ *mocks.MockIRedisCache) {
 				data := someStruct{Name: "test_value"}
-				err := testRedis.SetStruct(ctx, args.key, data)
+				err := testRedis.Set(ctx, args.key, data)
 				require.NoError(t, err)
 			},
 			want:    someStruct{Name: "test_value"},
@@ -682,7 +444,7 @@ func TestRedisCache_GetExpiration(t *testing.T) {
 			name: "Success",
 			args: args{key: "getExpiration_test_key", cache: testRedis},
 			setupCache: func(args args, _ *mocks.MockIRedisCache) {
-				err := testRedis.SetItem(ctx, args.key, []byte("test_value"))
+				err := testRedis.Set(ctx, args.key, "test_value")
 				require.NoError(t, err)
 			},
 			want: time.Minute,
@@ -823,11 +585,11 @@ func TestRedisCache_CleanAll(t *testing.T) {
 			name: "Success",
 			args: args{key: "cleanAll_test_key", cache: testRedis},
 			setupCache: func(args args, _ *mocks.MockIRedisCache) {
-				err := testRedis.SetItem(ctx, args.key, []byte("test_value"))
+				err := testRedis.Set(ctx, args.key, "test_value")
 				require.NoError(t, err)
 			},
 			validate: func(args args) {
-				data, err := args.cache.GetItem(ctx, args.key)
+				data, err := args.cache.Get(ctx, args.key)
 				require.Equal(t, ErrCacheMiss, err)
 				require.Nil(t, data)
 			},

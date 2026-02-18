@@ -125,7 +125,7 @@ func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
 
 	// access token will be on cache for 3 minutes after it duration
 	// this is to avoid the user to login again with the same access token (used in the middleware)
-	err = s.cache.SetStringWithExpiration(ctx, accessToken, "true", s.accessTokenDuration+3*time.Minute)
+	err = s.cache.Set(ctx, accessToken, "true", s.accessTokenDuration+3*time.Minute)
 	if err != nil {
 		s.log.Errorw(ctx, "error logging out", logger.Err(err))
 		return err

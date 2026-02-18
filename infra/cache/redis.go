@@ -51,8 +51,37 @@ func NewRedisCache(ctx context.Context, addr string, password string, db int, de
 	}, client, nil
 }
 
-// GetItem returns an Item from cache
-func (r *CacheManager) GetItem(ctx context.Context, key string) (data []byte, err error) {
+// Set stores a value in cache. Accepts string, []byte, int, int64 or any struct (JSON marshaled).
+// Expiration is optional: omit for default, pass for custom.
+func (r *CacheManager) Set(ctx context.Context, key string, data any, expiration ...time.Duration) error {
+	exp := r.defaultExpiration
+	if len(expiration) > 0 {
+		exp = expiration[0]
+	}
+
+	var bytes []byte
+	switch v := data.(type) {
+	case []byte:
+		bytes = v
+	case string:
+		bytes = []byte(v)
+	case int:
+		bytes = []byte(strconv.Itoa(v))
+	case int64:
+		bytes = []byte(strconv.FormatInt(v, 10))
+	default:
+		var err error
+		bytes, err = json.Marshal(data)
+		if err != nil {
+			return err
+		}
+	}
+
+	return r.redis.Set(ctx, key, bytes, exp).Err()
+}
+
+// Get returns raw bytes from cache
+func (r *CacheManager) Get(ctx context.Context, key string) (data []byte, err error) {
 	val, err := r.redis.Get(ctx, key).Bytes()
 	if errors.Is(err, redis.Nil) {
 		return val, ErrCacheMiss
@@ -63,29 +92,9 @@ func (r *CacheManager) GetItem(ctx context.Context, key string) (data []byte, er
 	return val, nil
 }
 
-// SetItem sets an item in cache
-func (r *CacheManager) SetItem(ctx context.Context, key string, data []byte) error {
-	err := r.SetItemWithExpiration(ctx, key, data, r.defaultExpiration)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// SetItemWithExpiration sets an item in cache
-func (r *CacheManager) SetItemWithExpiration(ctx context.Context, key string, data []byte, expiration time.Duration) error {
-	err := r.redis.Set(ctx, key, data, expiration).Err()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // GetInt returns an int64 from cache
 func (r *CacheManager) GetInt(ctx context.Context, key string) (data int64, err error) {
-	val, err := r.GetItem(ctx, key)
+	val, err := r.Get(ctx, key)
 	if errors.Is(err, ErrCacheMiss) {
 		return data, ErrCacheMiss
 	} else if err != nil {
@@ -95,9 +104,9 @@ func (r *CacheManager) GetInt(ctx context.Context, key string) (data int64, err 
 	return strconv.ParseInt(string(val), 10, 64)
 }
 
-// GetString returns an string from cache
+// GetString returns a string from cache
 func (r *CacheManager) GetString(ctx context.Context, key string) (data string, err error) {
-	val, err := r.GetItem(ctx, key)
+	val, err := r.Get(ctx, key)
 	if errors.Is(err, ErrCacheMiss) {
 		return data, ErrCacheMiss
 	} else if err != nil {
@@ -107,59 +116,14 @@ func (r *CacheManager) GetString(ctx context.Context, key string) (data string, 
 	return string(val), nil
 }
 
-// SetString sets an item in cache with default expiration
-func (r *CacheManager) SetString(ctx context.Context, key string, data string) error {
-	err := r.SetStringWithExpiration(ctx, key, data, r.defaultExpiration)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// SetStringWithExpiration sets an item in cache with an expiration
-func (r *CacheManager) SetStringWithExpiration(ctx context.Context, key string, data string, expiration time.Duration) error {
-	err := r.SetItemWithExpiration(ctx, key, []byte(data), expiration)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// GetStruct receive a pointer to a struct and returns the struct from cache
+// GetStruct receives a pointer to a struct and populates it from cache (JSON unmarshal)
 func (r *CacheManager) GetStruct(ctx context.Context, key string, data any) (err error) {
-	val, err := r.GetItem(ctx, key)
+	val, err := r.Get(ctx, key)
 	if err != nil {
 		return err
 	}
 
 	err = json.Unmarshal(val, &data)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// SetStruct sets an item in cache with default expiration
-func (r *CacheManager) SetStruct(ctx context.Context, key string, data any) error {
-	err := r.SetStructWithExpiration(ctx, key, data, r.defaultExpiration)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// SetStructWithExpiration sets an item in cache
-func (r *CacheManager) SetStructWithExpiration(ctx context.Context, key string, data any, expiration time.Duration) error {
-	dataString, err := json.Marshal(data)
-	if err != nil {
-		return err
-	}
-
-	err = r.SetItemWithExpiration(ctx, key, dataString, expiration)
 	if err != nil {
 		return err
 	}
