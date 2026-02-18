@@ -105,11 +105,11 @@ func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (se
 	return session, nil
 }
 
-func (r *authRepo) SetSessionAsBlocked(ctx context.Context, accountID int64) (err error) {
+func (r *authRepo) SetSessionAsBlocked(ctx context.Context, sessionUUID string) (err error) {
 	query := `
 		UPDATE tab_session
 		SET is_blocked = true
-		WHERE account_id = ?;
+		WHERE session_uuid = ?;
 	`
 
 	stmt, err := r.db.PrepareContext(ctx, query)
@@ -118,7 +118,7 @@ func (r *authRepo) SetSessionAsBlocked(ctx context.Context, accountID int64) (er
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, accountID)
+	_, err = stmt.ExecContext(ctx, sessionUUID)
 	if err != nil {
 		return mysqlutils.HandleMySQLError(err)
 	}

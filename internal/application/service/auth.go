@@ -118,9 +118,10 @@ func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
 	s.log.Info(ctx, "Process Started")
 	defer s.log.Info(ctx, "Process Finished")
 
-	loggedAccountID, err := s.accountSvc.GetLoggedAccountID(ctx)
-	if err != nil {
-		return err
+	sessionUUID, ok := ctx.Value(infra.SessionKey).(string)
+	if !ok || sessionUUID == "" {
+		s.log.Error(ctx, "session UUID not found in context")
+		return resterrors.NewUnauthorizedError("session not found")
 	}
 
 	// access token will be on cache for 3 minutes after it duration
@@ -131,7 +132,7 @@ func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
 		return err
 	}
 
-	err = s.dm.Auth().SetSessionAsBlocked(ctx, loggedAccountID)
+	err = s.dm.Auth().SetSessionAsBlocked(ctx, sessionUUID)
 	if err != nil {
 		s.log.Errorw(ctx, "error logging out", logger.Err(err))
 		return err

@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"go.uber.org/mock/gomock"
@@ -273,6 +274,7 @@ func Test_authService_Logout(t *testing.T) {
 		name      string
 		buildMock func(ctx context.Context, mocks allMocks, args args)
 		args      args
+		noSession bool
 		wantErr   bool
 	}{
 		{
@@ -281,20 +283,15 @@ func Test_authService_Logout(t *testing.T) {
 				accessToken: "token",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountSvc.EXPECT().GetLoggedAccountID(ctx).Return(int64(1), nil).Times(1)
 				mocks.mockCacheManager.EXPECT().Set(ctx, args.accessToken, "true", gomock.Any()).Return(nil).Times(1)
-				mocks.mockAuthRepo.EXPECT().SetSessionAsBlocked(ctx, int64(1)).Return(nil).Times(1)
+				mocks.mockAuthRepo.EXPECT().SetSessionAsBlocked(ctx, "session-uuid").Return(nil).Times(1)
 			},
 		},
 		{
-			name: "Should return error when there is some error to get logged account id",
-			args: args{
-				accessToken: "token",
-			},
-			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountSvc.EXPECT().GetLoggedAccountID(ctx).Return(int64(0), errors.New("some error")).Times(1)
-			},
-			wantErr: true,
+			name:      "Should return error when session UUID is not in context",
+			args:      args{accessToken: "token"},
+			noSession: true,
+			wantErr:   true,
 		},
 		{
 			name: "Should return error when there is some error to set string with expiration",
@@ -302,7 +299,6 @@ func Test_authService_Logout(t *testing.T) {
 				accessToken: "token",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountSvc.EXPECT().GetLoggedAccountID(ctx).Return(int64(1), nil).Times(1)
 				mocks.mockCacheManager.EXPECT().Set(ctx, args.accessToken, "true", gomock.Any()).Return(errors.New("some error")).Times(1)
 			},
 			wantErr: true,
@@ -313,9 +309,8 @@ func Test_authService_Logout(t *testing.T) {
 				accessToken: "token",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountSvc.EXPECT().GetLoggedAccountID(ctx).Return(int64(1), nil).Times(1)
 				mocks.mockCacheManager.EXPECT().Set(ctx, args.accessToken, "true", gomock.Any()).Return(nil).Times(1)
-				mocks.mockAuthRepo.EXPECT().SetSessionAsBlocked(ctx, int64(1)).Return(errors.New("some error")).Times(1)
+				mocks.mockAuthRepo.EXPECT().SetSessionAsBlocked(ctx, "session-uuid").Return(errors.New("some error")).Times(1)
 			},
 			wantErr: true,
 		},
@@ -323,7 +318,11 @@ func Test_authService_Logout(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			ctx := context.Background()
+			ctx := context.WithValue(context.Background(), infra.SessionKey, "session-uuid")
+			if tt.noSession {
+				ctx = context.Background()
+			}
+
 			m, ctrl := newServiceTestMock(t)
 			defer ctrl.Finish()
 

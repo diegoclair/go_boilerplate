@@ -140,17 +140,17 @@ func (mr *MockAuthRepoMockRecorder) GetSessionByUUID(ctx, sessionUUID any) *gomo
 }
 
 // SetSessionAsBlocked mocks base method.
-func (m *MockAuthRepo) SetSessionAsBlocked(ctx context.Context, accountID int64) error {
+func (m *MockAuthRepo) SetSessionAsBlocked(ctx context.Context, sessionUUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetSessionAsBlocked", ctx, accountID)
+	ret := m.ctrl.Call(m, "SetSessionAsBlocked", ctx, sessionUUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetSessionAsBlocked indicates an expected call of SetSessionAsBlocked.
-func (mr *MockAuthRepoMockRecorder) SetSessionAsBlocked(ctx, accountID any) *gomock.Call {
+func (mr *MockAuthRepoMockRecorder) SetSessionAsBlocked(ctx, sessionUUID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSessionAsBlocked", reflect.TypeOf((*MockAuthRepo)(nil).SetSessionAsBlocked), ctx, accountID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSessionAsBlocked", reflect.TypeOf((*MockAuthRepo)(nil).SetSessionAsBlocked), ctx, sessionUUID)
 }
 
 // MockAccountRepo is a mock of AccountRepo interface.

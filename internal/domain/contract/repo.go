@@ -17,7 +17,7 @@ type DataManager interface {
 type AuthRepo interface {
 	CreateSession(ctx context.Context, session dto.Session) (sessionID int64, err error)
 	GetSessionByUUID(ctx context.Context, sessionUUID string) (session dto.Session, err error)
-	SetSessionAsBlocked(ctx context.Context, accountID int64) (err error)
+	SetSessionAsBlocked(ctx context.Context, sessionUUID string) (err error)
 }
 
 type AccountRepo interface {
