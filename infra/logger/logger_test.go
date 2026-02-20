@@ -14,66 +14,52 @@ func TestNewLogger(t *testing.T) {
 	require.NotNil(t, logger)
 }
 
-func TestAddDefaultAttributesToLogger(t *testing.T) {
-	ctx := context.WithValue(context.Background(), infra.SessionKey, "sessionCode")
-	ctx = context.WithValue(ctx, infra.AccountUUIDKey, "accountUUID")
-
-	args := addDefaultAttributesToLogger(ctx)
-	require.Equal(t, "session", args[0].(logger.StringField).Key)
-	require.Equal(t, "sessionCode", args[0].(logger.StringField).Value)
-	require.Equal(t, "account_uuid", args[1].(logger.StringField).Key)
-	require.Equal(t, "accountUUID", args[1].(logger.StringField).Value)
-}
-
 func TestGetContextValue(t *testing.T) {
-	t.Run("Should return empty string when context is nil", func(t *testing.T) {
+	t.Run("Should return zero value and false when context is nil", func(t *testing.T) {
 		var ctx context.Context = nil
-		value := getContextValue(ctx, infra.SessionKey)
+		value, ok := getContextValue[string](ctx, infra.SessionKey)
+		require.False(t, ok)
 		require.Equal(t, "", value)
 	})
 
-	t.Run("Should return empty string when value is nil", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), infra.SessionKey, nil)
-		value := getContextValue(ctx, infra.AccountUUIDKey)
+	t.Run("Should return zero value and false when key not in context", func(t *testing.T) {
+		ctx := context.Background()
+		value, ok := getContextValue[string](ctx, infra.SessionKey)
+		require.False(t, ok)
 		require.Equal(t, "", value)
 	})
 
-	t.Run("Should return value", func(t *testing.T) {
+	t.Run("Should return string value", func(t *testing.T) {
 		ctx := context.WithValue(context.Background(), infra.SessionKey, "sessionCode")
-
-		value := getContextValue(ctx, infra.SessionKey)
+		value, ok := getContextValue[string](ctx, infra.SessionKey)
+		require.True(t, ok)
 		require.Equal(t, "sessionCode", value)
 	})
+
+	t.Run("Should return false when type does not match", func(t *testing.T) {
+		ctx := context.WithValue(context.Background(), infra.SessionKey, 123)
+		value, ok := getContextValue[string](ctx, infra.SessionKey)
+		require.False(t, ok)
+		require.Equal(t, "", value)
+	})
 }
 
-func TestGetSession(t *testing.T) {
-	t.Run("Should return empty string when session is empty", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), infra.SessionKey, "")
-		sessionCode, ok := getSession(ctx)
-		require.Equal(t, "", sessionCode)
-		require.False(t, ok)
-	})
-
-	t.Run("Should return session code", func(t *testing.T) {
+func TestAddDefaultAttributesToLogger(t *testing.T) {
+	t.Run("Should return session and account_uuid attributes", func(t *testing.T) {
 		ctx := context.WithValue(context.Background(), infra.SessionKey, "sessionCode")
-		sessionCode, ok := getSession(ctx)
-		require.Equal(t, "sessionCode", sessionCode)
-		require.True(t, ok)
-	})
-}
+		ctx = context.WithValue(ctx, infra.AccountUUIDKey, "accountUUID")
 
-func TestGetAccountUUID(t *testing.T) {
-	t.Run("Should return empty string when accountUUID is empty", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), infra.AccountUUIDKey, "")
-		accountUUID, ok := getAccountUUID(ctx)
-		require.Equal(t, "", accountUUID)
-		require.False(t, ok)
+		args := addDefaultAttributesToLogger(ctx)
+		require.Len(t, args, 2)
+		require.Equal(t, "session", args[0].(logger.StringField).Key)
+		require.Equal(t, "sessionCode", args[0].(logger.StringField).Value)
+		require.Equal(t, "account_uuid", args[1].(logger.StringField).Key)
+		require.Equal(t, "accountUUID", args[1].(logger.StringField).Value)
 	})
 
-	t.Run("Should return accountUUID", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), infra.AccountUUIDKey, "accountUUID")
-		accountUUID, ok := getAccountUUID(ctx)
-		require.Equal(t, "accountUUID", accountUUID)
-		require.True(t, ok)
+	t.Run("Should return empty when context has no values", func(t *testing.T) {
+		ctx := context.Background()
+		args := addDefaultAttributesToLogger(ctx)
+		require.Empty(t, args)
 	})
 }

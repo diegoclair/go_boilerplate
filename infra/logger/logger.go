@@ -19,44 +19,28 @@ func NewLogger(appName string, debugLevel bool) logger.Logger {
 func addDefaultAttributesToLogger(ctx context.Context) []logger.LogField {
 	args := []logger.LogField{}
 
-	if sessionCode, ok := getSession(ctx); ok {
+	if sessionCode, ok := getContextValue[string](ctx, infra.SessionKey); ok {
 		args = append(args, logger.String("session", sessionCode))
 	}
 
-	if accountUUID, ok := getAccountUUID(ctx); ok {
+	if accountUUID, ok := getContextValue[string](ctx, infra.AccountUUIDKey); ok {
 		args = append(args, logger.String("account_uuid", accountUUID))
 	}
 
 	return args
 }
 
-func getContextValue(ctx context.Context, key infra.Key) string {
+func getContextValue[T comparable](ctx context.Context, key infra.Key) (T, bool) {
+	var zero T
 	if ctx == nil {
-		return ""
+		return zero, false
 	}
 
 	value := ctx.Value(key)
 	if value == nil {
-		return ""
+		return zero, false
 	}
 
-	return value.(string)
-}
-
-func getSession(ctx context.Context) (string, bool) {
-	sessionCode := getContextValue(ctx, infra.SessionKey)
-	if sessionCode == "" {
-		return "", false
-	}
-
-	return sessionCode, true
-}
-
-func getAccountUUID(ctx context.Context) (string, bool) {
-	accountUUID := getContextValue(ctx, infra.AccountUUIDKey)
-	if accountUUID == "" {
-		return "", false
-	}
-
-	return accountUUID, true
+	v, ok := value.(T)
+	return v, ok
 }
