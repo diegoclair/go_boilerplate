@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE IF NOT EXISTS tab_account (
     account_id INT NOT NULL AUTO_INCREMENT,
     account_uuid CHAR(36) NOT NULL,
@@ -39,3 +40,7 @@ CONSTRAINT fk_tab_transfer_tab_account1
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 ) ENGINE = InnoDB CHARACTER SET=utf8;
+
+-- +goose Down
+DROP TABLE IF EXISTS tab_transfer;
+DROP TABLE IF EXISTS tab_account;

@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE IF NOT EXISTS tab_session (
     session_id INT NOT NULL AUTO_INCREMENT,
     session_uuid CHAR(36) NOT NULL,
@@ -20,3 +21,6 @@ CREATE TABLE IF NOT EXISTS tab_session (
         ON DELETE NO ACTION
         ON UPDATE NO ACTION
 ) ENGINE = InnoDB CHARACTER SET=utf8;
+
+-- +goose Down
+DROP TABLE IF EXISTS tab_session;
