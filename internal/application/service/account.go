@@ -10,7 +10,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/google/uuid"
@@ -43,7 +42,7 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 	}
 
 	_, err = s.dm.Account().GetAccountByDocument(ctx, account.CPF)
-	if err != nil && !mysqlutils.SQLNotFound(err.Error()) {
+	if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		s.log.Errorw(ctx, "error to get account by document", logger.Err(err))
 		return err
 	} else if err == nil {

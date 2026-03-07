@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"strings"
@@ -116,22 +116,22 @@ func TestWithCount(t *testing.T) {
 func TestBuildInPlaceholders(t *testing.T) {
 	t.Run("String slices", func(t *testing.T) {
 		t.Run("Multiple strings", func(t *testing.T) {
-			placeholders, newArgs := buildInPlaceholders([]any{1, "test"}, []string{"a", "b", "c"})
+			placeholders, newArgs := buildInPlaceholders([]any{1, "test"}, []string{"a", "b", "c"}, 3)
 
-			require.Equal(t, "?, ?, ?", placeholders)
+			require.Equal(t, "$3, $4, $5", placeholders)
 			require.Len(t, newArgs, 5)
 			require.Equal(t, []any{1, "test", "a", "b", "c"}, newArgs)
 		})
 
 		t.Run("Single string", func(t *testing.T) {
-			placeholders, newArgs := buildInPlaceholders([]any{42}, []string{"single"})
+			placeholders, newArgs := buildInPlaceholders([]any{42}, []string{"single"}, 2)
 
-			require.Equal(t, "?", placeholders)
+			require.Equal(t, "$2", placeholders)
 			require.Equal(t, []any{42, "single"}, newArgs)
 		})
 
 		t.Run("Empty slice", func(t *testing.T) {
-			placeholders, newArgs := buildInPlaceholders([]any{1, 2}, []string{})
+			placeholders, newArgs := buildInPlaceholders([]any{1, 2}, []string{}, 3)
 
 			require.Empty(t, placeholders)
 			require.Equal(t, []any{1, 2}, newArgs)
@@ -139,22 +139,22 @@ func TestBuildInPlaceholders(t *testing.T) {
 	})
 
 	t.Run("Int slices", func(t *testing.T) {
-		placeholders, newArgs := buildInPlaceholders([]any{"test"}, []int{10, 20, 30})
+		placeholders, newArgs := buildInPlaceholders([]any{"test"}, []int{10, 20, 30}, 2)
 
-		require.Equal(t, "?, ?, ?", placeholders)
+		require.Equal(t, "$2, $3, $4", placeholders)
 		require.Equal(t, []any{"test", 10, 20, 30}, newArgs)
 	})
 
 	t.Run("Int64 slices", func(t *testing.T) {
-		placeholders, newArgs := buildInPlaceholders([]any{}, []int64{100, 200})
+		placeholders, newArgs := buildInPlaceholders([]any{}, []int64{100, 200}, 1)
 
-		require.Equal(t, "?, ?", placeholders)
+		require.Equal(t, "$1, $2", placeholders)
 		require.Equal(t, []any{int64(100), int64(200)}, newArgs)
 	})
 
 	t.Run("Preserves initial args", func(t *testing.T) {
 		initial := []any{"preserved", 123}
-		_, newArgs := buildInPlaceholders(initial, []string{"new"})
+		_, newArgs := buildInPlaceholders(initial, []string{"new"}, 3)
 
 		require.Equal(t, []any{"preserved", 123, "new"}, newArgs)
 	})

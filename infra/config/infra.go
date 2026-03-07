@@ -1,7 +1,6 @@
 package config
 
 import (
-	"database/sql"
 	"fmt"
 	"sync"
 
@@ -9,11 +8,12 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/cache"
 	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/infra/crypto"
-	"github.com/diegoclair/go_boilerplate/infra/data/mysql"
+	"github.com/diegoclair/go_boilerplate/infra/data/postgres"
 	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_utils/logger"
 	"github.com/diegoclair/go_utils/validator"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel"
 	sResource "go.opentelemetry.io/otel/sdk/resource"
@@ -127,14 +127,13 @@ var (
 func (c *Config) GetDataManager() contract.DataManager {
 	dataOnce.Do(func() {
 		var (
-			err     error
-			mysqlDB *sql.DB
-			log     logger.Logger = c.GetLogger()
+			err  error
+			pool *pgxpool.Pool
+			log  logger.Logger = c.GetLogger()
 		)
 
-		dataManager, mysqlDB, err = mysql.Instance(c.ctx,
-			c.GetMysqlDsn(),
-			c.DB.MySQL.DBName,
+		dataManager, pool, err = postgres.Instance(c.ctx,
+			c.GetPostgresDsn(),
 			log,
 		)
 		if err != nil {
@@ -142,10 +141,8 @@ func (c *Config) GetDataManager() contract.DataManager {
 		}
 
 		c.AddCloser(func() {
-			log.Info(c.ctx, "Closing mysql connection...")
-			if err := mysqlDB.Close(); err != nil {
-				log.Errorw(c.ctx, "Error closing mysql connection", logger.Err(err))
-			}
+			log.Info(c.ctx, "Closing postgres connection...")
+			pool.Close()
 		})
 	})
 

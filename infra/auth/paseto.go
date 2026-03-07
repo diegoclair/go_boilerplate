@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -63,7 +64,11 @@ func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contra
 
 	err = payload.Valid()
 	if err != nil {
-		p.log.Errorw(ctx, "error to validate token", logger.Err(err))
+		if errors.Is(err, errExpiredToken) {
+			p.log.Warnw(ctx, "token has expired")
+		} else {
+			p.log.Errorw(ctx, "error to validate token", logger.Err(err))
+		}
 		return resp, resterrors.NewUnauthorizedError(err.Error())
 	}
 

@@ -1,6 +1,6 @@
 -- +goose Up
 ALTER TABLE tab_transfer
-    ADD COLUMN transfer_uuid CHAR(36) NOT NULL after transfer_id;
+    ADD COLUMN transfer_uuid UUID NOT NULL;
 
 -- +goose Down
 ALTER TABLE tab_transfer

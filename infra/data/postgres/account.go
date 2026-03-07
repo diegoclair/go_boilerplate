@@ -1,11 +1,11 @@
-package mysql
+package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
-	"github.com/diegoclair/go_utils/mysqlutils"
 )
 
 type accountRepo struct {
@@ -19,7 +19,7 @@ func newAccountRepo(db dbConn) contract.AccountRepo {
 }
 
 const querySelectBase string = `
-		SELECT 
+		SELECT
 			ta.account_id,
 			ta.account_uuid,
 			ta.name,
@@ -28,7 +28,7 @@ const querySelectBase string = `
 			ta.secret,
 			ta.created_at,
 			ta.active
-		
+
 		FROM tab_account 				ta
 		`
 
@@ -63,29 +63,19 @@ func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, acco
 			account_origin_id,
 			account_destination_id,
 			amount
-		) 
-		VALUES (?, ?, ?, ?);
+		)
+		VALUES ($1, $2, $3, $4)
+		RETURNING transfer_id;
 	`
 
-	stmt, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return transferID, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	result, err := stmt.ExecContext(ctx,
+	err = r.db.QueryRow(ctx, query,
 		transferUUID,
 		accountOriginID,
 		accountDestinationID,
 		amount,
-	)
+	).Scan(&transferID)
 	if err != nil {
-		return transferID, mysqlutils.HandleMySQLError(err)
-	}
-
-	transferID, err = result.LastInsertId()
-	if err != nil {
-		return transferID, mysqlutils.HandleMySQLError(err)
+		return transferID, handleDBError(err)
 	}
 
 	return transferID, nil
@@ -98,29 +88,19 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account)
 			name,
 			cpf,
 			secret
-		) 
-		VALUES (?, ?, ?, ?);
+		)
+		VALUES ($1, $2, $3, $4)
+		RETURNING account_id;
 	`
 
-	stmt, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return createdID, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	result, err := stmt.ExecContext(ctx,
+	err = r.db.QueryRow(ctx, query,
 		account.UUID,
 		account.Name,
 		account.CPF,
 		account.Password,
-	)
+	).Scan(&createdID)
 	if err != nil {
-		return createdID, mysqlutils.HandleMySQLError(err)
-	}
-
-	createdID, err = result.LastInsertId()
-	if err != nil {
-		return createdID, mysqlutils.HandleMySQLError(err)
+		return createdID, handleDBError(err)
 	}
 
 	return createdID, nil
@@ -128,19 +108,13 @@ func (r *accountRepo) CreateAccount(ctx context.Context, account entity.Account)
 
 func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF string) (account entity.Account, err error) {
 	query := querySelectBase + `
-		WHERE  	ta.cpf 	= ?
+		WHERE  	ta.cpf 	= $1
 	`
 
-	stmt, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return account, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-	row := stmt.QueryRowContext(ctx, encryptedCPF)
-
+	row := r.db.QueryRow(ctx, query, encryptedCPF)
 	account, err = r.parseAccount(row)
 	if err != nil {
-		return account, mysqlutils.HandleMySQLError(err)
+		return account, handleDBError(err)
 	}
 
 	return account, nil
@@ -148,39 +122,35 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 
 func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 	var params = []any{}
+	paramIndex := 1
 
 	query := withCount(querySelectBase)
 
 	if take > 0 {
-		query += `
-			LIMIT ?
-		`
+		query += fmt.Sprintf(`
+			LIMIT $%d
+		`, paramIndex)
 		params = append(params, take)
+		paramIndex++
 	}
 
 	if skip > 0 {
-		query += `
-			OFFSET ?
-		`
+		query += fmt.Sprintf(`
+			OFFSET $%d
+		`, paramIndex)
 		params = append(params, skip)
 	}
 
-	stmt, err := r.db.PrepareContext(ctx, query)
+	rows, err := r.db.Query(ctx, query, params...)
 	if err != nil {
-		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
+		return accounts, totalRecords, handleDBError(err)
 	}
-
-	defer stmt.Close()
-
-	rows, err := stmt.QueryContext(ctx, params...)
-	if err != nil {
-		return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
-	}
+	defer rows.Close()
 
 	for rows.Next() {
 		account, err := r.parseAccount(rows, &totalRecords)
 		if err != nil {
-			return accounts, totalRecords, mysqlutils.HandleMySQLError(err)
+			return accounts, totalRecords, handleDBError(err)
 		}
 
 		accounts = append(accounts, account)
@@ -190,49 +160,31 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 }
 
 func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
-	var params = []any{}
-
 	query := querySelectBase + `
-		WHERE ta.account_uuid = ?
+		WHERE ta.account_uuid = $1
 	`
-	params = append(params, accountUUID)
 
-	stmt, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return account, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRowContext(ctx, params...)
+	row := r.db.QueryRow(ctx, query, accountUUID)
 	account, err = r.parseAccount(row)
 	if err != nil {
-		return account, mysqlutils.HandleMySQLError(err)
+		return account, handleDBError(err)
 	}
 
 	return account, nil
 }
 
 func (r *accountRepo) GetAccountIDByUUID(ctx context.Context, accountUUID string) (accountID int64, err error) {
-	var params = []any{}
-
 	query := `
-		SELECT 
+		SELECT
 			account_id
-		
+
 		FROM tab_account
-		WHERE account_uuid = ?
+		WHERE account_uuid = $1
 	`
-	params = append(params, accountUUID)
 
-	stmt, err := r.db.PrepareContext(ctx, query)
+	err = r.db.QueryRow(ctx, query, accountUUID).Scan(&accountID)
 	if err != nil {
-		return accountID, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	err = stmt.QueryRowContext(ctx, params...).Scan(&accountID)
-	if err != nil {
-		return accountID, mysqlutils.HandleMySQLError(err)
+		return accountID, handleDBError(err)
 	}
 
 	return accountID, nil
@@ -240,6 +192,7 @@ func (r *accountRepo) GetAccountIDByUUID(ctx context.Context, accountUUID string
 
 func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, take, skip int64, origin bool) (transfers []entity.Transfer, totalRecords int64, err error) {
 	var params = []any{}
+	paramIndex := 1
 
 	query := withCount(`
 		SELECT
@@ -261,42 +214,38 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 	`)
 
 	if origin {
-		query += `WHERE	tt.account_origin_id 		= 	? `
+		query += fmt.Sprintf(`WHERE	tt.account_origin_id 		= 	$%d `, paramIndex)
 	} else {
-		query += `WHERE	tt.account_destination_id 	= 	? `
+		query += fmt.Sprintf(`WHERE	tt.account_destination_id 	= 	$%d `, paramIndex)
 	}
 
 	params = append(params, accountID)
+	paramIndex++
 
 	query += `
 		ORDER BY tt.created_at desc
 	`
 
 	if take > 0 {
-		query += `
-			LIMIT ?
-		`
+		query += fmt.Sprintf(`
+			LIMIT $%d
+		`, paramIndex)
 		params = append(params, take)
+		paramIndex++
 	}
 
 	if skip > 0 {
-		query += `
-			OFFSET ?
-		`
+		query += fmt.Sprintf(`
+			OFFSET $%d
+		`, paramIndex)
 		params = append(params, skip)
 	}
 
-	stmt, err := r.db.PrepareContext(ctx, query)
+	rows, err := r.db.Query(ctx, query, params...)
 	if err != nil {
-		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
+		return transfers, totalRecords, handleDBError(err)
 	}
-
-	defer stmt.Close()
-
-	rows, err := stmt.QueryContext(ctx, params...)
-	if err != nil {
-		return transfers, totalRecords, mysqlutils.HandleMySQLError(err)
-	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var transfer entity.Transfer
@@ -320,25 +269,18 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 }
 
 func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64, balance float64) (err error) {
-	var params = []any{}
 	query := `
 		UPDATE 	tab_account
-		
-		SET 	balance 	= ?
 
-		WHERE  	account_id 	= ?
+		SET 	balance 	= $1,
+				update_at 	= NOW()
+
+		WHERE  	account_id 	= $2
 	`
-	params = append(params, balance, accountID)
 
-	stmt, err := r.db.PrepareContext(ctx, query)
+	_, err = r.db.Exec(ctx, query, balance, accountID)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.ExecContext(ctx, params...)
-	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return handleDBError(err)
 	}
 
 	return nil

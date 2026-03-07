@@ -8,7 +8,7 @@ services:
     ports:
       - 5000:5000
     environment:
-      WAIT_HOSTS: db:3306
+      WAIT_HOSTS: db:5432
       WAIT_HOSTS_TIMEOUT: 60
     volumes:
       - ./:/app   #use this volume to set the live reload
@@ -31,22 +31,18 @@ services:
       - app-network
   
   db:
-    container_name: go-boilerplate-mysql
-    image: mysql:8.0.32
-    command: bash -c "usermod -u 1000 mysql && docker-entrypoint.sh mysqld --innodb-use-native-aio=0 --disable-log-bin"
-    cap_add:
-      - SYS_NICE  # CAP_SYS_NICE - this is to not show the error 'mbind: Operation not permitted' in database docker log
+    container_name: go-boilerplate-postgres
+    image: postgres:18
     restart: unless-stopped
-    tty: true
     ports:
-      - 3306:3306
+      - 5432:5432
     volumes:
-      - ./.docker/volumes/dbdata:/var/lib/mysql
+      - ./.docker/volumes/dbdata:/var/lib/postgresql/data
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=go_boilerplate_db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=root
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=go_boilerplate_db
     networks:
       - app-network
 

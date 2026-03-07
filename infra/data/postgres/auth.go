@@ -1,11 +1,10 @@
-package mysql
+package postgres
 
 import (
 	"context"
 
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	"github.com/diegoclair/go_utils/mysqlutils"
 )
 
 type authRepo struct {
@@ -29,16 +28,11 @@ func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (sess
 			is_blocked,
 			refresh_token_expires_at
 		)
-		VALUES (?, ?, ?, ?, ?, ?, ?);
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING session_id;
 	`
 
-	stmt, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return sessionID, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	result, err := stmt.ExecContext(ctx,
+	err = r.db.QueryRow(ctx, query,
 		session.SessionUUID,
 		session.AccountID,
 		session.RefreshToken,
@@ -46,22 +40,17 @@ func (r *authRepo) CreateSession(ctx context.Context, session dto.Session) (sess
 		session.ClientIP,
 		session.IsBlocked,
 		session.RefreshTokenExpiredAt,
-	)
+	).Scan(&sessionID)
 	if err != nil {
-		return sessionID, mysqlutils.HandleMySQLError(err)
-	}
-
-	sessionID, err = result.LastInsertId()
-	if err != nil {
-		return sessionID, mysqlutils.HandleMySQLError(err)
+		return sessionID, handleDBError(err)
 	}
 
 	return sessionID, nil
 }
 
 func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (session dto.Session, err error) {
-	query := ` 
-		SELECT 
+	query := `
+		SELECT
 			ts.session_id,
 			ts.session_uuid,
 			ta.account_id,
@@ -70,23 +59,16 @@ func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (se
 			ts.client_ip,
 			ts.is_blocked,
 			ts.refresh_token_expires_at
-		
+
 		FROM 	tab_session 			ts
 
 		INNER JOIN tab_account ta
 			ON ta.account_id = ts.account_id
 
-		WHERE	ts.session_uuid 		= 	?
-
+		WHERE	ts.session_uuid 		= 	$1
 	`
 
-	stmt, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return session, mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRowContext(ctx, sessionUUID)
+	row := r.db.QueryRow(ctx, query, sessionUUID)
 
 	err = row.Scan(
 		&session.SessionID,
@@ -99,7 +81,7 @@ func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (se
 		&session.RefreshTokenExpiredAt,
 	)
 	if err != nil {
-		return session, err
+		return session, handleDBError(err)
 	}
 
 	return session, nil
@@ -108,19 +90,14 @@ func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (se
 func (r *authRepo) SetSessionAsBlocked(ctx context.Context, sessionUUID string) (err error) {
 	query := `
 		UPDATE tab_session
-		SET is_blocked = true
-		WHERE session_uuid = ?;
+		SET is_blocked = true,
+			update_at  = NOW()
+		WHERE session_uuid = $1;
 	`
 
-	stmt, err := r.db.PrepareContext(ctx, query)
+	_, err = r.db.Exec(ctx, query, sessionUUID)
 	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.ExecContext(ctx, sessionUUID)
-	if err != nil {
-		return mysqlutils.HandleMySQLError(err)
+		return handleDBError(err)
 	}
 
 	return nil

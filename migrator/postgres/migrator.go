@@ -1,13 +1,14 @@
-package mysql
+package postgres
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"fmt"
 	"io/fs"
 	"log"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 )
 
@@ -15,15 +16,21 @@ import (
 var SqlFiles embed.FS
 
 // Migrate applies all pending database migrations using goose.
-func Migrate(db *sql.DB) error {
+func Migrate(pool *pgxpool.Pool) error {
+	if pool == nil {
+		return fmt.Errorf("pool is nil")
+	}
+
 	ctx := context.Background()
+
+	db := stdlib.OpenDBFromPool(pool)
 
 	sqlFS, err := fs.Sub(SqlFiles, "sql")
 	if err != nil {
 		return fmt.Errorf("getting sql subdirectory: %w", err)
 	}
 
-	provider, err := goose.NewProvider(goose.DialectMySQL, db, sqlFS)
+	provider, err := goose.NewProvider(goose.DialectPostgres, db, sqlFS)
 	if err != nil {
 		return fmt.Errorf("creating goose provider: %w", err)
 	}

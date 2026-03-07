@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra"
@@ -10,7 +11,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/mysqlutils"
 	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
 )
@@ -104,7 +104,7 @@ func (s *authApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (ses
 
 	session, err = s.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
 	if err != nil {
-		if mysqlutils.SQLNotFound(err.Error()) {
+		if errors.Is(err, domain.ErrNotFound) {
 			return session, resterrors.NewUnauthorizedError("session not found")
 		}
 		s.log.Errorw(ctx, "error getting session", logger.Err(err))

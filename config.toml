@@ -17,12 +17,13 @@ port = "5000"
   default-expiration = "24h"
   
 [db]
-  [db.mysql]
+  [db.postgres]
   username = "root"
   password = "root"
-  host = "db" # mysql container name
-  port = 3306
+  host = "db" # postgres container name
+  port = 5432
   db-name = "go_boilerplate_db"
+  sslmode = "disable"
   max-life-in-minutes = 1
   max-idle-connections = 5
   max-open-connections = 100

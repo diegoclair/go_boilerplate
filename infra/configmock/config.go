@@ -25,10 +25,10 @@ type AuthConfig struct {
 }
 
 type DBConfig struct {
-	MySQL MySQLConfig
+	Postgres PostgresConfig
 }
 
-type MySQLConfig struct {
+type PostgresConfig struct {
 	Host     string
 	Port     string
 	Username string
@@ -51,7 +51,7 @@ func New() *ConfigMock {
 			PasetoSymmetricKey:   "d152a3402-4d32-85ad-19df4c9934cd",
 		},
 		DB: DBConfig{
-			MySQL: MySQLConfig{
+			Postgres: PostgresConfig{
 				Host:     "",
 				Port:     "",
 				Username: "guest",
@@ -68,9 +68,11 @@ func New() *ConfigMock {
 	}
 }
 
-func (c *ConfigMock) GetMysqlDSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=true",
-		c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.Host, c.DB.MySQL.Port,
+func (c *ConfigMock) GetPostgresDSN() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		c.DB.Postgres.Username, c.DB.Postgres.Password,
+		c.DB.Postgres.Host, c.DB.Postgres.Port,
+		c.DB.Postgres.DBName,
 	)
 }
 
@@ -78,17 +80,13 @@ func (c *ConfigMock) GetLogger() logger.Logger {
 	return logger.NewNoop()
 }
 
-func (c *ConfigMock) GetMysqlDNS() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.Host, c.DB.MySQL.Port, c.DB.MySQL.DBName)
-}
-
 func (c *ConfigMock) SetRedisHost(host, port string) {
 	c.Redis.Host = fmt.Sprintf("%s:%s", host, port)
 }
 
-func (c *ConfigMock) SetMySQLHostAndPort(host, port string) {
-	c.DB.MySQL.Host = host
-	c.DB.MySQL.Port = port
+func (c *ConfigMock) SetPostgresHostAndPort(host, port string) {
+	c.DB.Postgres.Host = host
+	c.DB.Postgres.Port = port
 }
 
 func (c *ConfigMock) GetCacheManager(ctrl *gomock.Controller) *mocks.MockCacheManager {

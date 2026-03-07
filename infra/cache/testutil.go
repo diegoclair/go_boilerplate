@@ -27,7 +27,7 @@ func SetRedisTestContainerConfig(ctx context.Context, cfg *configmock.ConfigMock
 		Started:          true,
 	})
 	if err != nil {
-		log.Fatalf("cannot start mysql container: %v", err)
+		log.Fatalf("cannot start redis container: %v", err)
 	}
 
 	mappedPort, err := redisContainer.MappedPort(ctx, "6379")

@@ -2,47 +2,52 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"io/fs"
 	"log"
 	"os"
 
-	"github.com/diegoclair/go_boilerplate/migrator/mysql"
-	_ "github.com/go-sql-driver/mysql"
+	pgMigrator "github.com/diegoclair/go_boilerplate/migrator/postgres"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 )
 
 func main() {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
-		envOr("DB_MYSQL_USERNAME", "root"),
-		envOr("DB_MYSQL_PASSWORD", "root"),
-		envOr("DB_MYSQL_HOST", "localhost"),
-		envOr("DB_MYSQL_PORT", "3306"),
-		envOr("DB_MYSQL_DB_NAME", "go_boilerplate_db"),
+	ctx := context.Background()
+
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		envOr("DB_POSTGRES_USERNAME", "root"),
+		envOr("DB_POSTGRES_PASSWORD", "root"),
+		envOr("DB_POSTGRES_HOST", "localhost"),
+		envOr("DB_POSTGRES_PORT", "5432"),
+		envOr("DB_POSTGRES_DB_NAME", "go_boilerplate_db"),
+		envOr("DB_POSTGRES_SSLMODE", "disable"),
 	)
 
-	db, err := sql.Open("mysql", dsn)
+	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
-	defer db.Close()
+	defer pool.Close()
 
-	if err := db.Ping(); err != nil {
+	if err := pool.Ping(ctx); err != nil {
 		log.Fatalf("failed to ping database: %v", err)
 	}
 
-	sqlFS, err := fs.Sub(mysql.SqlFiles, "sql")
+	db := stdlib.OpenDBFromPool(pool)
+
+	sqlFS, err := fs.Sub(pgMigrator.SqlFiles, "sql")
 	if err != nil {
 		log.Fatalf("failed to get sql subdirectory: %v", err)
 	}
 
-	provider, err := goose.NewProvider(goose.DialectMySQL, db, sqlFS)
+	provider, err := goose.NewProvider(goose.DialectPostgres, db, sqlFS)
 	if err != nil {
 		log.Fatalf("failed to create goose provider: %v", err)
 	}
 
-	result, err := provider.Down(context.Background())
+	result, err := provider.Down(ctx)
 	if err != nil {
 		log.Fatalf("migration down failed: %v", err)
 	}

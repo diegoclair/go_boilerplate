@@ -50,22 +50,27 @@ type CacheConfig struct {
 }
 
 type DBConfig struct {
-	MySQL MySQLConfig `mapstructure:"mysql"`
+	Postgres PostgresConfig `mapstructure:"postgres"`
 }
 
-type MySQLConfig struct {
+type PostgresConfig struct {
 	Username           string `mapstructure:"username"`
 	Password           string `mapstructure:"password"`
 	Host               string `mapstructure:"host"`
 	Port               string `mapstructure:"port"`
 	DBName             string `mapstructure:"db-name"`
+	SSLMode            string `mapstructure:"sslmode"`
 	MaxLifeInMinutes   int    `mapstructure:"max-life-in-minutes"`
 	MaxIdleConnections int    `mapstructure:"max-idle-connections"`
 	MaxOpenConnections int    `mapstructure:"max-open-connections"`
 }
 
-func (c *Config) GetMysqlDsn() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", c.DB.MySQL.Username, c.DB.MySQL.Password, c.DB.MySQL.Host, c.DB.MySQL.Port, c.DB.MySQL.DBName)
+func (c *Config) GetPostgresDsn() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		c.DB.Postgres.Username, c.DB.Postgres.Password,
+		c.DB.Postgres.Host, c.DB.Postgres.Port,
+		c.DB.Postgres.DBName, c.DB.Postgres.SSLMode,
+	)
 }
 
 type LogConfig struct {

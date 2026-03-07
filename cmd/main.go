@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
-	db "github.com/diegoclair/go_boilerplate/infra/data/mysql"
+	db "github.com/diegoclair/go_boilerplate/infra/data/postgres"
 	"github.com/diegoclair/go_boilerplate/infra/shutdown"
 	"github.com/diegoclair/go_boilerplate/internal/application/service"
 	"github.com/diegoclair/go_boilerplate/internal/domain"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest"
-	"github.com/diegoclair/go_boilerplate/migrator/mysql"
+	pgMigrator "github.com/diegoclair/go_boilerplate/migrator/postgres"
 	"github.com/diegoclair/go_utils/logger"
 )
 
@@ -40,9 +40,9 @@ func main() {
 	)
 
 	log.Info(ctx, "Running the migrations...")
-	err = mysql.Migrate(cfg.GetDataManager().(*db.MysqlConn).DB())
+	err = pgMigrator.Migrate(cfg.GetDataManager().(*db.PostgresConn).Pool())
 	if err != nil {
-		log.Errorw(ctx, "error to migrate mysql", logger.Err(err))
+		log.Errorw(ctx, "error to migrate postgres", logger.Err(err))
 		return
 	}
 	log.Info(ctx, "Migrations completed successfully")

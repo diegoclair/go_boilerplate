@@ -1,16 +1,15 @@
-package mysql
+package postgres
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/crypto"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/random"
-	"github.com/stretchr/testify/require"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 )
 
 func createRandomAccount(t *testing.T) entity.Account {
@@ -28,11 +27,11 @@ func createRandomAccount(t *testing.T) entity.Account {
 	args.Password, err = c.HashPassword(random.RandomPassword())
 	require.NoError(t, err)
 
-	createID, err := testMysql.Account().CreateAccount(context.Background(), args)
+	createID, err := testDB.Account().CreateAccount(context.Background(), args)
 	require.NoError(t, err)
 	require.NotZero(t, createID)
 
-	account, err := testMysql.Account().GetAccountByUUID(context.Background(), args.UUID)
+	account, err := testDB.Account().GetAccountByUUID(context.Background(), args.UUID)
 	require.NoError(t, err)
 	require.NotEmpty(t, account)
 	validateTwoAccounts(t, args, account)
@@ -54,28 +53,14 @@ func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }
 
-func TestCreateAccountErrorsWithMock(t *testing.T) {
-	testForInsertErrorsWithMock(t, func(db *sql.DB) error {
-		_, err := newAccountRepo(db).CreateAccount(context.Background(), entity.Account{})
-		return err
-	})
-}
-
 func TestGetAccountByDocument(t *testing.T) {
 	account := createRandomAccount(t)
 
-	account2, err := testMysql.Account().GetAccountByDocument(context.Background(), account.CPF)
+	account2, err := testDB.Account().GetAccountByDocument(context.Background(), account.CPF)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
 
 	validateTwoAccounts(t, account, account2)
-}
-
-func TestGetAccountByDocumentErrorsWithMock(t *testing.T) {
-	testForSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
-		_, err := newAccountRepo(db).GetAccountByDocument(context.Background(), "cpf")
-		return err
-	})
 }
 
 func TestGetAccounts(t *testing.T) {
@@ -85,7 +70,7 @@ func TestGetAccounts(t *testing.T) {
 	ctx := context.Background()
 
 	// assert first account created
-	accounts, totalRecords, err := testMysql.Account().GetAccounts(ctx, 10, 0)
+	accounts, totalRecords, err := testDB.Account().GetAccounts(ctx, 10, 0)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
 
@@ -101,7 +86,7 @@ func TestGetAccounts(t *testing.T) {
 	require.NotZero(t, accounts[0].CreatedAT)
 
 	// assert second account created
-	accounts, totalRecords, err = testMysql.Account().GetAccounts(ctx, 10, 1)
+	accounts, totalRecords, err = testDB.Account().GetAccounts(ctx, 10, 1)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
 
@@ -117,44 +102,23 @@ func TestGetAccounts(t *testing.T) {
 	require.NotZero(t, accounts[0].CreatedAT)
 }
 
-func TestGetAccountsErrorsWithMock(t *testing.T) {
-	testForPaginatedSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
-		_, _, err := newAccountRepo(db).GetAccounts(context.Background(), 10, 0)
-		return err
-	})
-}
-
 func TestGetAccountByUUID(t *testing.T) {
 	account := createRandomAccount(t)
 
-	account2, err := testMysql.Account().GetAccountByUUID(context.Background(), account.UUID)
+	account2, err := testDB.Account().GetAccountByUUID(context.Background(), account.UUID)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
 
 	validateTwoAccounts(t, account, account2)
 }
 
-func TestGetAccountByUUIDErrorsWithMock(t *testing.T) {
-	testForSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
-		_, err := newAccountRepo(db).GetAccountByUUID(context.Background(), "uuid")
-		return err
-	})
-}
-
 func TestGetAccountIDByUUID(t *testing.T) {
 	account := createRandomAccount(t)
 
-	accountID, err := testMysql.Account().GetAccountIDByUUID(context.Background(), account.UUID)
+	accountID, err := testDB.Account().GetAccountIDByUUID(context.Background(), account.UUID)
 	require.NoError(t, err)
 	require.NotZero(t, accountID)
 	require.Equal(t, account.ID, accountID)
-}
-
-func TestGetAccountIDByUUIDErrorsWithMock(t *testing.T) {
-	testForSelectErrorsWithMock(t, "account_id", func(db *sql.DB) error {
-		_, err := newAccountRepo(db).GetAccountIDByUUID(context.Background(), "uuid")
-		return err
-	})
 }
 
 func TestAddTransfer(t *testing.T) {
@@ -162,16 +126,9 @@ func TestAddTransfer(t *testing.T) {
 	account2 := createRandomAccount(t)
 
 	transferUUID := uuid.Must(uuid.NewV7()).String()
-	transferID, err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
+	transferID, err := testDB.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
 	require.NotZero(t, transferID)
-}
-
-func TestAddTransferErrorsWithMock(t *testing.T) {
-	testForInsertErrorsWithMock(t, func(db *sql.DB) error {
-		_, err := newAccountRepo(db).AddTransfer(context.Background(), "uuid", 1, 2, 50)
-		return err
-	})
 }
 
 func TestUpdateBalance(t *testing.T) {
@@ -179,19 +136,13 @@ func TestUpdateBalance(t *testing.T) {
 	account := createRandomAccount(t)
 
 	var balance float64 = 12
-	err := testMysql.Account().UpdateAccountBalance(ctx, account.ID, balance)
+	err := testDB.Account().UpdateAccountBalance(ctx, account.ID, balance)
 	require.NoError(t, err)
 
-	updatedAccount, err := testMysql.Account().GetAccountByUUID(ctx, account.UUID)
+	updatedAccount, err := testDB.Account().GetAccountByUUID(ctx, account.UUID)
 	require.NoError(t, err)
 
 	require.Equal(t, balance, updatedAccount.Balance)
-}
-
-func TestUpdateBalanceErrorsWithMock(t *testing.T) {
-	testForUpdateDeleteErrorsWithMock(t, func(db *sql.DB) error {
-		return newAccountRepo(db).UpdateAccountBalance(context.Background(), 1, 12)
-	})
 }
 
 func TestGetTransfersByAccountID(t *testing.T) {
@@ -201,37 +152,30 @@ func TestGetTransfersByAccountID(t *testing.T) {
 	account3 := createRandomAccount(t)
 
 	transferUUID := uuid.Must(uuid.NewV7()).String()
-	_, err := testMysql.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
+	_, err := testDB.Account().AddTransfer(context.Background(), transferUUID, account.ID, account2.ID, 50)
 	require.NoError(t, err)
 
 	transferUUID = uuid.Must(uuid.NewV7()).String()
 
-	_, err = testMysql.Account().AddTransfer(context.Background(), transferUUID, account3.ID, account2.ID, 50)
+	_, err = testDB.Account().AddTransfer(context.Background(), transferUUID, account3.ID, account2.ID, 50)
 	require.NoError(t, err)
 
-	transfersMade, totalRecordMade, err := testMysql.Account().GetTransfersByAccountID(ctx, account.ID, 0, 0, true)
+	transfersMade, totalRecordMade, err := testDB.Account().GetTransfersByAccountID(ctx, account.ID, 0, 0, true)
 	require.NoError(t, err)
 
 	require.Len(t, transfersMade, 1)
 	require.Equal(t, 1, int(totalRecordMade))
 
-	transfersReceived, totalRecordReceived, err := testMysql.Account().GetTransfersByAccountID(ctx, account2.ID, 10, 0, false)
+	transfersReceived, totalRecordReceived, err := testDB.Account().GetTransfersByAccountID(ctx, account2.ID, 10, 0, false)
 	require.NoError(t, err)
 
 	require.Len(t, transfersReceived, 2)
 	require.Equal(t, 2, int(totalRecordReceived))
 
 	//if skip one record, should return only one record
-	transfersReceived, totalRecordReceived, err = testMysql.Account().GetTransfersByAccountID(ctx, account2.ID, 10, 1, false)
+	transfersReceived, totalRecordReceived, err = testDB.Account().GetTransfersByAccountID(ctx, account2.ID, 10, 1, false)
 	require.NoError(t, err)
 
 	require.Len(t, transfersReceived, 1)
 	require.Equal(t, 2, int(totalRecordReceived))
-}
-
-func TestGetTransfersByAccountIDErrorsWithMock(t *testing.T) {
-	testForPaginatedSelectErrorsWithMock(t, "transfer_id", func(db *sql.DB) error {
-		_, _, err := newAccountRepo(db).GetTransfersByAccountID(context.Background(), 1, 0, 0, true)
-		return err
-	})
 }
