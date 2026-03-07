@@ -18,6 +18,7 @@ func setPostgresTestContainerConfig(ctx context.Context, cfg *configmock.ConfigM
 		postgres.WithDatabase(cfg.DB.Postgres.DBName),
 		postgres.WithUsername(cfg.DB.Postgres.Username),
 		postgres.WithPassword(cfg.DB.Postgres.Password),
+		postgres.BasicWaitStrategies(),
 	)
 	if err != nil {
 		log.Fatalf("cannot start postgres container: %v", err)
