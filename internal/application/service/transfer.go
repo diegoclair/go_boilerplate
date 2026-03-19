@@ -2,14 +2,14 @@ package service
 
 import (
 	"context"
-	"errors"
 
+	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
+	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/google/uuid"
 )
@@ -47,21 +47,21 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 	}
 
 	if !fromAccount.HasSufficientFunds(transfer.Amount) {
-		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
+		return errcodes.ErrInsufficientFunds
 	}
 
 	destAccount, err := s.dm.Account().GetAccountByUUID(ctx, transfer.AccountDestinationUUID)
 	if err != nil {
-		if errors.Is(err, domain.ErrNotFound) {
-			s.log.Errorw(ctx, "error to get destination account by uuid", logger.Err(err))
-			return resterrors.NewNotFoundError("Invalid destination account")
+		if apperr.IsNotFound(err) {
+			s.log.Errorw(ctx, "destination account not found", logger.Err(err))
+			return errcodes.ErrInvalidDestinationAccount
 		}
 		s.log.Errorw(ctx, "error to get destination account by uuid", logger.Err(err))
 		return err
 	}
 
 	if fromAccount.ID == destAccount.ID {
-		return resterrors.NewConflictError("You can't transfer to yourself")
+		return errcodes.ErrSelfTransfer
 	}
 
 	transfer.TransferUUID = uuid.Must(uuid.NewV7()).String()

@@ -53,7 +53,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 			},
 			CheckResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "Unmarshal type error")
+				require.Contains(t, resp.Body.String(), "invalid request body")
 			},
 		},
 		test.PrivateEndpointTest{
@@ -69,9 +69,7 @@ func TestHandler_handleAddTransfer(t *testing.T) {
 					Return(fmt.Errorf("error to create transfer")).MinTimes(1)
 			},
 			CheckResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "Service temporarily unavailable")
-				require.Contains(t, resp.Body.String(), "error to create transfer")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 	)
@@ -140,9 +138,7 @@ func TestHandler_handleGetTransfers(t *testing.T) {
 				test.AddAuthorization(ctx, t, req, m)
 			},
 			CheckResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "Service temporarily unavailable")
-				require.Contains(t, resp.Body.String(), "error to get transfers")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 	)

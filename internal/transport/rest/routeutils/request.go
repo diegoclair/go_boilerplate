@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_utils/resterrors"
+	"github.com/diegoclair/apperr"
 	echo "github.com/labstack/echo/v4"
 )
 
@@ -26,18 +26,18 @@ func GetRequiredParam[T comparable](rawValue string, converter ArrayConverter[T]
 
 	// Check for empty string first
 	if strings.TrimSpace(rawValue) == "" {
-		return zero, resterrors.NewUnprocessableEntity(errorMessage)
+		return zero, apperr.ErrInvalidInput.WithMessage(errorMessage)
 	}
 
 	// Convert the value using the same converter as arrays
 	value, err := converter(rawValue)
 	if err != nil {
-		return zero, resterrors.NewUnprocessableEntity(errorMessage)
+		return zero, apperr.ErrInvalidInput.WithMessage(errorMessage)
 	}
 
 	// Check if result is zero value (Go's zero value check)
 	if value == zero {
-		return zero, resterrors.NewUnprocessableEntity(errorMessage)
+		return zero, apperr.ErrInvalidInput.WithMessage(errorMessage)
 	}
 
 	return value, nil
@@ -102,7 +102,7 @@ func GetArrayParam[T any](rawValue, separator string, converter ArrayConverter[T
 		if trimmed := strings.TrimSpace(item); trimmed != "" {
 			value, err := converter(trimmed)
 			if err != nil {
-				return nil, resterrors.NewUnprocessableEntity("Invalid value: " + trimmed + " - " + err.Error())
+				return nil, apperr.ErrInvalidInput.WithMessage("Invalid value: " + trimmed + " - " + err.Error())
 			}
 			result = append(result, value)
 		}

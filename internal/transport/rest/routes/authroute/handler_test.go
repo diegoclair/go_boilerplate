@@ -71,7 +71,7 @@ func TestHandler_handleLogin(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "Unmarshal type error")
+				require.Contains(t, resp.Body.String(), "invalid request body")
 			},
 		},
 		{
@@ -88,8 +88,7 @@ func TestHandler_handleLogin(t *testing.T) {
 				m.AuthAppMock.EXPECT().Login(ctx, body.ToDto()).Return(entity.Account{}, fmt.Errorf("error to login")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "error to login")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 		{
@@ -107,8 +106,7 @@ func TestHandler_handleLogin(t *testing.T) {
 				m.AuthTokenMock.EXPECT().CreateAccessToken(ctx, gomock.Any()).Return("", contract.TokenPayload{}, fmt.Errorf("error to create access token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "error to create access token")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 		{
@@ -127,8 +125,7 @@ func TestHandler_handleLogin(t *testing.T) {
 				m.AuthTokenMock.EXPECT().CreateRefreshToken(ctx, gomock.Any()).Return("", contract.TokenPayload{}, fmt.Errorf("error to create refresh token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "error to create refresh token")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 		{
@@ -148,8 +145,7 @@ func TestHandler_handleLogin(t *testing.T) {
 				m.AuthAppMock.EXPECT().CreateSession(ctx, gomock.Any()).Return(fmt.Errorf("error to create session")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "error to create session")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 	}
@@ -243,7 +239,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "Unmarshal type error")
+				require.Contains(t, resp.Body.String(), "invalid request body")
 			},
 		},
 		{
@@ -257,8 +253,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 				m.AuthTokenMock.EXPECT().VerifyToken(ctx, gomock.Any()).Return(contract.TokenPayload{}, fmt.Errorf("error to verify token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "error to verify token")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 		{
@@ -283,8 +278,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					Return(dto.Session{}, fmt.Errorf("error to get session by uuid")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "error to get session by uuid")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 		{
@@ -339,7 +333,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, resp.Code)
-				require.Contains(t, resp.Body.String(), "expired session")
+				require.Contains(t, resp.Body.String(), "session has expired")
 			},
 		},
 		{
@@ -374,8 +368,7 @@ func TestHandler_handleRefreshToken(t *testing.T) {
 					Return("", contract.TokenPayload{}, fmt.Errorf("error to create access token")).Times(1)
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "error to create access token")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 	}
@@ -434,8 +427,7 @@ func TestHandler_handleLogout(t *testing.T) {
 				m.AuthAppMock.EXPECT().Logout(ctx, gomock.Any()).Return(fmt.Errorf("error to logout")).Times(1)
 			},
 			CheckResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, recorder.Code)
-				require.Contains(t, recorder.Body.String(), "error to logout")
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 	)

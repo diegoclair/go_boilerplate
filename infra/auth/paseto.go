@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -51,7 +51,7 @@ func (p *pasetoAuth) CreateRefreshToken(ctx context.Context, input contract.Toke
 
 func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contract.TokenPayload, err error) {
 	if strings.TrimSpace(token) == "" {
-		return resp, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+		return resp, apperr.ErrTokenInvalid
 	}
 
 	payload := &tokenPayload{}
@@ -59,17 +59,17 @@ func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contra
 	err = p.paseto.Decrypt(token, p.symmetricKey, payload, nil)
 	if err != nil {
 		p.log.Errorw(ctx, "error to decrypt token", logger.Err(err))
-		return resp, resterrors.NewUnauthorizedError(errInvalidToken.Error())
+		return resp, apperr.ErrTokenInvalid
 	}
 
 	err = payload.Valid()
 	if err != nil {
 		if errors.Is(err, errExpiredToken) {
 			p.log.Warnw(ctx, "token has expired")
-		} else {
-			p.log.Errorw(ctx, "error to validate token", logger.Err(err))
+			return resp, apperr.ErrTokenExpired
 		}
-		return resp, resterrors.NewUnauthorizedError(err.Error())
+		p.log.Errorw(ctx, "error to validate token", logger.Err(err))
+		return resp, apperr.ErrTokenInvalid
 	}
 
 	return payload.toContract(), nil
@@ -81,7 +81,7 @@ func (a *pasetoAuth) createToken(ctx context.Context, input tokenPayloadInput, d
 	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)
 	if err != nil {
 		a.log.Errorw(ctx, "error to encrypt token", logger.Err(err))
-		return tokenString, payload, resterrors.NewUnauthorizedError(err.Error())
+		return tokenString, payload, apperr.ErrInternal.Wrap(err)
 	}
 
 	return tokenString, payload, nil

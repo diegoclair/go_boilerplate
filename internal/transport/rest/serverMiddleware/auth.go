@@ -1,10 +1,10 @@
 package servermiddleware
 
 import (
+	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra"
 	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	"github.com/diegoclair/go_utils/resterrors"
 	echo "github.com/labstack/echo/v4"
 )
 
@@ -14,7 +14,7 @@ func AuthMiddlewarePrivateRoute(authToken infraContract.AuthToken, cache contrac
 
 			accessToken := ctx.Request().Header.Get(infra.TokenKey.String())
 			if len(accessToken) == 0 {
-				return resterrors.NewUnauthorizedError("access token is required")
+				return apperr.ErrTokenRequired
 			}
 
 			payload, err := authToken.VerifyToken(ctx.Request().Context(), accessToken)
@@ -24,7 +24,7 @@ func AuthMiddlewarePrivateRoute(authToken infraContract.AuthToken, cache contrac
 
 			valid, _ := cache.GetString(ctx.Request().Context(), accessToken)
 			if valid != "" {
-				return resterrors.NewUnauthorizedError("token is invalid")
+				return apperr.ErrTokenInvalid
 			}
 
 			// Add information to the echo context

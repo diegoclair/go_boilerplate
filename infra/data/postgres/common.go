@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/diegoclair/go_boilerplate/internal/domain"
+	"github.com/diegoclair/apperr"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
@@ -22,9 +22,9 @@ type scanner interface {
 	Scan(dest ...any) error
 }
 
-// handleDBError converts PostgreSQL-specific errors to domain errors.
-//   - pgx.ErrNoRows → domain.ErrNotFound
-//   - unique_violation (23505) → domain.ErrConflict
+// handleDBError converts PostgreSQL-specific errors to apperr errors.
+//   - pgx.ErrNoRows → apperr.ErrRecordNotFound
+//   - unique_violation (23505) → apperr.ErrDuplicateEntry
 //   - others → returned as-is
 func handleDBError(err error) error {
 	if err == nil {
@@ -32,12 +32,12 @@ func handleDBError(err error) error {
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return domain.ErrNotFound
+		return apperr.ErrRecordNotFound
 	}
 
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-		return domain.ErrConflict
+		return apperr.ErrDuplicateEntry
 	}
 
 	return err

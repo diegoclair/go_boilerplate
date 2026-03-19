@@ -9,6 +9,7 @@ import (
 	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
+	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
 	"github.com/google/uuid"
@@ -114,15 +115,15 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 	}
 
 	if session.IsBlocked {
-		return routeutils.ResponseUnauthorizedError(c, "session blocked")
+		return routeutils.HandleError(c, errcodes.ErrSessionBlocked)
 	}
 
 	if session.RefreshToken != input.RefreshToken {
-		return routeutils.ResponseUnauthorizedError(c, "mismatched session token")
+		return routeutils.HandleError(c, errcodes.ErrSessionTokenMismatch)
 	}
 
 	if time.Now().After(session.RefreshTokenExpiredAt) {
-		return routeutils.ResponseUnauthorizedError(c, "expired session")
+		return routeutils.HandleError(c, errcodes.ErrSessionExpired)
 	}
 
 	req := infraContract.TokenPayloadInput{

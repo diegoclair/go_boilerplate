@@ -47,6 +47,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
+github.com/diegoclair/apperr v0.1.1 h1:TcoBenBcQVF9c50sPmcWNIynvjafDiGMGRmB/9MNni4=
+github.com/diegoclair/apperr v0.1.1/go.mod h1:QGmxUOpOsWqB0qozsx4lMHq8WF3WLoE03DfZqu31R6I=
 github.com/diegoclair/go_utils v1.0.14 h1:7iCfS6dNzfJpYYP7UeYyFJQeZP30Vqqp8/AyQTnAbRc=
 github.com/diegoclair/go_utils v1.0.14/go.mod h1:VuJG8zA90LkWy7AsIOGRfhyCGBummvUu2w/4zsw0Ud0=
 github.com/diegoclair/goswag v1.0.11 h1:MHllZPLCH9yTcP0Qo8FZU0H7abyKwpAS+QFq6CziopY=

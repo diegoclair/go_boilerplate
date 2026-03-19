@@ -3,7 +3,7 @@ package routeutils
 import (
 	"net/http"
 
-	"github.com/diegoclair/go_utils/resterrors"
+	"github.com/diegoclair/apperr/httpmap"
 	echo "github.com/labstack/echo/v4"
 )
 
@@ -26,36 +26,15 @@ func ResponseAPIOk(c echo.Context, data interface{}) error {
 	return c.JSON(http.StatusOK, data)
 }
 
-func ResponseUnauthorizedError(c echo.Context, errMsg string) error {
-	err := resterrors.NewUnauthorizedError(errMsg)
-	return c.JSON(err.StatusCode(), err)
-}
-
-func ResponseAPIError(c echo.Context, status int, message string, err string, causes interface{}) error {
-	returnValue := resterrors.NewRestError(message, status, err, causes)
-	return c.JSON(status, returnValue)
-}
-
 func ResponseInvalidRequestBody(c echo.Context, err error) error {
-	e := resterrors.NewBadRequestError("Invalid request body", err)
-	return c.JSON(e.StatusCode(), e)
+	return c.JSON(http.StatusBadRequest, httpmap.ErrorResponse{
+		Message:    "invalid request body",
+		StatusCode: http.StatusBadRequest,
+		Error:      http.StatusText(http.StatusBadRequest),
+	})
 }
 
-func HandleError(c echo.Context, errorToHandle error) (err error) {
-	statusCode := http.StatusServiceUnavailable
-	errorMessage := ErrorMessageServiceUnavailable
-
-	if errorToHandle != nil {
-		errorString := errorToHandle.Error()
-
-		restErr, ok := resterrors.FromError(errorToHandle).(resterrors.RestErr)
-		if !ok {
-			return ResponseAPIError(c, statusCode, errorMessage, errorString, nil)
-		}
-
-		return c.JSON(restErr.StatusCode(), restErr)
-
-	}
-
-	return ResponseAPIError(c, statusCode, errorMessage, "", nil)
+func HandleError(c echo.Context, errorToHandle error) error {
+	status, body := httpmap.ToHTTP(errorToHandle)
+	return c.JSON(status, body)
 }

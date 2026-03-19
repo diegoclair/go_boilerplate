@@ -2,22 +2,17 @@ package service
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
+	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
-)
-
-const (
-	wrongLogin            string = "Document or password are wrong"
-	errDeactivatedAccount string = "Account is deactivated"
 )
 
 type authApp struct {
@@ -55,14 +50,14 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 	account, err = s.dm.Account().GetAccountByDocument(ctx, input.CPF)
 	if err != nil {
 		s.log.Errorw(ctx, "error getting account by document", logger.Err(err))
-		return account, resterrors.NewUnauthorizedError(wrongLogin)
+		return account, errcodes.ErrInvalidCredentials
 	}
 
-	ctx = context.WithValue(ctx, infra.AccountUUIDKey, account.UUID) // set account uuid in context to be used in logs
+	ctx = context.WithValue(ctx, infra.AccountUUIDKey, account.UUID)
 
 	if !account.Active {
 		s.log.Error(ctx, "account is not active")
-		return account, resterrors.NewUnauthorizedError(errDeactivatedAccount)
+		return account, errcodes.ErrDeactivatedAccount
 	}
 
 	s.log.Infow(ctx, "account information used to login",
@@ -73,7 +68,7 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 	err = s.crypto.CheckPassword(input.Password, account.Password)
 	if err != nil {
 		s.log.Error(ctx, "wrong password")
-		return account, resterrors.NewUnauthorizedError(wrongLogin)
+		return account, errcodes.ErrInvalidCredentials
 	}
 
 	return account, nil
@@ -104,8 +99,8 @@ func (s *authApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (ses
 
 	session, err = s.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
 	if err != nil {
-		if errors.Is(err, domain.ErrNotFound) {
-			return session, resterrors.NewUnauthorizedError("session not found")
+		if apperr.IsNotFound(err) {
+			return session, errcodes.ErrSessionNotFound
 		}
 		s.log.Errorw(ctx, "error getting session", logger.Err(err))
 		return session, err
@@ -121,7 +116,7 @@ func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
 	sessionUUID, ok := ctx.Value(infra.SessionKey).(string)
 	if !ok || sessionUUID == "" {
 		s.log.Error(ctx, "session UUID not found in context")
-		return resterrors.NewUnauthorizedError("session not found")
+		return errcodes.ErrSessionNotFound
 	}
 
 	// access token will be on cache for 3 minutes after it duration

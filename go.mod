@@ -3,6 +3,7 @@ module github.com/diegoclair/go_boilerplate
 go 1.26.1
 
 require (
+	github.com/diegoclair/apperr v0.1.1
 	github.com/diegoclair/go_utils v1.0.14
 	github.com/diegoclair/goswag v1.0.11
 	github.com/google/uuid v1.6.0

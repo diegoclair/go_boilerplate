@@ -1,3 +1,5 @@
+name: go-boilerplate
+
 services:
 
   app:

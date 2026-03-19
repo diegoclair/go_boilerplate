@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 
+	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
+	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
 	"github.com/diegoclair/go_utils/logger"
-	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/google/uuid"
 )
@@ -42,12 +43,12 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 	}
 
 	_, err = s.dm.Account().GetAccountByDocument(ctx, account.CPF)
-	if err != nil && !errors.Is(err, domain.ErrNotFound) {
+	if err != nil && !apperr.IsNotFound(err) {
 		s.log.Errorw(ctx, "error to get account by document", logger.Err(err))
 		return err
 	} else if err == nil {
 		s.log.Error(ctx, "The document number is already in use")
-		return resterrors.NewConflictError("The cpf is already in use")
+		return errcodes.ErrCPFAlreadyInUse
 	}
 
 	account.Password, err = s.crypto.HashPassword(account.Password)

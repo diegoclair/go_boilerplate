@@ -58,7 +58,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "Unmarshal type error")
+				require.Contains(t, resp.Body.String(), "invalid request body")
 			},
 		},
 		{
@@ -75,8 +75,7 @@ func TestHandler_handleAddAccount(t *testing.T) {
 				mock.AccountAppMock.EXPECT().CreateAccount(ctx, body.ToDto()).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "Service temporarily unavailable")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 	}
@@ -173,8 +172,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 				mock.AccountAppMock.EXPECT().GetAccounts(ctx, int64(10), int64(0)).Times(1).Return(accounts, int64(0), fmt.Errorf("some service error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock test.SvcMocks, args args) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "some service error")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 	}
@@ -246,15 +244,14 @@ func TestHandler_GetAccountByID(t *testing.T) {
 				mock.AccountAppMock.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Times(1).Return(entity.Account{}, fmt.Errorf("some service error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock test.SvcMocks, args args) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "some service error")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 		{
 			name: "Should return error if we have an invalid uuid",
 			args: args{accountUUID: " "},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder, mock test.SvcMocks, args args) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Equal(t, http.StatusBadRequest, resp.Code)
 				require.Contains(t, resp.Body.String(), "Invalid account_uuid")
 			},
 		},
@@ -324,7 +321,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, resp.Code)
-				require.Contains(t, resp.Body.String(), "Unmarshal type error")
+				require.Contains(t, resp.Body.String(), "invalid request body")
 			},
 		},
 		{
@@ -335,7 +332,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 				},
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+				require.Equal(t, http.StatusBadRequest, resp.Code)
 				require.Contains(t, resp.Body.String(), "account_uuid is required")
 			},
 		},
@@ -355,8 +352,7 @@ func TestHandler_handleAddBalance(t *testing.T) {
 				mock.AccountAppMock.EXPECT().AddBalance(ctx, input).Times(1).Return(errors.New("some error"))
 			},
 			checkResponse: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusServiceUnavailable, resp.Code)
-				require.Contains(t, resp.Body.String(), "Service temporarily unavailable")
+				require.Equal(t, http.StatusInternalServerError, resp.Code)
 			},
 		},
 	}

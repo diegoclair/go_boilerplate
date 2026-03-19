@@ -17,7 +17,6 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/transferroute"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/internal/transport/rest/serverMiddleware"
-	"github.com/diegoclair/go_utils/resterrors"
 	"github.com/diegoclair/goswag"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
@@ -52,7 +51,7 @@ func StartRestServer(ctx context.Context, cfg *config.Config, infra domain.Infra
 }
 
 func NewRestServer(services *service.Apps, authToken infraContract.AuthToken, cache contract.CacheManager, appName string) *Server {
-	router := goswag.NewEcho(resterrors.GoSwagDefaultResponseErrors()...)
+	router := goswag.NewEcho(routeutils.DefaultSwaggerErrors()...)
 	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	router.Echo().HTTPErrorHandler = func(err error, c echo.Context) {
 		_ = routeutils.HandleError(c, err)

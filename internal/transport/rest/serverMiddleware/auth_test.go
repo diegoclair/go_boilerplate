@@ -5,11 +5,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/contract"
 	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/diegoclair/go_boilerplate/mocks"
-	"github.com/diegoclair/go_utils/resterrors"
+	"github.com/diegoclair/apperr/httpmap"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -51,7 +52,8 @@ func TestAuthMiddleware(t *testing.T) {
 		})(c)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusUnauthorized, err.(resterrors.RestErr).StatusCode())
+		status, _ := httpmap.ToHTTP(err)
+		assert.Equal(t, http.StatusUnauthorized, status)
 	})
 
 	t.Run("Should return error when verify token fails", func(t *testing.T) {
@@ -60,14 +62,15 @@ func TestAuthMiddleware(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
-		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{}, resterrors.NewUnauthorizedError("an error occurred"))
+		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{}, apperr.ErrTokenInvalid)
 
 		err := middleware(func(c echo.Context) error {
 			return nil
 		})(c)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusUnauthorized, err.(resterrors.RestErr).StatusCode())
+		status, _ := httpmap.ToHTTP(err)
+		assert.Equal(t, http.StatusUnauthorized, status)
 	})
 
 	t.Run("Should return error when token is already invalid", func(t *testing.T) {
@@ -87,6 +90,7 @@ func TestAuthMiddleware(t *testing.T) {
 		})(c)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusUnauthorized, err.(resterrors.RestErr).StatusCode())
+		status, _ := httpmap.ToHTTP(err)
+		assert.Equal(t, http.StatusUnauthorized, status)
 	})
 }
