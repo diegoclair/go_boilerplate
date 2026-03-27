@@ -48,7 +48,7 @@ func Test_accountService_CreateAccount(t *testing.T) {
 					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, apperr.ErrRecordNotFound).Times(1),
 					mocks.mockCrypto.EXPECT().HashPassword(args.account.Password).Return("123", nil).Times(1),
 
-					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, account entity.Account) (int64, error) {
+					mocks.mockAccountRepo.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, account entity.Account) (int64, error) {
 						require.Equal(t, args.account.Name, account.Name)
 						require.Equal(t, args.account.CPF, account.CPF)
 						require.NotEmpty(t, account.Password)
@@ -80,7 +80,7 @@ func Test_accountService_CreateAccount(t *testing.T) {
 				gomock.InOrder(
 					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.account.CPF).Return(entity.Account{}, apperr.ErrRecordNotFound).Times(1),
 					mocks.mockCrypto.EXPECT().HashPassword(args.account.Password).Return("123", nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().CreateAccount(ctx, gomock.Any()).Return(int64(0), errors.New("some error")).Times(1),
+					mocks.mockAccountRepo.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Return(int64(0), errors.New("some error")).Times(1),
 				)
 			},
 			wantErr: true,
@@ -154,8 +154,8 @@ func Test_accountService_AddBalance(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 50}
 				gomock.InOrder(
-					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, result.ID, result.Balance+args.amount).Return(nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.accountUUID).Return(result, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(gomock.Any(), result.ID, result.Balance+args.amount).Return(nil).Times(1),
 				)
 			},
 		},
@@ -165,8 +165,8 @@ func Test_accountService_AddBalance(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 0.2}
 				gomock.InOrder(
-					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, result.ID, 0.3).Return(nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.accountUUID).Return(result, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(gomock.Any(), result.ID, 0.3).Return(nil).Times(1),
 				)
 			},
 		},
@@ -175,7 +175,7 @@ func Test_accountService_AddBalance(t *testing.T) {
 			args: args{accountUUID: "d152a340-9a87-4d32-85ad-19df4c9934cd", amount: 7.32},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{}
-				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, assert.AnError).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.accountUUID).Return(result, assert.AnError).Times(1)
 			},
 			wantErr: true,
 		},
@@ -185,8 +185,8 @@ func Test_accountService_AddBalance(t *testing.T) {
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{ID: 12, UUID: args.accountUUID, Balance: 50}
 				gomock.InOrder(
-					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1),
-					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(ctx, result.ID, result.Balance+args.amount).Return(assert.AnError).Times(1),
+					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.accountUUID).Return(result, nil).Times(1),
+					mocks.mockAccountRepo.EXPECT().UpdateAccountBalance(gomock.Any(), result.ID, result.Balance+args.amount).Return(assert.AnError).Times(1),
 				)
 			},
 			wantErr: true,
@@ -304,7 +304,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := entity.Account{ID: 1, UUID: "123", Name: "name"}
-				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(result, nil).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.accountUUID).Return(result, nil).Times(1)
 			},
 			wantAccount: entity.Account{ID: 1, UUID: "123", Name: "name"},
 			wantErr:     false,
@@ -315,7 +315,7 @@ func Test_accountService_GetAccountByUUID(t *testing.T) {
 				accountUUID: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(ctx, args.accountUUID).Return(entity.Account{}, errors.New("some error")).Times(1)
+				mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.accountUUID).Return(entity.Account{}, errors.New("some error")).Times(1)
 			},
 			wantAccount: entity.Account{},
 			wantErr:     true,

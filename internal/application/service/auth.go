@@ -51,16 +51,12 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 	}
 
 	ctx = context.WithValue(ctx, infra.AccountUUIDKey, account.UUID)
+	ctx = logger.WithAttrs(ctx, logger.Attr("account_id", account.ID))
 
 	if !account.Active {
 		s.log.Error(ctx, "account is not active")
 		return account, errcodes.ErrDeactivatedAccount
 	}
-
-	s.log.Info(ctx, "account information used to login",
-		logger.Attr("account_id", account.ID),
-		logger.Attr("name", account.Name),
-	)
 
 	err = s.crypto.CheckPassword(input.Password, account.Password)
 	if err != nil {
@@ -88,6 +84,8 @@ func (s *authApp) CreateSession(ctx context.Context, session dto.Session) (err e
 }
 
 func (s *authApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (session dto.Session, err error) {
+	ctx = logger.WithAttrs(ctx, logger.Attr("session_uuid", sessionUUID))
+
 	session, err = s.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
 	if err != nil {
 		if apperr.IsNotFound(err) {

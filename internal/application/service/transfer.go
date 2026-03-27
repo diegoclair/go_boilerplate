@@ -37,6 +37,8 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 		return err
 	}
 
+	ctx = logger.WithAttrs(ctx, logger.Attr("destination_account_uuid", transfer.AccountDestinationUUID))
+
 	fromAccount, err := s.accountSvc.GetLoggedAccount(ctx)
 	if err != nil {
 		s.log.Error(ctx, "error to get logged account", logger.Err(err))
@@ -62,6 +64,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 	}
 
 	transfer.TransferUUID = uuid.Must(uuid.NewV7()).String()
+	ctx = logger.WithAttrs(ctx, logger.Attr("transfer_uuid", transfer.TransferUUID))
 
 	return s.dm.WithTransaction(ctx, func(tx contract.DataManager) error {
 

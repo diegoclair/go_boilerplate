@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra"
@@ -55,6 +54,7 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 		return err
 	}
 	account.UUID = uuid.Must(uuid.NewV7()).String()
+	ctx = logger.WithAttrs(ctx, logger.Attr("account_uuid", account.UUID))
 
 	_, err = s.dm.Account().CreateAccount(ctx, account)
 	if err != nil {
@@ -66,6 +66,8 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 }
 
 func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInput) (err error) {
+	ctx = logger.WithAttrs(ctx, logger.Attr("account_uuid", input.AccountUUID))
+
 	err = input.Validate(ctx, s.validator)
 	if err != nil {
 		s.log.Error(ctx, "error or invalid input", logger.Err(err))
@@ -96,12 +98,12 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 		return accounts, totalRecords, err
 	}
 
-	s.log.Info(ctx, fmt.Sprintf("Found %d accounts", totalRecords))
-
 	return accounts, totalRecords, nil
 }
 
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
+	ctx = logger.WithAttrs(ctx, logger.Attr("account_uuid", accountUUID))
+
 	account, err = s.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
 		s.log.Error(ctx, "error to get account by uuid", logger.Err(err))

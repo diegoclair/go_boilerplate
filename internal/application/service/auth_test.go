@@ -226,7 +226,7 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
 				result := dto.Session{SessionID: 1, SessionUUID: "123"}
-				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).Return(result, nil).Times(1)
+				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(gomock.Any(), args.sessionUUID).Return(result, nil).Times(1)
 			},
 			wantSession: dto.Session{SessionID: 1, SessionUUID: "123"},
 			wantErr:     false,
@@ -237,7 +237,7 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 				sessionUUID: "123",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(ctx, args.sessionUUID).Return(dto.Session{}, errors.New("some error")).Times(1)
+				mocks.mockAuthRepo.EXPECT().GetSessionByUUID(gomock.Any(), args.sessionUUID).Return(dto.Session{}, errors.New("some error")).Times(1)
 			},
 			wantSession: dto.Session{},
 			wantErr:     true,
