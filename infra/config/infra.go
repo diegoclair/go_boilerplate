@@ -11,7 +11,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/data/postgres"
 	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -41,7 +41,7 @@ func (c *Config) setupTracer() {
 
 	c.AddCloser(func() {
 		if err := tracer.Shutdown(c.ctx); err != nil {
-			c.GetLogger().Errorw(c.ctx, "Failed to shutdown tracer", logger.Err(err))
+			c.GetLogger().Error(c.ctx, "Failed to shutdown tracer", logger.Err(err))
 		}
 	})
 }
@@ -61,7 +61,7 @@ func (c *Config) GetAuthToken() infraContract.AuthToken {
 			log,
 		)
 		if err != nil {
-			log.Fatalw(c.ctx, "Failed to create auth token", logger.Err(err))
+			log.Fatal(c.ctx, "Failed to create auth token", logger.Err(err))
 		}
 	})
 
@@ -82,7 +82,7 @@ func (c *Config) GetCacheManager() contract.CacheManager {
 			err    error
 		)
 
-		log.Infof(c.ctx, "Connecting to the cache server at %s:%d.", c.Cache.Redis.Host, c.Cache.Redis.Port)
+		log.Info(c.ctx, fmt.Sprintf("Connecting to the cache server at %s:%d.", c.Cache.Redis.Host, c.Cache.Redis.Port))
 		cacheManager, client, err = cache.NewRedisCache(c.ctx,
 			fmt.Sprintf("%s:%d", c.Cache.Redis.Host, c.Cache.Redis.Port),
 			c.Cache.Redis.Pass,
@@ -90,13 +90,13 @@ func (c *Config) GetCacheManager() contract.CacheManager {
 			c.Cache.Redis.DefaultExpiration,
 			log)
 		if err != nil {
-			log.Fatalw(c.ctx, "Failed to create cache manager", logger.Err(err))
+			log.Fatal(c.ctx, "Failed to create cache manager", logger.Err(err))
 		}
 
 		c.AddCloser(func() {
 			log.Info(c.ctx, "Closing redis connection...")
 			if err := client.Close(); err != nil {
-				log.Errorw(c.ctx, "Error closing redis connection", logger.Err(err))
+				log.Error(c.ctx, "Error closing redis connection", logger.Err(err))
 			}
 		})
 	})
@@ -137,7 +137,7 @@ func (c *Config) GetDataManager() contract.DataManager {
 			log,
 		)
 		if err != nil {
-			log.Fatalw(c.ctx, "Failed to create data manager", logger.Err(err))
+			log.Fatal(c.ctx, "Failed to create data manager", logger.Err(err))
 		}
 
 		c.AddCloser(func() {
@@ -182,7 +182,7 @@ func (c *Config) GetValidator() validator.Validator {
 
 		v, err = validator.NewValidator()
 		if err != nil {
-			log.Fatalw(c.ctx, "Failed to create validator", logger.Err(err))
+			log.Fatal(c.ctx, "Failed to create validator", logger.Err(err))
 		}
 	})
 

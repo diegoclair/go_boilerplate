@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 
 	"github.com/redis/go-redis/v9"
 )

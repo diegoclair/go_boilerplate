@@ -8,7 +8,7 @@ import (
 
 	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra/contract"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -58,17 +58,17 @@ func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contra
 
 	err = p.paseto.Decrypt(token, p.symmetricKey, payload, nil)
 	if err != nil {
-		p.log.Errorw(ctx, "error to decrypt token", logger.Err(err))
+		p.log.Error(ctx, "error to decrypt token", logger.Err(err))
 		return resp, apperr.ErrTokenInvalid
 	}
 
 	err = payload.Valid()
 	if err != nil {
 		if errors.Is(err, errExpiredToken) {
-			p.log.Warnw(ctx, "token has expired")
+			p.log.Warn(ctx, "token has expired")
 			return resp, apperr.ErrTokenExpired
 		}
-		p.log.Errorw(ctx, "error to validate token", logger.Err(err))
+		p.log.Error(ctx, "error to validate token", logger.Err(err))
 		return resp, apperr.ErrTokenInvalid
 	}
 
@@ -80,7 +80,7 @@ func (a *pasetoAuth) createToken(ctx context.Context, input tokenPayloadInput, d
 
 	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)
 	if err != nil {
-		a.log.Errorw(ctx, "error to encrypt token", logger.Err(err))
+		a.log.Error(ctx, "error to encrypt token", logger.Err(err))
 		return tokenString, payload, apperr.ErrInternal.Wrap(err)
 	}
 

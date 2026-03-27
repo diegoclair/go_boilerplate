@@ -4,27 +4,27 @@ import (
 	"context"
 
 	"github.com/diegoclair/go_boilerplate/infra"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 )
 
 func NewLogger(appName string, debugLevel bool) logger.Logger {
-	params := logger.LogParams{
-		AppName:                  appName,
-		DebugLevel:               debugLevel,
-		AddAttributesFromContext: addDefaultAttributesToLogger,
+	params := logger.Params{
+		AppName:          appName,
+		DebugLevel:       debugLevel,
+		ContextExtractor: addDefaultAttributesToLogger,
 	}
 	return logger.New(params)
 }
 
-func addDefaultAttributesToLogger(ctx context.Context) []logger.LogField {
-	args := []logger.LogField{}
+func addDefaultAttributesToLogger(ctx context.Context) []logger.Field {
+	args := []logger.Field{}
 
 	if sessionCode, ok := getContextValue[string](ctx, infra.SessionKey); ok {
-		args = append(args, logger.String("session", sessionCode))
+		args = append(args, logger.Attr("session", sessionCode))
 	}
 
 	if accountUUID, ok := getContextValue[string](ctx, infra.AccountUUIDKey); ok {
-		args = append(args, logger.String("account_uuid", accountUUID))
+		args = append(args, logger.Attr("account_uuid", accountUUID))
 	}
 
 	return args

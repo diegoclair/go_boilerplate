@@ -2,7 +2,7 @@ package domain
 
 import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/diegoclair/go_utils/validator"
 )
 

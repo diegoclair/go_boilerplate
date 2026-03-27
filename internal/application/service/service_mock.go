@@ -6,7 +6,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/diegoclair/go_boilerplate/mocks"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

@@ -12,7 +12,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest"
 	pgMigrator "github.com/diegoclair/go_boilerplate/migrator/postgres"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 )
 
 const (
@@ -42,14 +42,14 @@ func main() {
 	log.Info(ctx, "Running the migrations...")
 	err = pgMigrator.Migrate(cfg.GetDataManager().(*db.PostgresConn).Pool())
 	if err != nil {
-		log.Errorw(ctx, "error to migrate postgres", logger.Err(err))
+		log.Error(ctx, "error to migrate postgres", logger.Err(err))
 		return
 	}
 	log.Info(ctx, "Migrations completed successfully")
 
 	apps, err := service.New(infra, cfg.App.Auth.AccessTokenDuration)
 	if err != nil {
-		log.Errorw(ctx, "error to get domain services", logger.Err(err))
+		log.Error(ctx, "error to get domain services", logger.Err(err))
 		return
 	}
 

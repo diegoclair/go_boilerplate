@@ -11,7 +11,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/diegoclair/go_utils/validator"
 )
 
@@ -40,13 +40,13 @@ func newAuthApp(infra domain.Infrastructure, accountSvc contract.AccountApp, acc
 func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account entity.Account, err error) {
 	err = input.Validate(ctx, s.validator)
 	if err != nil {
-		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
+		s.log.Error(ctx, "error or invalid input", logger.Err(err))
 		return account, err
 	}
 
 	account, err = s.dm.Account().GetAccountByDocument(ctx, input.CPF)
 	if err != nil {
-		s.log.Errorw(ctx, "error getting account by document", logger.Err(err))
+		s.log.Error(ctx, "error getting account by document", logger.Err(err))
 		return account, errcodes.ErrInvalidCredentials
 	}
 
@@ -57,9 +57,9 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 		return account, errcodes.ErrDeactivatedAccount
 	}
 
-	s.log.Infow(ctx, "account information used to login",
-		logger.Int64("account_id", account.ID),
-		logger.String("name", account.Name),
+	s.log.Info(ctx, "account information used to login",
+		logger.Attr("account_id", account.ID),
+		logger.Attr("name", account.Name),
 	)
 
 	err = s.crypto.CheckPassword(input.Password, account.Password)
@@ -74,13 +74,13 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 func (s *authApp) CreateSession(ctx context.Context, session dto.Session) (err error) {
 	err = session.Validate(ctx, s.validator)
 	if err != nil {
-		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
+		s.log.Error(ctx, "error or invalid input", logger.Err(err))
 		return err
 	}
 
 	_, err = s.dm.Auth().CreateSession(ctx, session)
 	if err != nil {
-		s.log.Errorw(ctx, "error creating session", logger.Err(err))
+		s.log.Error(ctx, "error creating session", logger.Err(err))
 		return err
 	}
 
@@ -93,7 +93,7 @@ func (s *authApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (ses
 		if apperr.IsNotFound(err) {
 			return session, errcodes.ErrSessionNotFound
 		}
-		s.log.Errorw(ctx, "error getting session", logger.Err(err))
+		s.log.Error(ctx, "error getting session", logger.Err(err))
 		return session, err
 	}
 
@@ -111,13 +111,13 @@ func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
 	// this is to avoid the user to login again with the same access token (used in the middleware)
 	err = s.cache.Set(ctx, accessToken, "true", s.accessTokenDuration+3*time.Minute)
 	if err != nil {
-		s.log.Errorw(ctx, "error logging out", logger.Err(err))
+		s.log.Error(ctx, "error logging out", logger.Err(err))
 		return err
 	}
 
 	err = s.dm.Auth().SetSessionAsBlocked(ctx, sessionUUID)
 	if err != nil {
-		s.log.Errorw(ctx, "error logging out", logger.Err(err))
+		s.log.Error(ctx, "error logging out", logger.Err(err))
 		return err
 	}
 

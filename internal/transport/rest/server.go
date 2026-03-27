@@ -35,14 +35,14 @@ func StartRestServer(ctx context.Context, cfg *config.Config, infra domain.Infra
 		port = "5000"
 	}
 
-	infra.Logger().Infof(ctx, "About to start the application on port: %s...", port)
+	infra.Logger().Info(ctx, fmt.Sprintf("About to start the application on port: %s...", port))
 
 	go func() {
 		if err := server.Start(port); err != nil {
 			if err == http.ErrServerClosed {
-				infra.Logger().Infof(ctx, "Server stopped")
+				infra.Logger().Info(ctx, "Server stopped")
 			} else {
-				infra.Logger().Errorf(ctx, "Server error: %v", err)
+				infra.Logger().Error(ctx, fmt.Sprintf("Server error: %v", err))
 			}
 		}
 	}()

@@ -13,7 +13,7 @@ import (
 	reflect "reflect"
 
 	contract "github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	logger "github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	validator "github.com/diegoclair/go_utils/validator"
 	gomock "go.uber.org/mock/gomock"
 )

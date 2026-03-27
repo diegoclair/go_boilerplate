@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -33,14 +33,14 @@ func Instance(ctx context.Context, dsn string, log logger.Logger) (*PostgresConn
 
 		pool, connErr = pgxpool.New(ctx, dsn)
 		if connErr != nil {
-			log.Errorw(ctx, "Database connection error", logger.Err(connErr))
+			log.Error(ctx, "Database connection error", logger.Err(connErr))
 			return
 		}
 
 		log.Info(ctx, "Database Ping...")
 		connErr = pool.Ping(ctx)
 		if connErr != nil {
-			log.Errorw(ctx, "Database Ping error", logger.Err(connErr))
+			log.Error(ctx, "Database Ping error", logger.Err(connErr))
 			return
 		}
 

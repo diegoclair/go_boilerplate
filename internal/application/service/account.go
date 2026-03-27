@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra"
@@ -11,7 +12,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/diegoclair/go_utils/validator"
 	"github.com/google/uuid"
 )
@@ -35,13 +36,13 @@ func newAccountService(infra domain.Infrastructure) *accountService {
 func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInput) (err error) {
 	account, err := input.ToEntityValidate(ctx, s.validator)
 	if err != nil {
-		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
+		s.log.Error(ctx, "error or invalid input", logger.Err(err))
 		return err
 	}
 
 	_, err = s.dm.Account().GetAccountByDocument(ctx, account.CPF)
 	if err != nil && !apperr.IsNotFound(err) {
-		s.log.Errorw(ctx, "error to get account by document", logger.Err(err))
+		s.log.Error(ctx, "error to get account by document", logger.Err(err))
 		return err
 	} else if err == nil {
 		s.log.Error(ctx, "The document number is already in use")
@@ -50,14 +51,14 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 
 	account.Password, err = s.crypto.HashPassword(account.Password)
 	if err != nil {
-		s.log.Errorw(ctx, "error to hash password", logger.Err(err))
+		s.log.Error(ctx, "error to hash password", logger.Err(err))
 		return err
 	}
 	account.UUID = uuid.Must(uuid.NewV7()).String()
 
 	_, err = s.dm.Account().CreateAccount(ctx, account)
 	if err != nil {
-		s.log.Errorw(ctx, "error to create account", logger.Err(err))
+		s.log.Error(ctx, "error to create account", logger.Err(err))
 		return err
 	}
 
@@ -67,13 +68,13 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInput) (err error) {
 	err = input.Validate(ctx, s.validator)
 	if err != nil {
-		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
+		s.log.Error(ctx, "error or invalid input", logger.Err(err))
 		return err
 	}
 
 	account, err := s.dm.Account().GetAccountByUUID(ctx, input.AccountUUID)
 	if err != nil {
-		s.log.Errorw(ctx, "error to get account by uuid", logger.Err(err))
+		s.log.Error(ctx, "error to get account by uuid", logger.Err(err))
 		return err
 	}
 
@@ -81,7 +82,7 @@ func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInp
 
 	err = s.dm.Account().UpdateAccountBalance(ctx, account.ID, account.Balance)
 	if err != nil {
-		s.log.Errorw(ctx, "error to update account balance", logger.Err(err))
+		s.log.Error(ctx, "error to update account balance", logger.Err(err))
 		return err
 	}
 
@@ -91,11 +92,11 @@ func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInp
 func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 	accounts, totalRecords, err = s.dm.Account().GetAccounts(ctx, take, skip)
 	if err != nil {
-		s.log.Errorw(ctx, "error to get accounts", logger.Err(err))
+		s.log.Error(ctx, "error to get accounts", logger.Err(err))
 		return accounts, totalRecords, err
 	}
 
-	s.log.Infof(ctx, "Found %d accounts", totalRecords)
+	s.log.Info(ctx, fmt.Sprintf("Found %d accounts", totalRecords))
 
 	return accounts, totalRecords, nil
 }
@@ -103,7 +104,7 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
 	account, err = s.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
-		s.log.Errorw(ctx, "error to get account by uuid", logger.Err(err))
+		s.log.Error(ctx, "error to get account by uuid", logger.Err(err))
 		return account, err
 	}
 
@@ -129,7 +130,7 @@ func (s *accountService) GetLoggedAccountID(ctx context.Context) (accountID int6
 
 	accountID, err = s.dm.Account().GetAccountIDByUUID(ctx, loggedAccountUUID)
 	if err != nil {
-		s.log.Errorw(ctx, "error to get logged account ID by uuid", logger.Err(err))
+		s.log.Error(ctx, "error to get logged account ID by uuid", logger.Err(err))
 		return accountID, err
 	}
 
@@ -144,7 +145,7 @@ func (s *accountService) GetLoggedAccount(ctx context.Context) (account entity.A
 
 	account, err = s.dm.Account().GetAccountByUUID(ctx, loggedAccountUUID)
 	if err != nil {
-		s.log.Errorw(ctx, "error to get logged account by uuid", logger.Err(err))
+		s.log.Error(ctx, "error to get logged account by uuid", logger.Err(err))
 		return account, err
 	}
 

@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
 )
@@ -48,7 +48,7 @@ func GracefulShutdown(ctx context.Context, log logger.Logger, opts ...ShutdownOp
 
 		err := s.restServer.Shutdown(ctx)
 		if err != nil {
-			log.Errorw(ctx, "Failed to shutdown rest server", logger.Err(err))
+			log.Error(ctx, "Failed to shutdown rest server", logger.Err(err))
 		}
 	}
 

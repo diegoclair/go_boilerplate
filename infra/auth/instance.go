@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/contract"
-	"github.com/diegoclair/go_utils/logger"
+	"github.com/diegoclair/logger"
 )
 
 const (
