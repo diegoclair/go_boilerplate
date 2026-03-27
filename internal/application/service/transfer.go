@@ -31,9 +31,6 @@ func newTransferService(infra domain.Infrastructure, accountSvc contract.Account
 }
 
 func (s *transferService) CreateTransfer(ctx context.Context, input dto.TransferInput) (err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	transfer, err := input.ToEntityValidate(ctx, s.validator)
 	if err != nil {
 		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
@@ -94,9 +91,6 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 }
 
 func (s *transferService) GetTransfers(ctx context.Context, take, skip int64) (transfers []entity.Transfer, totalRecords int64, err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	accountID, err := s.accountSvc.GetLoggedAccountID(ctx)
 	if err != nil {
 		s.log.Errorw(ctx, "error to get logged account", logger.Err(err))

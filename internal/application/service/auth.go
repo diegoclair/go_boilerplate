@@ -38,9 +38,6 @@ func newAuthApp(infra domain.Infrastructure, accountSvc contract.AccountApp, acc
 }
 
 func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account entity.Account, err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	err = input.Validate(ctx, s.validator)
 	if err != nil {
 		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
@@ -75,9 +72,6 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 }
 
 func (s *authApp) CreateSession(ctx context.Context, session dto.Session) (err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	err = session.Validate(ctx, s.validator)
 	if err != nil {
 		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
@@ -94,9 +88,6 @@ func (s *authApp) CreateSession(ctx context.Context, session dto.Session) (err e
 }
 
 func (s *authApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (session dto.Session, err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	session, err = s.dm.Auth().GetSessionByUUID(ctx, sessionUUID)
 	if err != nil {
 		if apperr.IsNotFound(err) {
@@ -110,9 +101,6 @@ func (s *authApp) GetSessionByUUID(ctx context.Context, sessionUUID string) (ses
 }
 
 func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	sessionUUID, ok := ctx.Value(infra.SessionKey).(string)
 	if !ok || sessionUUID == "" {
 		s.log.Error(ctx, "session UUID not found in context")

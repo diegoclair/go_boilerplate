@@ -33,9 +33,6 @@ func newAccountService(infra domain.Infrastructure) *accountService {
 }
 
 func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInput) (err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	account, err := input.ToEntityValidate(ctx, s.validator)
 	if err != nil {
 		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
@@ -68,9 +65,6 @@ func (s *accountService) CreateAccount(ctx context.Context, input dto.AccountInp
 }
 
 func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInput) (err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	err = input.Validate(ctx, s.validator)
 	if err != nil {
 		s.log.Errorw(ctx, "error or invalid input", logger.Err(err))
@@ -95,9 +89,6 @@ func (s *accountService) AddBalance(ctx context.Context, input dto.AddBalanceInp
 }
 
 func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	accounts, totalRecords, err = s.dm.Account().GetAccounts(ctx, take, skip)
 	if err != nil {
 		s.log.Errorw(ctx, "error to get accounts", logger.Err(err))
@@ -110,9 +101,6 @@ func (s *accountService) GetAccounts(ctx context.Context, take, skip int64) (acc
 }
 
 func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
-	s.log.Infof(ctx, "Process Started with accountUUID: %s", accountUUID)
-	defer s.log.Infof(ctx, "Process Finished for accountUUID: %s", accountUUID)
-
 	account, err = s.dm.Account().GetAccountByUUID(ctx, accountUUID)
 	if err != nil {
 		s.log.Errorw(ctx, "error to get account by uuid", logger.Err(err))
@@ -123,9 +111,6 @@ func (s *accountService) GetAccountByUUID(ctx context.Context, accountUUID strin
 }
 
 func (s *accountService) getLoggedAccountUUID(ctx context.Context) (accountUUID string, err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	loggedAccountUUID, ok := ctx.Value(infra.AccountUUIDKey).(string)
 	if !ok {
 		errMsg := "accountUUID should not be empty"
@@ -137,9 +122,6 @@ func (s *accountService) getLoggedAccountUUID(ctx context.Context) (accountUUID 
 }
 
 func (s *accountService) GetLoggedAccountID(ctx context.Context) (accountID int64, err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	loggedAccountUUID, err := s.getLoggedAccountUUID(ctx)
 	if err != nil {
 		return accountID, err
@@ -155,9 +137,6 @@ func (s *accountService) GetLoggedAccountID(ctx context.Context) (accountID int6
 }
 
 func (s *accountService) GetLoggedAccount(ctx context.Context) (account entity.Account, err error) {
-	s.log.Info(ctx, "Process Started")
-	defer s.log.Info(ctx, "Process Finished")
-
 	loggedAccountUUID, err := s.getLoggedAccountUUID(ctx)
 	if err != nil {
 		return account, err
