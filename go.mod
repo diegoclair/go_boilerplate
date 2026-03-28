@@ -3,6 +3,7 @@ module github.com/diegoclair/go_boilerplate
 go 1.26.1
 
 require (
+	aidanwoods.dev/go-paseto v1.6.0
 	github.com/diegoclair/apperr v0.1.1
 	github.com/diegoclair/go_utils v1.0.14
 	github.com/diegoclair/goswag v1.0.11
@@ -12,7 +13,6 @@ require (
 	github.com/labstack/echo-contrib v0.17.3
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
-	github.com/o1egl/paseto v1.0.0
 	github.com/pressly/goose/v3 v3.27.0
 	github.com/redis/go-redis/v9 v9.8.0
 	github.com/stretchr/testify v1.11.1
@@ -30,13 +30,11 @@ require (
 )
 
 require (
+	aidanwoods.dev/go-result v0.3.1 // indirect
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
-	github.com/aead/chacha20poly1305 v0.0.0-20201124145622-1a5aba2a8b29 // indirect
-	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect

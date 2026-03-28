@@ -4,35 +4,42 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"time"
 
+	"aidanwoods.dev/go-paseto"
 	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/logger"
-	"github.com/o1egl/paseto"
-	"golang.org/x/crypto/chacha20poly1305"
 )
 
+const claimData = "data"
+
 type pasetoAuth struct {
-	paseto       *paseto.V2
-	symmetricKey []byte
-	log          logger.Logger
+	key    paseto.V4SymmetricKey
+	parser paseto.Parser
+	log    logger.Logger
 }
 
 func newPasetoAuth(symmetricKey string, log logger.Logger) (*pasetoAuth, error) {
-	if len(symmetricKey) != chacha20poly1305.KeySize {
+	if len(symmetricKey) != minSecretKeySize {
+		return nil, errInvalidPrivateKey
+	}
+
+	key, err := paseto.V4SymmetricKeyFromBytes([]byte(symmetricKey))
+	if err != nil {
 		return nil, errInvalidPrivateKey
 	}
 
 	return &pasetoAuth{
-		paseto:       paseto.NewV2(),
-		symmetricKey: []byte(symmetricKey),
-		log:          log,
+		key:    key,
+		parser: paseto.NewParser(),
+		log:    log,
 	}, nil
 }
 
 func (p *pasetoAuth) CreateAccessToken(ctx context.Context, input contract.TokenPayloadInput) (tokenString string, resp contract.TokenPayload, err error) {
-	tokenString, payload, err := p.createToken(ctx, fromContractTokenPayloadInput(input), accessTokenDurationTime)
+	payload := newPayload(fromContractTokenPayloadInput(input), accessTokenDurationTime)
+
+	tokenString, err = p.createToken(ctx, payload)
 	if err != nil {
 		return tokenString, resp, err
 	}
@@ -41,7 +48,9 @@ func (p *pasetoAuth) CreateAccessToken(ctx context.Context, input contract.Token
 }
 
 func (p *pasetoAuth) CreateRefreshToken(ctx context.Context, input contract.TokenPayloadInput) (tokenString string, resp contract.TokenPayload, err error) {
-	tokenString, payload, err := p.createToken(ctx, fromContractTokenPayloadInput(input), refreshTokenDurationTime)
+	payload := newPayload(fromContractTokenPayloadInput(input), refreshTokenDurationTime)
+
+	tokenString, err = p.createToken(ctx, payload)
 	if err != nil {
 		return tokenString, resp, err
 	}
@@ -49,21 +58,24 @@ func (p *pasetoAuth) CreateRefreshToken(ctx context.Context, input contract.Toke
 	return tokenString, payload.toContract(), nil
 }
 
-func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contract.TokenPayload, err error) {
-	if strings.TrimSpace(token) == "" {
+func (p *pasetoAuth) VerifyToken(ctx context.Context, tokenStr string) (resp contract.TokenPayload, err error) {
+	if strings.TrimSpace(tokenStr) == "" {
 		return resp, apperr.ErrTokenInvalid
 	}
 
-	payload := &tokenPayload{}
-
-	err = p.paseto.Decrypt(token, p.symmetricKey, payload, nil)
+	token, err := p.parser.ParseV4Local(p.key, tokenStr, nil)
 	if err != nil {
 		p.log.Error(ctx, "error to decrypt token", logger.Err(err))
 		return resp, apperr.ErrTokenInvalid
 	}
 
-	err = payload.Valid()
+	payload, err := tokenPayloadFromClaims(token)
 	if err != nil {
+		p.log.Error(ctx, "error to parse token claims", logger.Err(err))
+		return resp, apperr.ErrTokenInvalid
+	}
+
+	if err := payload.Valid(); err != nil {
 		if errors.Is(err, errExpiredToken) {
 			p.log.Warn(ctx, "token has expired")
 			return resp, apperr.ErrTokenExpired
@@ -75,14 +87,21 @@ func (p *pasetoAuth) VerifyToken(ctx context.Context, token string) (resp contra
 	return payload.toContract(), nil
 }
 
-func (a *pasetoAuth) createToken(ctx context.Context, input tokenPayloadInput, duration time.Duration) (tokenString string, payload *tokenPayload, err error) {
-	payload = newPayload(input, duration)
-
-	tokenString, err = a.paseto.Encrypt(a.symmetricKey, payload, nil)
-	if err != nil {
-		a.log.Error(ctx, "error to encrypt token", logger.Err(err))
-		return tokenString, payload, apperr.ErrInternal.Wrap(err)
+func (p *pasetoAuth) createToken(_ context.Context, payload *tokenPayload) (string, error) {
+	token := paseto.NewToken()
+	token.SetIssuedAt(payload.IssuedAt)
+	token.SetExpiration(payload.ExpiredAt)
+	if err := token.Set(claimData, payload); err != nil {
+		return "", err
 	}
 
-	return tokenString, payload, nil
+	return token.V4Encrypt(p.key, nil), nil
+}
+
+func tokenPayloadFromClaims(token *paseto.Token) (*tokenPayload, error) {
+	payload := &tokenPayload{}
+	if err := token.Get(claimData, payload); err != nil {
+		return nil, err
+	}
+	return payload, nil
 }
