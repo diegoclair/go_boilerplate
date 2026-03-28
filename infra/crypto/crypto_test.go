@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -8,72 +9,78 @@ import (
 
 func TestHashPassword(t *testing.T) {
 	c := NewCrypto()
-	type args struct {
-		password string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name:    "Should return a hashed password",
-			args:    args{password: "123456"},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.HashPassword(tt.args.password)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("HashPassword() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			require.NotEmpty(t, got)
-		})
-	}
+
+	t.Run("Should return an argon2id hash", func(t *testing.T) {
+		hash, err := c.HashPassword("123456")
+		require.NoError(t, err)
+		require.NotEmpty(t, hash)
+		require.True(t, strings.HasPrefix(hash, "$argon2id$"), "hash should be argon2id format, got: %s", hash)
+	})
+
+	t.Run("Should generate different hashes for same password", func(t *testing.T) {
+		hash1, err := c.HashPassword("same-password")
+		require.NoError(t, err)
+
+		hash2, err := c.HashPassword("same-password")
+		require.NoError(t, err)
+
+		require.NotEqual(t, hash1, hash2, "each hash should use a unique salt")
+	})
+
+	t.Run("Should handle empty password", func(t *testing.T) {
+		hash, err := c.HashPassword("")
+		require.NoError(t, err)
+		require.NotEmpty(t, hash)
+	})
 }
 
 func TestCheckPassword(t *testing.T) {
 	c := NewCrypto()
 
-	type args struct {
-		password       string
-		hashedPassword string
+	t.Run("Should verify correct password with argon2id hash", func(t *testing.T) {
+		password := "my-secure-password"
+		hash, err := c.HashPassword(password)
+		require.NoError(t, err)
+
+		err = c.CheckPassword(password, hash)
+		require.NoError(t, err)
+	})
+
+	t.Run("Should reject wrong password with argon2id hash", func(t *testing.T) {
+		hash, err := c.HashPassword("correct-password")
+		require.NoError(t, err)
+
+		err = c.CheckPassword("wrong-password", hash)
+		require.Error(t, err)
+	})
+
+	t.Run("Should reject invalid argon2id format", func(t *testing.T) {
+		err := c.CheckPassword("password", "$argon2id$invalid")
+		require.Error(t, err)
+	})
+}
+
+func TestCheckPassword_RoundTrip(t *testing.T) {
+	c := NewCrypto()
+
+	passwords := []string{
+		"simple",
+		"c0mpl3x!P@ssw0rd#2026",
+		"com espaços e acentuação",
+		"🔐emoji-password",
+		strings.Repeat("a", 100),
 	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name:    "Should return nil if the password is correct",
-			args:    args{password: "123456", hashedPassword: "$2a$10$jN9Oi/xk63jSMlWFHvqSseIcJh/5YNfGfpkd9VpKndvQzhJChYUAW"},
-			wantErr: false,
-		},
-		{
-			name:    "Should return an error if the hashed password is incorrect",
-			args:    args{password: "123456", hashedPassword: "$2a$10$2H2yQjIe2m4n1Yh1uV4f3u3Z4K6d1Qa1c1f2v3e4r5t6y7u8i9o0"},
-			wantErr: true,
-		},
-		{
-			name:    "Should return an error if the hashed password is incorrect",
-			args:    args{password: "123456", hashedPassword: "$2a$10$2H2yQjIe2m4n1Yh1uV4f3u3Z4K6d1Qa1c1f2v3e4r5t6y7u8i9o0p"},
-			wantErr: true,
-		},
-		{
-			name:    "Should return an error if the hashed password is incorrect",
-			args:    args{password: "123456", hashedPassword: "$2a$10$2H2yQjIe2m4n1Yh1uV4f3u3Z4K6d1Qa1c1f2v3e4r5t6y7u8i9o0p"},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := c.CheckPassword(tt.args.password, tt.args.hashedPassword)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("CheckPassword() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+
+	for _, pw := range passwords {
+		t.Run("Round trip: "+pw[:min(len(pw), 20)], func(t *testing.T) {
+			hash, err := c.HashPassword(pw)
+			require.NoError(t, err)
+
+			err = c.CheckPassword(pw, hash)
+			require.NoError(t, err)
+
+			err = c.CheckPassword(pw+"x", hash)
+			require.Error(t, err)
 		})
 	}
 }
