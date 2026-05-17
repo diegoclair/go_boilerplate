@@ -7,7 +7,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/logger"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -93,8 +93,8 @@ func (c *ConfigMock) GetCacheManager(ctrl *gomock.Controller) *mocks.MockCacheMa
 	return mocks.NewMockCacheManager(ctrl)
 }
 
-func (c *ConfigMock) GetValidator(t *testing.T) validator.Validator {
-	v, err := validator.NewValidator()
+func (c *ConfigMock) GetValidator(t *testing.T) apperrmap.Validator {
+	v, err := apperrmap.NewValidator()
 	require.NoError(t, err)
 
 	return v

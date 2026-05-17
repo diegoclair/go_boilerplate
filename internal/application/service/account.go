@@ -12,7 +12,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
 	"github.com/diegoclair/logger"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/google/uuid"
 )
 
@@ -20,7 +20,7 @@ type accountService struct {
 	crypto    contract.Crypto
 	dm        contract.DataManager
 	log       logger.Logger
-	validator validator.Validator
+	validator apperrmap.Validator
 }
 
 func newAccountService(infra domain.Infrastructure) *accountService {

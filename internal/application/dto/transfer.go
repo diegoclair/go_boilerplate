@@ -2,7 +2,7 @@ package dto
 
 import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"golang.org/x/net/context"
 )
 
@@ -12,7 +12,7 @@ type TransferInput struct {
 }
 
 // ToEntityValidate validate the input and return the entity
-func (t *TransferInput) ToEntityValidate(ctx context.Context, v validator.Validator) (transfer entity.Transfer, err error) {
+func (t *TransferInput) ToEntityValidate(ctx context.Context, v apperrmap.Validator) (transfer entity.Transfer, err error) {
 	err = v.ValidateStruct(ctx, t)
 	if err != nil {
 		return transfer, err

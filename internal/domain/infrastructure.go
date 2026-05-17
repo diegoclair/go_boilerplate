@@ -1,9 +1,9 @@
 package domain
 
 import (
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/logger"
-	"github.com/diegoclair/go_utils/validator"
 )
 
 type Infrastructure interface {
@@ -11,7 +11,7 @@ type Infrastructure interface {
 	DataManager() contract.DataManager
 	Logger() logger.Logger
 	Crypto() contract.Crypto
-	Validator() validator.Validator
+	Validator() apperrmap.Validator
 }
 
 type infrastructureServices struct {
@@ -19,7 +19,7 @@ type infrastructureServices struct {
 	dataManager  contract.DataManager
 	logger       logger.Logger
 	crypto       contract.Crypto
-	validator    validator.Validator
+	validator    apperrmap.Validator
 }
 
 type InfraOption func(*infrastructureServices)
@@ -48,9 +48,9 @@ func WithCrypto(crypto contract.Crypto) InfraOption {
 	}
 }
 
-func WithValidator(validator validator.Validator) InfraOption {
+func WithValidator(v apperrmap.Validator) InfraOption {
 	return func(i *infrastructureServices) {
-		i.validator = validator
+		i.validator = v
 	}
 }
 
@@ -78,6 +78,6 @@ func (i *infrastructureServices) Crypto() contract.Crypto {
 	return i.crypto
 }
 
-func (i *infrastructureServices) Validator() validator.Validator {
+func (i *infrastructureServices) Validator() apperrmap.Validator {
 	return i.validator
 }

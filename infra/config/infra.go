@@ -12,7 +12,7 @@ import (
 	infraLogger "github.com/diegoclair/go_boilerplate/infra/logger"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
 	"github.com/diegoclair/logger"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel"
@@ -168,25 +168,25 @@ func (c *Config) GetHttpPort() string {
 }
 
 var (
-	v             validator.Validator
+	validatorInst apperrmap.Validator
 	validatorOnce sync.Once
 )
 
 // GetValidator returns a new validator or panics if it fails
-func (c *Config) GetValidator() validator.Validator {
+func (c *Config) GetValidator() apperrmap.Validator {
 	validatorOnce.Do(func() {
 		var (
 			err error
 			log logger.Logger = c.GetLogger()
 		)
 
-		v, err = validator.NewValidator()
+		validatorInst, err = apperrmap.NewValidator()
 		if err != nil {
 			log.Fatal(c.ctx, "Failed to create validator", logger.Err(err))
 		}
 	})
 
-	return v
+	return validatorInst
 }
 
 var (

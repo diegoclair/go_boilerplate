@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/diegoclair/go_boilerplate/util/number"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"golang.org/x/net/context"
 )
 
@@ -19,7 +19,7 @@ type Session struct {
 	RefreshTokenExpiredAt time.Time
 }
 
-func (s *Session) Validate(ctx context.Context, v validator.Validator) error {
+func (s *Session) Validate(ctx context.Context, v apperrmap.Validator) error {
 	return v.ValidateStruct(ctx, s)
 }
 
@@ -29,7 +29,7 @@ type LoginInput struct {
 }
 
 // Validate validate the input
-func (l *LoginInput) Validate(ctx context.Context, v validator.Validator) error {
+func (l *LoginInput) Validate(ctx context.Context, v apperrmap.Validator) error {
 	l.CPF = number.CleanNumber(l.CPF)
 	return v.ValidateStruct(ctx, l)
 }

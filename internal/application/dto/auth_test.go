@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSession_Validate(t *testing.T) {
 	ctx := context.Background()
-	v, err := validator.NewValidator()
+	v, err := apperrmap.NewValidator()
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -65,7 +65,7 @@ func TestSession_Validate(t *testing.T) {
 
 func TestLoginInput_Validate(t *testing.T) {
 	ctx := context.Background()
-	v, err := validator.NewValidator()
+	v, err := apperrmap.NewValidator()
 	require.NoError(t, err)
 
 	tests := []struct {

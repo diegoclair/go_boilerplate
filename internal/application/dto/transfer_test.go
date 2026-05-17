@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTransferInput_ToEntityValidate(t *testing.T) {
 	ctx := context.Background()
-	v, err := validator.NewValidator()
+	v, err := apperrmap.NewValidator()
 	require.NoError(t, err)
 
 	type fields struct {

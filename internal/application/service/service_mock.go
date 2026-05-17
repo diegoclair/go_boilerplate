@@ -7,7 +7,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/logger"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -20,7 +20,7 @@ type allMocks struct {
 
 	mockCacheManager *mocks.MockCacheManager
 	mockCrypto       *mocks.MockCrypto
-	mockValidator    validator.Validator
+	mockValidator    apperrmap.Validator
 	mockLogger       logger.Logger
 
 	mockAccountSvc *mocks.MockAccountApp

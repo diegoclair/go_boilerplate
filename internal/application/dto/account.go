@@ -5,7 +5,7 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_boilerplate/util/number"
-	"github.com/diegoclair/go_utils/validator"
+	"github.com/diegoclair/appvalidator/apperrmap"
 )
 
 type AccountInput struct {
@@ -15,10 +15,10 @@ type AccountInput struct {
 }
 
 // ToEntityValidate validate the input and return the entity
-func (a *AccountInput) ToEntityValidate(ctx context.Context, validator validator.Validator) (account entity.Account, err error) {
+func (a *AccountInput) ToEntityValidate(ctx context.Context, v apperrmap.Validator) (account entity.Account, err error) {
 	a.CPF = number.CleanNumber(a.CPF)
 
-	err = validator.ValidateStruct(ctx, a)
+	err = v.ValidateStruct(ctx, a)
 	if err != nil {
 		return account, err
 	}
@@ -38,6 +38,6 @@ type AddBalanceInput struct {
 }
 
 // Validate validate the input
-func (a *AddBalanceInput) Validate(ctx context.Context, validator validator.Validator) error {
-	return validator.ValidateStruct(ctx, a)
+func (a *AddBalanceInput) Validate(ctx context.Context, v apperrmap.Validator) error {
+	return v.ValidateStruct(ctx, a)
 }

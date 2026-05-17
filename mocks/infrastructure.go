@@ -12,9 +12,9 @@ package mocks
 import (
 	reflect "reflect"
 
+	apperrmap "github.com/diegoclair/appvalidator/apperrmap"
 	contract "github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	"github.com/diegoclair/logger"
-	validator "github.com/diegoclair/go_utils/validator"
+	logger "github.com/diegoclair/logger"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -99,10 +99,10 @@ func (mr *MockInfrastructureMockRecorder) Logger() *gomock.Call {
 }
 
 // Validator mocks base method.
-func (m *MockInfrastructure) Validator() validator.Validator {
+func (m *MockInfrastructure) Validator() apperrmap.Validator {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Validator")
-	ret0, _ := ret[0].(validator.Validator)
+	ret0, _ := ret[0].(apperrmap.Validator)
 	return ret0
 }
 
