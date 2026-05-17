@@ -39,16 +39,8 @@ infra-mocks:
 # @ to avoid echoing the command
 .PHONY: docs
 docs:
-	@echo "=====> Generating docs"
-
-	@go install github.com/swaggo/swag/cmd/swag@latest
-	@cd goswag && \
-	go run main.go && \
-	cd .. && \
-	swag init --pdl=2 --parseInternal -g ./goswag/main.go -o ./docs && \
-	swag fmt -d ./goswag/
-
-	@echo "=====> Docs generated"
+	@go install github.com/diegoclair/goswag/cmd/goswag@latest
+	@goswag docs
 
 .PHONY: start
 start:

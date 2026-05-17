@@ -147,7 +147,7 @@ API documentation is generated in Swagger/OpenAPI format and served directly by 
 *   **Generation:** The documentation is generated automatically from code annotations (specifically in the `/internal/transport` layer handlers) using [goswag](https://github.com/diegoclair/goswag), an open-source tool developed for this purpose.
 
 ### Generating Docs
-To regenerate the API documentation (Swagger/OpenAPI) using `swag` and the `goswag` helper after making changes to handlers or annotations in the `/internal/transport` layer:
+To regenerate the API documentation (Swagger/OpenAPI) using the [goswag](https://github.com/diegoclair/goswag) CLI after making changes to handlers or annotations in the `/internal/transport` layer:
 ```bash
 make docs
 ```
