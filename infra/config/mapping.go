@@ -65,12 +65,25 @@ type PostgresConfig struct {
 	MaxOpenConnections int    `mapstructure:"max-open-connections"`
 }
 
+// GetPostgresDsn builds the connection string with pgxpool sizing params.
+// Without pool_max_conns pgx defaults to max(4, NumCPU), ignoring the
+// configured limit.
 func (c *Config) GetPostgresDsn() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		c.DB.Postgres.Username, c.DB.Postgres.Password,
 		c.DB.Postgres.Host, c.DB.Postgres.Port,
 		c.DB.Postgres.DBName, c.DB.Postgres.SSLMode,
 	)
+	if c.DB.Postgres.MaxOpenConnections > 0 {
+		dsn += fmt.Sprintf("&pool_max_conns=%d", c.DB.Postgres.MaxOpenConnections)
+	}
+	if c.DB.Postgres.MaxIdleConnections > 0 {
+		dsn += fmt.Sprintf("&pool_min_conns=%d", c.DB.Postgres.MaxIdleConnections)
+	}
+	if c.DB.Postgres.MaxLifeInMinutes > 0 {
+		dsn += fmt.Sprintf("&pool_max_conn_lifetime=%dm", c.DB.Postgres.MaxLifeInMinutes)
+	}
+	return dsn
 }
 
 type LogConfig struct {
