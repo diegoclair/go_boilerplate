@@ -64,12 +64,21 @@ func repoInstances(db dbConn) *PostgresConn {
 	}
 }
 
-func (c *PostgresConn) WithTransaction(ctx context.Context, fn func(dm contract.DataManager) error) error {
+// The callback gets contract.Repos, never the DataManager: a transaction opened
+// from inside this one would run on its own connection, commit on its own, and
+// survive the outer rollback. Handing over the repositories alone makes that a
+// compile error instead of a convention.
+func (c *PostgresConn) WithTransaction(ctx context.Context, fn func(tx contract.Repos) error) error {
 	tx, err := c.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
+	// Covers the panic path, where neither branch below runs and the connection
+	// would stay checked out with the transaction open. No-op after a commit.
+	defer func() { _ = tx.Rollback(ctx) }()
 
+	// repoInstances carries no pool on purpose: nothing reachable from here may
+	// start a transaction.
 	txConn := repoInstances(tx)
 	err = fn(txConn)
 	if err != nil {

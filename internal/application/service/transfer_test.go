@@ -60,7 +60,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 							Balance: 25.50,
 						}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(
-						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+						func(ctx context.Context, fn func(r contract.Repos) error) error {
 							return fn(mocks.mockDataManager)
 						},
 					).Times(1),
@@ -128,7 +128,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 							Balance: 0.2,
 						}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(
-						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+						func(ctx context.Context, fn func(r contract.Repos) error) error {
 							return fn(mocks.mockDataManager)
 						},
 					).Times(1),
@@ -252,7 +252,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.transfer.AccountDestinationUUID).
 						Return(entity.Account{ID: 2}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(
-						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+						func(ctx context.Context, fn func(r contract.Repos) error) error {
 							return fn(mocks.mockDataManager)
 						},
 					).Times(1),
@@ -279,7 +279,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.transfer.AccountDestinationUUID).
 						Return(entity.Account{ID: 2}, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(
-						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+						func(ctx context.Context, fn func(r contract.Repos) error) error {
 							return fn(mocks.mockDataManager)
 						},
 					).Times(1),
@@ -309,7 +309,7 @@ func Test_transferService_CreateTransfer(t *testing.T) {
 					mocks.mockAccountRepo.EXPECT().GetAccountByUUID(gomock.Any(), args.transfer.AccountDestinationUUID).
 						Return(respAccountDest, nil).Times(1),
 					mocks.mockDataManager.EXPECT().WithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(
-						func(ctx context.Context, fn func(r contract.DataManager) error) error {
+						func(ctx context.Context, fn func(r contract.Repos) error) error {
 							return fn(mocks.mockDataManager)
 						},
 					).Times(1),

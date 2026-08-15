@@ -19,6 +19,58 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
+// MockRepos is a mock of Repos interface.
+type MockRepos struct {
+	ctrl     *gomock.Controller
+	recorder *MockReposMockRecorder
+	isgomock struct{}
+}
+
+// MockReposMockRecorder is the mock recorder for MockRepos.
+type MockReposMockRecorder struct {
+	mock *MockRepos
+}
+
+// NewMockRepos creates a new mock instance.
+func NewMockRepos(ctrl *gomock.Controller) *MockRepos {
+	mock := &MockRepos{ctrl: ctrl}
+	mock.recorder = &MockReposMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockRepos) EXPECT() *MockReposMockRecorder {
+	return m.recorder
+}
+
+// Account mocks base method.
+func (m *MockRepos) Account() contract.AccountRepo {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Account")
+	ret0, _ := ret[0].(contract.AccountRepo)
+	return ret0
+}
+
+// Account indicates an expected call of Account.
+func (mr *MockReposMockRecorder) Account() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockRepos)(nil).Account))
+}
+
+// Auth mocks base method.
+func (m *MockRepos) Auth() contract.AuthRepo {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Auth")
+	ret0, _ := ret[0].(contract.AuthRepo)
+	return ret0
+}
+
+// Auth indicates an expected call of Auth.
+func (mr *MockReposMockRecorder) Auth() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Auth", reflect.TypeOf((*MockRepos)(nil).Auth))
+}
+
 // MockDataManager is a mock of DataManager interface.
 type MockDataManager struct {
 	ctrl     *gomock.Controller
@@ -72,7 +124,7 @@ func (mr *MockDataManagerMockRecorder) Auth() *gomock.Call {
 }
 
 // WithTransaction mocks base method.
-func (m *MockDataManager) WithTransaction(ctx context.Context, fn func(contract.DataManager) error) error {
+func (m *MockDataManager) WithTransaction(ctx context.Context, fn func(contract.Repos) error) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithTransaction", ctx, fn)
 	ret0, _ := ret[0].(error)

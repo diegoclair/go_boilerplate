@@ -66,7 +66,7 @@ func (s *transferService) CreateTransfer(ctx context.Context, input dto.Transfer
 	transfer.TransferUUID = uuid.Must(uuid.NewV7()).String()
 	ctx = logger.WithAttrs(ctx, logger.Attr("transfer_uuid", transfer.TransferUUID))
 
-	return s.dm.WithTransaction(ctx, func(tx contract.DataManager) error {
+	return s.dm.WithTransaction(ctx, func(tx contract.Repos) error {
 
 		_, err = tx.Account().AddTransfer(ctx, transfer.TransferUUID, fromAccount.ID, destAccount.ID, transfer.Amount)
 		if err != nil {

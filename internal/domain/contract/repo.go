@@ -7,11 +7,17 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 )
 
-// DataManager holds the methods that manipulates the main data.
-type DataManager interface {
-	WithTransaction(ctx context.Context, fn func(r DataManager) error) error
+// Repos is every repository and nothing else. A transaction hands this to its
+// callback, so opening a second one from inside cannot compile.
+type Repos interface {
 	Account() AccountRepo
 	Auth() AuthRepo
+}
+
+// DataManager holds the methods that manipulates the main data.
+type DataManager interface {
+	Repos
+	WithTransaction(ctx context.Context, fn func(tx Repos) error) error
 }
 
 type AuthRepo interface {
