@@ -8,12 +8,12 @@ import (
 )
 
 type authRepo struct {
-	db dbConn
+	queries
 }
 
 func newAuthRepo(db dbConn) contract.AuthRepo {
 	return &authRepo{
-		db: db,
+		queries: queries{db: db},
 	}
 }
 
@@ -68,23 +68,18 @@ func (r *authRepo) GetSessionByUUID(ctx context.Context, sessionUUID string) (se
 		WHERE	ts.session_uuid 		= 	$1
 	`
 
-	row := r.db.QueryRow(ctx, query, sessionUUID)
-
-	err = row.Scan(
-		&session.SessionID,
-		&session.SessionUUID,
-		&session.AccountID,
-		&session.RefreshToken,
-		&session.UserAgent,
-		&session.ClientIP,
-		&session.IsBlocked,
-		&session.RefreshTokenExpiredAt,
-	)
-	if err != nil {
-		return session, handleDBError(err)
-	}
-
-	return session, nil
+	return r.queryOne(ctx, query, func(row scanner) (session dto.Session, err error) {
+		return session, row.Scan(
+			&session.SessionID,
+			&session.SessionUUID,
+			&session.AccountID,
+			&session.RefreshToken,
+			&session.UserAgent,
+			&session.ClientIP,
+			&session.IsBlocked,
+			&session.RefreshTokenExpiredAt,
+		)
+	}, sessionUUID)
 }
 
 func (r *authRepo) SetSessionAsBlocked(ctx context.Context, sessionUUID string) (err error) {

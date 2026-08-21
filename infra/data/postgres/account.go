@@ -9,12 +9,12 @@ import (
 )
 
 type accountRepo struct {
-	db dbConn
+	queries
 }
 
 func newAccountRepo(db dbConn) contract.AccountRepo {
 	return &accountRepo{
-		db: db,
+		queries: queries{db: db},
 	}
 }
 
@@ -32,6 +32,19 @@ const querySelectBase string = `
 		FROM tab_account 				ta
 		`
 
+// scanAccount is the projection in the shape the query helpers take.
+func (r *accountRepo) scanAccount(row scanner) (entity.Account, error) {
+	return r.parseAccount(row)
+}
+
+// scanAccountPage also reads the count column withCount appends, for a
+// paginated read.
+func (r *accountRepo) scanAccountPage(total *int64) func(scanner) (entity.Account, error) {
+	return func(row scanner) (entity.Account, error) {
+		return r.parseAccount(row, total)
+	}
+}
+
 func (r *accountRepo) parseAccount(row scanner, total ...*int64) (account entity.Account, err error) {
 	dests := []any{
 		&account.ID,
@@ -48,12 +61,7 @@ func (r *accountRepo) parseAccount(row scanner, total ...*int64) (account entity
 		dests = append(dests, total[0])
 	}
 
-	err = row.Scan(dests...)
-	if err != nil {
-		return account, err
-	}
-
-	return account, nil
+	return account, row.Scan(dests...)
 }
 
 func (r *accountRepo) AddTransfer(ctx context.Context, transferUUID string, accountOriginID, accountDestinationID int64, amount float64) (transferID int64, err error) {
@@ -111,20 +119,14 @@ func (r *accountRepo) GetAccountByDocument(ctx context.Context, encryptedCPF str
 		WHERE  	ta.cpf 	= $1
 	`
 
-	row := r.db.QueryRow(ctx, query, encryptedCPF)
-	account, err = r.parseAccount(row)
-	if err != nil {
-		return account, handleDBError(err)
-	}
-
-	return account, nil
+	return r.queryOne(ctx, query, r.scanAccount, encryptedCPF)
 }
 
 func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accounts []entity.Account, totalRecords int64, err error) {
 	var params = []any{}
 	paramIndex := 1
 
-	query := withCount(querySelectBase)
+	query := querySelectBase
 
 	if take > 0 {
 		query += fmt.Sprintf(`
@@ -141,22 +143,9 @@ func (r *accountRepo) GetAccounts(ctx context.Context, take, skip int64) (accoun
 		params = append(params, skip)
 	}
 
-	rows, err := r.db.Query(ctx, query, params...)
-	if err != nil {
-		return accounts, totalRecords, handleDBError(err)
-	}
-	defer rows.Close()
+	accounts, err = r.queryList(ctx, withCount(query), r.scanAccountPage(&totalRecords), params...)
 
-	for rows.Next() {
-		account, err := r.parseAccount(rows, &totalRecords)
-		if err != nil {
-			return accounts, totalRecords, handleDBError(err)
-		}
-
-		accounts = append(accounts, account)
-	}
-
-	return accounts, totalRecords, nil
+	return accounts, totalRecords, err
 }
 
 func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) (account entity.Account, err error) {
@@ -164,13 +153,7 @@ func (r *accountRepo) GetAccountByUUID(ctx context.Context, accountUUID string) 
 		WHERE ta.account_uuid = $1
 	`
 
-	row := r.db.QueryRow(ctx, query, accountUUID)
-	account, err = r.parseAccount(row)
-	if err != nil {
-		return account, handleDBError(err)
-	}
-
-	return account, nil
+	return r.queryOne(ctx, query, r.scanAccount, accountUUID)
 }
 
 func (r *accountRepo) GetAccountIDByUUID(ctx context.Context, accountUUID string) (accountID int64, err error) {
@@ -194,7 +177,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 	var params = []any{}
 	paramIndex := 1
 
-	query := withCount(`
+	query := `
 		SELECT
 			tt.transfer_id,
 			tt.transfer_uuid,
@@ -211,7 +194,7 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 		INNER JOIN tab_account dest
 			ON dest.account_id = tt.account_destination_id
 
-	`)
+	`
 
 	if origin {
 		query += fmt.Sprintf(`WHERE	tt.account_origin_id 		= 	$%d `, paramIndex)
@@ -241,15 +224,8 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 		params = append(params, skip)
 	}
 
-	rows, err := r.db.Query(ctx, query, params...)
-	if err != nil {
-		return transfers, totalRecords, handleDBError(err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var transfer entity.Transfer
-		err = rows.Scan(
+	transfers, err = r.queryList(ctx, withCount(query), func(row scanner) (transfer entity.Transfer, err error) {
+		return transfer, row.Scan(
 			&transfer.ID,
 			&transfer.TransferUUID,
 			&transfer.AccountOriginUUID,
@@ -258,14 +234,9 @@ func (r *accountRepo) GetTransfersByAccountID(ctx context.Context, accountID, ta
 			&transfer.CreatedAt,
 			&totalRecords,
 		)
-		if err != nil {
-			return transfers, totalRecords, err
-		}
+	}, params...)
 
-		transfers = append(transfers, transfer)
-	}
-
-	return transfers, totalRecords, nil
+	return transfers, totalRecords, err
 }
 
 func (r *accountRepo) UpdateAccountBalance(ctx context.Context, accountID int64, balance float64) (err error) {

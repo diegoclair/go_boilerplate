@@ -43,6 +43,43 @@ func handleDBError(err error) error {
 	return err
 }
 
+// queries is the connection a repository reads through. Repositories embed it,
+// so the helpers below read as methods and each call carries one argument less.
+type queries struct {
+	db dbConn
+}
+
+// queryOne runs q and scans the single row it returns. handleDBError is applied
+// here, so a caller must not map the result again.
+func (c queries) queryOne[T any](ctx context.Context, q string, scan func(scanner) (T, error), args ...any) (T, error) {
+	item, err := scan(c.db.QueryRow(ctx, q, args...))
+	return item, handleDBError(err)
+}
+
+// queryList runs q and collects one T per row. On success the slice is never
+// nil, so a caller can encode an empty result as [] instead of null. Every
+// failure — the query, a scan, the iteration itself — goes through
+// handleDBError. A paginated read passes withCount(q) and lets its scan close
+// over the total.
+func (c queries) queryList[T any](ctx context.Context, q string, scan func(scanner) (T, error), args ...any) ([]T, error) {
+	rows, err := c.db.Query(ctx, q, args...)
+	if err != nil {
+		return nil, handleDBError(err)
+	}
+	defer rows.Close()
+
+	items := make([]T, 0)
+	for rows.Next() {
+		item, err := scan(rows)
+		if err != nil {
+			return nil, handleDBError(err)
+		}
+		items = append(items, item)
+	}
+
+	return items, handleDBError(rows.Err())
+}
+
 // withCount adds COUNT(*) OVER() to a base query for pagination
 // It searches for the first "FROM" keyword (case-insensitive, word boundary) and inserts the count column before it
 func withCount(baseQuery string) string {
