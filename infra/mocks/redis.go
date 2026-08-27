@@ -75,6 +75,20 @@ func (mr *MockIRedisCacheMockRecorder) Expire(ctx, key, expiration any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Expire", reflect.TypeOf((*MockIRedisCache)(nil).Expire), ctx, key, expiration)
 }
 
+// ExpireNX mocks base method.
+func (m *MockIRedisCache) ExpireNX(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExpireNX", ctx, key, expiration)
+	ret0, _ := ret[0].(*redis.BoolCmd)
+	return ret0
+}
+
+// ExpireNX indicates an expected call of ExpireNX.
+func (mr *MockIRedisCacheMockRecorder) ExpireNX(ctx, key, expiration any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExpireNX", reflect.TypeOf((*MockIRedisCache)(nil).ExpireNX), ctx, key, expiration)
+}
+
 // Get mocks base method.
 func (m *MockIRedisCache) Get(ctx context.Context, key string) *redis.StringCmd {
 	m.ctrl.T.Helper()
@@ -89,18 +103,18 @@ func (mr *MockIRedisCacheMockRecorder) Get(ctx, key any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIRedisCache)(nil).Get), ctx, key)
 }
 
-// Incr mocks base method.
-func (m *MockIRedisCache) Incr(ctx context.Context, key string) *redis.IntCmd {
+// IncrBy mocks base method.
+func (m *MockIRedisCache) IncrBy(ctx context.Context, key string, value int64) *redis.IntCmd {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Incr", ctx, key)
+	ret := m.ctrl.Call(m, "IncrBy", ctx, key, value)
 	ret0, _ := ret[0].(*redis.IntCmd)
 	return ret0
 }
 
-// Incr indicates an expected call of Incr.
-func (mr *MockIRedisCacheMockRecorder) Incr(ctx, key any) *gomock.Call {
+// IncrBy indicates an expected call of IncrBy.
+func (mr *MockIRedisCacheMockRecorder) IncrBy(ctx, key, value any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Incr", reflect.TypeOf((*MockIRedisCache)(nil).Incr), ctx, key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrBy", reflect.TypeOf((*MockIRedisCache)(nil).IncrBy), ctx, key, value)
 }
 
 // Keys mocks base method.

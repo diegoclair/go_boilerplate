@@ -23,3 +23,8 @@ type AuthToken interface {
 	CreateRefreshToken(ctx context.Context, input TokenPayloadInput) (tokenString string, payload TokenPayload, err error)
 	VerifyToken(ctx context.Context, token string) (payload TokenPayload, err error)
 }
+
+type PasswordHasher interface {
+	HashPassword(password string) (string, error)
+	CheckPassword(password, hashedPassword string) error
+}

@@ -1,13 +1,5 @@
 package cache
 
-type errorString string
+import "github.com/diegoclair/go_boilerplate/infra/contract"
 
-func (err errorString) Error() string {
-	return string(err)
-}
-
-// ErrCache represents cache manager related errors
-const (
-	// ErrCacheMiss indicates a cache miss when fetching an item from CacheManager.
-	ErrCacheMiss = errorString("cache miss: key not found")
-)
+const ErrCacheMiss = contract.ErrCacheMiss

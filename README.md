@@ -90,7 +90,9 @@ A fundamental principle of Clean Architecture is the **Dependency Rule**: source
 This structure ensures that changes in outer layers (like `/infra`, `/transport`, UI frameworks, or databases) have minimal impact on the core business logic.
 
 ### Authentication
-Login never reveals whether an account exists: an unknown document still pays for a decoy Argon2id hash, and the deactivated-account error is only returned after the password checks out.
+*   **No existence oracle:** login never reveals whether an account exists — an unknown document still pays for a decoy Argon2id hash, and the deactivated-account error is only returned after the password checks out.
+*   **Attempt lockout in cache:** failed logins are counted per identity in Redis within a fixed window that starts at the first failure, and once the ceiling is reached the refusal is answered from the counter alone, before any account lookup.
+*   **A wait, never a deactivation:** the counter expires on its own and no failed attempt ever writes `active = false`, so the way back in costs the account nothing.
 
 ## 💻 Getting Started
 

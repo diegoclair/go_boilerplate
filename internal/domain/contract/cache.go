@@ -17,7 +17,9 @@ type CacheManager interface {
 	GetInt(ctx context.Context, key string) (data int64, err error)
 	GetStruct(ctx context.Context, key string, data any) error
 
-	Increase(ctx context.Context, key string) error
+	// The ttl applies only when the increment creates the key, so a counter keeps
+	// its original expiry across later increments.
+	IncrBy(ctx context.Context, key string, delta int64, ttl time.Duration) (int64, error)
 
 	GetExpiration(ctx context.Context, key string) (time.Duration, error)
 	SetExpiration(ctx context.Context, key string, expiration time.Duration) error

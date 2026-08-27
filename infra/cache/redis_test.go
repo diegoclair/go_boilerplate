@@ -280,71 +280,92 @@ func TestRedisCache_GetString(t *testing.T) {
 	}
 }
 
-func TestRedisCache_Increase(t *testing.T) {
+func TestRedisCache_IncrBy(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockedRedis, redisMock := getRedisCacheMock(ctrl)
 
-	type args struct {
-		key   string
-		cache *CacheManager
-	}
-	tests := []struct {
-		name       string
-		args       args
-		setupCache func(args args, m *mocks.MockIRedisCache)
-		wantErr    error
-	}{
-		{
-			name:    "Success",
-			args:    args{key: "increase_key", cache: testRedis},
-			wantErr: nil,
-		},
-		{
-			name: "Error",
-			args: args{key: "increase_key", cache: mockedRedis},
-			setupCache: func(args args, m *mocks.MockIRedisCache) {
-				m.EXPECT().Incr(gomock.Any(), args.key).Return(redis.NewIntResult(0, errors.New("some error")))
-			},
-			wantErr: errors.New("some error"),
-		},
-	}
+	t.Run("Error", func(t *testing.T) {
+		redisMock.EXPECT().IncrBy(ctx, "incrby_error_key", int64(1)).
+			Return(redis.NewIntResult(0, errors.New("some error")))
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setupCache != nil {
-				tt.setupCache(tt.args, redisMock)
-			}
-
-			err := tt.args.cache.Increase(ctx, tt.args.key)
-			require.Equal(t, tt.wantErr, err)
-		})
-	}
-}
-
-func Test_redisCache_Increase(t *testing.T) {
-	ctx := context.Background()
-	cacheRegis := testRedis
-
-	t.Run("Success", func(t *testing.T) {
-		key := "increase_key_1"
-		err := cacheRegis.Increase(ctx, key)
-		require.NoError(t, err)
+		got, err := mockedRedis.IncrBy(ctx, "incrby_error_key", 1, time.Minute)
+		require.Error(t, err)
+		require.Zero(t, got)
 	})
 
-	t.Run("success_2", func(t *testing.T) {
-		key := "increase_key_2"
-		err := cacheRegis.Increase(ctx, key)
+	// The count already happened, so the caller gets it even when the expiry could
+	// not be written.
+	t.Run("Expiration error", func(t *testing.T) {
+		redisMock.EXPECT().IncrBy(ctx, "incrby_expire_key", int64(1)).
+			Return(redis.NewIntResult(1, nil))
+		redisMock.EXPECT().ExpireNX(ctx, "incrby_expire_key", time.Minute).
+			Return(redis.NewBoolResult(false, errors.New("some error")))
+
+		got, err := mockedRedis.IncrBy(ctx, "incrby_expire_key", 1, time.Minute)
+		require.Error(t, err)
+		require.Equal(t, int64(1), got)
+	})
+}
+
+func Test_redisCache_IncrBy(t *testing.T) {
+	ctx := context.Background()
+	cacheRedis := testRedis
+
+	// Renewing the expiry on every increment would keep a counter alive for as
+	// long as the increments keep coming.
+	t.Run("the expiration belongs to the increment that created the key", func(t *testing.T) {
+		key := "incrby_key_1"
+
+		got, err := cacheRedis.IncrBy(ctx, key, 1, time.Minute)
+		require.NoError(t, err)
+		require.Equal(t, int64(1), got)
+
+		ttl, err := cacheRedis.GetExpiration(ctx, key)
+		require.NoError(t, err)
+		require.Greater(t, ttl, time.Duration(0))
+		require.LessOrEqual(t, ttl, time.Minute)
+
+		got, err = cacheRedis.IncrBy(ctx, key, 1, time.Hour)
+		require.NoError(t, err)
+		require.Equal(t, int64(2), got)
+
+		kept, err := cacheRedis.GetExpiration(ctx, key)
+		require.NoError(t, err)
+		require.LessOrEqual(t, kept, ttl)
+	})
+
+	// A counter that lost its expiry would lock an identity out forever.
+	t.Run("a key left without an expiration gets one", func(t *testing.T) {
+		key := "incrby_key_3"
+
+		got, err := cacheRedis.IncrBy(ctx, key, 1, 0)
+		require.NoError(t, err)
+		require.Equal(t, int64(1), got)
+
+		ttl, err := cacheRedis.GetExpiration(ctx, key)
+		require.NoError(t, err)
+		require.Equal(t, time.Duration(-1), ttl)
+
+		_, err = cacheRedis.IncrBy(ctx, key, 1, time.Minute)
 		require.NoError(t, err)
 
-		err = cacheRegis.Increase(ctx, key)
+		healed, err := cacheRedis.GetExpiration(ctx, key)
 		require.NoError(t, err)
+		require.Greater(t, healed, time.Duration(0))
+	})
 
-		value, err := cacheRegis.GetInt(ctx, key)
+	t.Run("without an expiration the key stays", func(t *testing.T) {
+		key := "incrby_key_2"
+
+		got, err := cacheRedis.IncrBy(ctx, key, 2, 0)
 		require.NoError(t, err)
+		require.Equal(t, int64(2), got)
 
-		require.Equal(t, int64(2), value)
+		ttl, err := cacheRedis.GetExpiration(ctx, key)
+		require.NoError(t, err)
+		require.Equal(t, time.Duration(-1), ttl)
 	})
 }
 

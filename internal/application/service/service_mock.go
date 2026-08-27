@@ -2,13 +2,11 @@ package service
 
 import (
 	"testing"
-	"time"
 
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/diegoclair/go_boilerplate/infra/configmock"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/logger"
-	"github.com/diegoclair/appvalidator/apperrmap"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
@@ -44,7 +42,6 @@ func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
 
 	cm := cfg.GetCacheManager(ctrl)
 	crypto := cfg.GetCrypto(ctrl)
-	crypto.EXPECT().HashPassword(decoySource).Return("decoy-hash", nil).AnyTimes()
 
 	log := cfg.GetLogger()
 	v := cfg.GetValidator(t)
@@ -69,10 +66,6 @@ func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
 		mockValidator:    v,
 		mockLogger:       log,
 	}
-
-	s, err := New(domainMock, time.Minute)
-	require.NoError(t, err)
-	require.NotNil(t, s)
 
 	return
 }

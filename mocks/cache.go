@@ -163,18 +163,19 @@ func (mr *MockCacheManagerMockRecorder) GetStruct(ctx, key, data any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStruct", reflect.TypeOf((*MockCacheManager)(nil).GetStruct), ctx, key, data)
 }
 
-// Increase mocks base method.
-func (m *MockCacheManager) Increase(ctx context.Context, key string) error {
+// IncrBy mocks base method.
+func (m *MockCacheManager) IncrBy(ctx context.Context, key string, delta int64, ttl time.Duration) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Increase", ctx, key)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "IncrBy", ctx, key, delta, ttl)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// Increase indicates an expected call of Increase.
-func (mr *MockCacheManagerMockRecorder) Increase(ctx, key any) *gomock.Call {
+// IncrBy indicates an expected call of IncrBy.
+func (mr *MockCacheManagerMockRecorder) IncrBy(ctx, key, delta, ttl any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Increase", reflect.TypeOf((*MockCacheManager)(nil).Increase), ctx, key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrBy", reflect.TypeOf((*MockCacheManager)(nil).IncrBy), ctx, key, delta, ttl)
 }
 
 // Set mocks base method.

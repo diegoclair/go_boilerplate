@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/diegoclair/go_boilerplate/infra"
+	"github.com/diegoclair/go_boilerplate/infra/auth"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
@@ -16,38 +17,54 @@ import (
 	"github.com/diegoclair/logger"
 )
 
-// The input is irrelevant and not a secret; what matters is that the hash carries
-// whatever cost the crypto is configured with today.
-const decoySource = "go-boilerplate-decoy"
+// Prefixes the attempt counters so they never collide with another key family.
+const lockoutNamespace = "account"
 
 type authApp struct {
 	cache               contract.CacheManager
-	crypto              contract.Crypto
 	dm                  contract.DataManager
 	log                 logger.Logger
 	validator           apperrmap.Validator
 	accountSvc          contract.AccountApp
 	accessTokenDuration time.Duration
-	decoyPassword       string
+	signIn              *auth.SignIn[entity.Account]
 }
 
 func newAuthApp(infra domain.Infrastructure, accountSvc contract.AccountApp, accessTokenDuration time.Duration) (*authApp, error) {
-	cryptoClient := infra.Crypto()
-
-	decoyPassword, err := cryptoClient.HashPassword(decoySource)
+	lockout, err := auth.NewLockout(infra.CacheManager(), lockoutNamespace, domain.MaxLoginAttempts, domain.LoginAttemptWindow)
 	if err != nil {
-		return nil, fmt.Errorf("auth service: mint the decoy hash: %w", err)
+		return nil, err
+	}
+
+	dm := infra.DataManager()
+
+	signIn, err := auth.NewSignIn(auth.SignInDeps[entity.Account]{
+		Lockout: lockout,
+		Crypto:  infra.Crypto(),
+		Logger:  infra.Logger(),
+		Errors: auth.SignInErrors{
+			WrongCredentials: errcodes.ErrInvalidCredentials,
+			Locked:           errcodes.ErrMaxLoginAttempts,
+			Deactivated:      errcodes.ErrDeactivatedAccount,
+		},
+		Find: func(ctx context.Context, document string) (entity.Account, error) {
+			return dm.Account().GetAccountByDocument(ctx, document)
+		},
+		PasswordHash: func(account entity.Account) string { return account.Password },
+		IsActive:     func(account entity.Account) bool { return account.Active },
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return &authApp{
 		cache:               infra.CacheManager(),
-		crypto:              cryptoClient,
-		dm:                  infra.DataManager(),
+		dm:                  dm,
 		log:                 infra.Logger(),
 		validator:           infra.Validator(),
 		accountSvc:          accountSvc,
 		accessTokenDuration: accessTokenDuration,
-		decoyPassword:       decoyPassword,
+		signIn:              signIn,
 	}, nil
 }
 
@@ -58,34 +75,12 @@ func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account enti
 		return entity.Account{}, err
 	}
 
-	account, err = s.dm.Account().GetAccountByDocument(ctx, input.CPF)
+	account, err = s.signIn.Authenticate(ctx, input.CPF, input.Password)
 	if err != nil {
-		if !apperr.IsNotFound(err) {
-			s.log.Error(ctx, "error getting account by document", logger.Err(err))
-			return entity.Account{}, err
+		if errors.Is(err, errcodes.ErrMaxLoginAttempts) {
+			s.log.Warn(ctx, "login refused: too many attempts")
 		}
-
-		// Paying the hashing cost here keeps the answer for a document nobody
-		// owns as slow as the answer for one that exists.
-		_ = s.crypto.CheckPassword(input.Password, s.decoyPassword)
-
-		s.log.Error(ctx, "account not found")
-		return entity.Account{}, errcodes.ErrInvalidCredentials
-	}
-
-	ctx = context.WithValue(ctx, infra.AccountUUIDKey, account.UUID)
-	ctx = logger.WithAttrs(ctx, logger.Attr("account_id", account.ID))
-
-	err = s.crypto.CheckPassword(input.Password, account.Password)
-	if err != nil {
-		s.log.Error(ctx, "wrong password")
-		return entity.Account{}, errcodes.ErrInvalidCredentials
-	}
-
-	// Only whoever already proved the password gets told the account exists but is off.
-	if !account.Active {
-		s.log.Error(ctx, "account is not active")
-		return entity.Account{}, errcodes.ErrDeactivatedAccount
+		return entity.Account{}, err
 	}
 
 	return account, nil

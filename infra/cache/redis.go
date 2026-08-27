@@ -19,7 +19,8 @@ type IRedisCache interface {
 	Set(ctx context.Context, key string, value any, expiration time.Duration) *redis.StatusCmd
 	TTL(ctx context.Context, key string) *redis.DurationCmd
 	Expire(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd
-	Incr(ctx context.Context, key string) *redis.IntCmd
+	ExpireNX(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd
+	IncrBy(ctx context.Context, key string, value int64) *redis.IntCmd
 	Del(ctx context.Context, keys ...string) *redis.IntCmd
 	Keys(ctx context.Context, pattern string) *redis.StringSliceCmd
 }
@@ -151,14 +152,22 @@ func (r *CacheManager) SetExpiration(ctx context.Context, key string, expiration
 	return nil
 }
 
-// Increase increases an int key, setting it to zero if the key doesn't exists
-func (r *CacheManager) Increase(ctx context.Context, key string) (err error) {
-	err = r.redis.Incr(ctx, key).Err()
+// ExpireNX keeps the expiry of the first increment, and heals a key whose
+// Expire failed — without it a blip between the two round-trips would leave
+// the counter immortal.
+func (r *CacheManager) IncrBy(ctx context.Context, key string, delta int64, ttl time.Duration) (int64, error) {
+	n, err := r.redis.IncrBy(ctx, key, delta).Result()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	if ttl > 0 {
+		if err = r.redis.ExpireNX(ctx, key, ttl).Err(); err != nil {
+			return n, err
+		}
+	}
+
+	return n, nil
 }
 
 // Delete removes a list of keys from the cache

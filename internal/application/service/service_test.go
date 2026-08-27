@@ -6,12 +6,15 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestNew(t *testing.T) {
 	t.Run("Valid infrastructure", func(t *testing.T) {
 		m, ctrl := newServiceTestMock(t)
 		defer ctrl.Finish()
+
+		m.mockCrypto.EXPECT().HashPassword(gomock.Any()).Return(mockDecoyPassword, nil).Times(1)
 
 		apps, err := New(m.mockDomain, time.Hour)
 		assert.NoError(t, err)
