@@ -35,6 +35,7 @@
 - [Project Architecture](#project-architecture)
   - [Directory Structure](#directory-structure)
   - [Dependency Rule](#dependency-rule)
+  - [Authentication](#authentication)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites-)
   - [Configuration](#configuration)
@@ -87,6 +88,9 @@ A fundamental principle of Clean Architecture is the **Dependency Rule**: source
 *   The `/cmd` layer orchestrates the setup and depends on concrete types from `/internal` and `/infra` during initialization.
 
 This structure ensures that changes in outer layers (like `/infra`, `/transport`, UI frameworks, or databases) have minimal impact on the core business logic.
+
+### Authentication
+Login never reveals whether an account exists: an unknown document still pays for a decoy Argon2id hash, and the deactivated-account error is only returned after the password checks out.
 
 ## 💻 Getting Started
 

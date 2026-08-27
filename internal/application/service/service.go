@@ -14,7 +14,6 @@ type Apps struct {
 	TransferService contract.TransferApp
 }
 
-// New to get instance of all services
 func New(infra domain.Infrastructure, accessTokenDuration time.Duration) (*Apps, error) {
 	if err := validateInfrastructure(infra); err != nil {
 		return nil, err
@@ -22,14 +21,18 @@ func New(infra domain.Infrastructure, accessTokenDuration time.Duration) (*Apps,
 
 	accSvc := newAccountService(infra)
 
+	authSvc, err := newAuthApp(infra, accSvc, accessTokenDuration)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Apps{
 		AccountService:  accSvc,
-		AuthService:     newAuthApp(infra, accSvc, accessTokenDuration),
+		AuthService:     authSvc,
 		TransferService: newTransferService(infra, accSvc),
 	}, nil
 }
 
-// validateInfrastructure validate the dependencies needed to initialize the services
 func validateInfrastructure(infra domain.Infrastructure) error {
 	if infra.Logger() == nil {
 		return errors.New("logger is required")

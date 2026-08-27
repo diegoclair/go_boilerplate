@@ -7,11 +7,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/diegoclair/apperr"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
+	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
+	"github.com/diegoclair/go_boilerplate/mocks"
+	"github.com/diegoclair/logger"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
+
+// Must match the hash the shared service mock stubs HashPassword with.
+const mockDecoyPassword = "decoy-hash"
 
 func Test_newAuthApp(t *testing.T) {
 	m, ctrl := newServiceTestMock(t)
@@ -24,11 +32,40 @@ func Test_newAuthApp(t *testing.T) {
 		validator:           m.mockValidator,
 		accountSvc:          m.mockAccountSvc,
 		accessTokenDuration: time.Minute,
+		decoyPassword:       mockDecoyPassword,
 	}
 
-	if got := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute); !reflect.DeepEqual(got, want) {
+	got, err := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+	require.NoError(t, err)
+
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("newAuthService() = %v, want %v", got, want)
 	}
+}
+
+func Test_newAuthApp_decoyMintingError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	crypto := mocks.NewMockCrypto(ctrl)
+	crypto.EXPECT().HashPassword(gomock.Any()).Return("", errors.New("some error")).Times(1)
+
+	got, err := newAuthAppWithCrypto(t, ctrl, crypto)
+	require.Error(t, err)
+	require.Nil(t, got)
+}
+
+func newAuthAppWithCrypto(t *testing.T, ctrl *gomock.Controller, crypto *mocks.MockCrypto) (*authApp, error) {
+	t.Helper()
+
+	infraMock := mocks.NewMockInfrastructure(ctrl)
+	infraMock.EXPECT().CacheManager().Return(mocks.NewMockCacheManager(ctrl)).AnyTimes()
+	infraMock.EXPECT().DataManager().Return(mocks.NewMockDataManager(ctrl)).AnyTimes()
+	infraMock.EXPECT().Logger().Return(logger.NewNoop()).AnyTimes()
+	infraMock.EXPECT().Crypto().Return(crypto).AnyTimes()
+	infraMock.EXPECT().Validator().Return(nil).AnyTimes()
+
+	return newAuthApp(infraMock, mocks.NewMockAccountApp(ctrl), time.Minute)
 }
 
 func Test_authService_Login(t *testing.T) {
@@ -37,10 +74,13 @@ func Test_authService_Login(t *testing.T) {
 		password string
 	}
 	tests := []struct {
-		name      string
-		buildMock func(ctx context.Context, mocks allMocks, args args)
-		args      args
-		wantErr   bool
+		name         string
+		buildMock    func(ctx context.Context, mocks allMocks, args args)
+		args         args
+		wantAccount  entity.Account
+		wantErr      bool
+		wantErrIs    error
+		wantErrNotIs error
 	}{
 		{
 			name: "Should login without any errors",
@@ -62,27 +102,35 @@ func Test_authService_Login(t *testing.T) {
 					mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).Return(nil).Times(1),
 				)
 			},
+			wantAccount: entity.Account{
+				ID:       1,
+				UUID:     "uuid",
+				Name:     "name",
+				CPF:      "01234567890",
+				Password: "01234567890",
+				Active:   true,
+			},
 		},
 		{
-			name: "Should return error when the account is not active",
+			name: "Should spend the decoy hash when the document has no account",
 			args: args{
 				cpf:      "01234567890",
 				password: "01234567890",
 			},
 			buildMock: func(ctx context.Context, mocks allMocks, args args) {
-				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
-					ID:       1,
-					UUID:     "uuid",
-					Name:     "name",
-					CPF:      args.cpf,
-					Password: args.password,
-					Active:   false,
-				}, nil).Times(1)
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).
+						Return(entity.Account{}, apperr.ErrRecordNotFound).Times(1),
+
+					mocks.mockCrypto.EXPECT().CheckPassword(args.password, mockDecoyPassword).
+						Return(errors.New("password does not match")).Times(1),
+				)
 			},
-			wantErr: true,
+			wantErr:   true,
+			wantErrIs: errcodes.ErrInvalidCredentials,
 		},
 		{
-			name: "Should return error when there is some error to get account by document",
+			name: "Should keep a database failure as a system error",
 			args: args{
 				cpf:      "01234567890",
 				password: "01234567890",
@@ -91,7 +139,55 @@ func Test_authService_Login(t *testing.T) {
 				mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).
 					Return(entity.Account{}, errors.New("some error")).Times(1)
 			},
-			wantErr: true,
+			wantErr:      true,
+			wantErrNotIs: errcodes.ErrInvalidCredentials,
+		},
+		{
+			name: "Should not reveal the deactivation when the password is wrong",
+			args: args{
+				cpf:      "01234567890",
+				password: "01234567890",
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
+						ID:       1,
+						UUID:     "uuid",
+						Name:     "name",
+						CPF:      args.cpf,
+						Password: args.password,
+						Active:   false,
+					}, nil).Times(1),
+
+					mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).
+						Return(errors.New("some error")).Times(1),
+				)
+			},
+			wantErr:   true,
+			wantErrIs: errcodes.ErrInvalidCredentials,
+		},
+		{
+			name: "Should reveal the deactivation once the password is right",
+			args: args{
+				cpf:      "01234567890",
+				password: "01234567890",
+			},
+			buildMock: func(ctx context.Context, mocks allMocks, args args) {
+				gomock.InOrder(
+					mocks.mockAccountRepo.EXPECT().GetAccountByDocument(ctx, args.cpf).Return(entity.Account{
+						ID:       1,
+						UUID:     "uuid",
+						Name:     "name",
+						CPF:      args.cpf,
+						Password: args.password,
+						Active:   false,
+					}, nil).Times(1),
+
+					mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).Return(nil).Times(1),
+				)
+			},
+			wantErr:   true,
+			wantErrIs: errcodes.ErrDeactivatedAccount,
 		},
 		{
 			name: "Should return error when the password is wrong",
@@ -111,7 +207,8 @@ func Test_authService_Login(t *testing.T) {
 
 				mocks.mockCrypto.EXPECT().CheckPassword(args.password, args.password).Return(errors.New("some error")).Times(1)
 			},
-			wantErr: true,
+			wantErr:   true,
+			wantErrIs: errcodes.ErrInvalidCredentials,
 		},
 		{
 			name:    "Should return error when the input is invalid",
@@ -130,18 +227,34 @@ func Test_authService_Login(t *testing.T) {
 				tt.buildMock(ctx, m, tt.args)
 			}
 
-			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			s, err := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			require.NoError(t, err)
 
 			input := dto.LoginInput{
 				CPF:      tt.args.cpf,
 				Password: tt.args.password,
 			}
 
-			_, err := s.Login(ctx, input)
+			account, err := s.Login(ctx, input)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("authService.Login() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
+			if tt.wantErrIs != nil {
+				require.ErrorIs(t, err, tt.wantErrIs)
+			}
+
+			if tt.wantErrNotIs != nil {
+				require.NotErrorIs(t, err, tt.wantErrNotIs)
+			}
+
+			if tt.wantErr {
+				require.Empty(t, account)
+				return
+			}
+
+			require.Equal(t, tt.wantAccount, account)
 		})
 	}
 }
@@ -200,7 +313,9 @@ func Test_authService_CreateSession(t *testing.T) {
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			s, err := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			require.NoError(t, err)
+
 			if err := s.CreateSession(ctx, tt.args.session); (err != nil) != tt.wantErr {
 				t.Errorf("authService.CreateSession() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -253,7 +368,9 @@ func Test_authService_GetSessionByUUID(t *testing.T) {
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			s, err := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			require.NoError(t, err)
+
 			gotSession, err := s.GetSessionByUUID(ctx, tt.args.sessionUUID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("authService.GetSessionByUUID() error = %v, wantErr %v", err, tt.wantErr)
@@ -329,7 +446,9 @@ func Test_authService_Logout(t *testing.T) {
 			if tt.buildMock != nil {
 				tt.buildMock(ctx, m, tt.args)
 			}
-			s := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			s, err := newAuthApp(m.mockDomain, m.mockAccountSvc, time.Minute)
+			require.NoError(t, err)
+
 			if err := s.Logout(ctx, tt.args.accessToken); (err != nil) != tt.wantErr {
 				t.Errorf("authService.Logout() error = %v, wantErr %v", err, tt.wantErr)
 			}

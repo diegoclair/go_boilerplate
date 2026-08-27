@@ -44,6 +44,8 @@ func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
 
 	cm := cfg.GetCacheManager(ctrl)
 	crypto := cfg.GetCrypto(ctrl)
+	crypto.EXPECT().HashPassword(decoySource).Return("decoy-hash", nil).AnyTimes()
+
 	log := cfg.GetLogger()
 	v := cfg.GetValidator(t)
 
@@ -68,7 +70,6 @@ func newServiceTestMock(t *testing.T) (m allMocks, ctrl *gomock.Controller) {
 		mockLogger:       log,
 	}
 
-	// validate func New
 	s, err := New(domainMock, time.Minute)
 	require.NoError(t, err)
 	require.NotNil(t, s)

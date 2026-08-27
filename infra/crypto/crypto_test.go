@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -83,4 +84,29 @@ func TestCheckPassword_RoundTrip(t *testing.T) {
 			require.Error(t, err)
 		})
 	}
+}
+
+func TestHashPasswordCostIsIndependentOfTheInput(t *testing.T) {
+	c := NewCrypto()
+
+	// A decoy hash is only useful against a timing oracle while it costs what a
+	// real one costs, whatever the input it was minted from.
+	decoy, err := c.HashPassword("any-decoy-source")
+	require.NoError(t, err)
+
+	genuine, err := c.HashPassword("a-real-password")
+	require.NoError(t, err)
+
+	want := fmt.Sprintf("m=%d,t=%d,p=%d", argonMemory, argonIterations, argonParallelism)
+	require.Equal(t, want, costParameters(t, decoy))
+	require.Equal(t, want, costParameters(t, genuine))
+}
+
+func costParameters(t *testing.T, hash string) string {
+	t.Helper()
+
+	parts := strings.Split(hash, "$")
+	require.Len(t, parts, 6)
+
+	return parts[3]
 }

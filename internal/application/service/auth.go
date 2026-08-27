@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/diegoclair/apperr"
+	"github.com/diegoclair/appvalidator/apperrmap"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/internal/application/dto"
 	"github.com/diegoclair/go_boilerplate/internal/domain"
@@ -12,8 +14,11 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/domain/entity"
 	"github.com/diegoclair/go_boilerplate/internal/domain/errcodes"
 	"github.com/diegoclair/logger"
-	"github.com/diegoclair/appvalidator/apperrmap"
 )
+
+// The input is irrelevant and not a secret; what matters is that the hash carries
+// whatever cost the crypto is configured with today.
+const decoySource = "go-boilerplate-decoy"
 
 type authApp struct {
 	cache               contract.CacheManager
@@ -23,45 +28,64 @@ type authApp struct {
 	validator           apperrmap.Validator
 	accountSvc          contract.AccountApp
 	accessTokenDuration time.Duration
+	decoyPassword       string
 }
 
-func newAuthApp(infra domain.Infrastructure, accountSvc contract.AccountApp, accessTokenDuration time.Duration) *authApp {
+func newAuthApp(infra domain.Infrastructure, accountSvc contract.AccountApp, accessTokenDuration time.Duration) (*authApp, error) {
+	cryptoClient := infra.Crypto()
+
+	decoyPassword, err := cryptoClient.HashPassword(decoySource)
+	if err != nil {
+		return nil, fmt.Errorf("auth service: mint the decoy hash: %w", err)
+	}
+
 	return &authApp{
 		cache:               infra.CacheManager(),
-		crypto:              infra.Crypto(),
+		crypto:              cryptoClient,
 		dm:                  infra.DataManager(),
 		log:                 infra.Logger(),
 		validator:           infra.Validator(),
 		accountSvc:          accountSvc,
 		accessTokenDuration: accessTokenDuration,
-	}
+		decoyPassword:       decoyPassword,
+	}, nil
 }
 
 func (s *authApp) Login(ctx context.Context, input dto.LoginInput) (account entity.Account, err error) {
 	err = input.Validate(ctx, s.validator)
 	if err != nil {
 		s.log.Error(ctx, "error or invalid input", logger.Err(err))
-		return account, err
+		return entity.Account{}, err
 	}
 
 	account, err = s.dm.Account().GetAccountByDocument(ctx, input.CPF)
 	if err != nil {
-		s.log.Error(ctx, "error getting account by document", logger.Err(err))
-		return account, errcodes.ErrInvalidCredentials
+		if !apperr.IsNotFound(err) {
+			s.log.Error(ctx, "error getting account by document", logger.Err(err))
+			return entity.Account{}, err
+		}
+
+		// Paying the hashing cost here keeps the answer for a document nobody
+		// owns as slow as the answer for one that exists.
+		_ = s.crypto.CheckPassword(input.Password, s.decoyPassword)
+
+		s.log.Error(ctx, "account not found")
+		return entity.Account{}, errcodes.ErrInvalidCredentials
 	}
 
 	ctx = context.WithValue(ctx, infra.AccountUUIDKey, account.UUID)
 	ctx = logger.WithAttrs(ctx, logger.Attr("account_id", account.ID))
 
-	if !account.Active {
-		s.log.Error(ctx, "account is not active")
-		return account, errcodes.ErrDeactivatedAccount
-	}
-
 	err = s.crypto.CheckPassword(input.Password, account.Password)
 	if err != nil {
 		s.log.Error(ctx, "wrong password")
-		return account, errcodes.ErrInvalidCredentials
+		return entity.Account{}, errcodes.ErrInvalidCredentials
+	}
+
+	// Only whoever already proved the password gets told the account exists but is off.
+	if !account.Active {
+		s.log.Error(ctx, "account is not active")
+		return entity.Account{}, errcodes.ErrDeactivatedAccount
 	}
 
 	return account, nil
@@ -105,8 +129,8 @@ func (s *authApp) Logout(ctx context.Context, accessToken string) (err error) {
 		return errcodes.ErrSessionNotFound
 	}
 
-	// access token will be on cache for 3 minutes after it duration
-	// this is to avoid the user to login again with the same access token (used in the middleware)
+	// Outliving the token itself is what stops the middleware from honouring a
+	// logged-out token until it expires on its own.
 	err = s.cache.Set(ctx, accessToken, "true", s.accessTokenDuration+3*time.Minute)
 	if err != nil {
 		s.log.Error(ctx, "error logging out", logger.Err(err))
