@@ -16,7 +16,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/test"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/transferroute"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/google/uuid"
 )

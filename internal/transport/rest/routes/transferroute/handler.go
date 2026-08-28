@@ -7,7 +7,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
 
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 )
 
 var (
@@ -29,7 +29,7 @@ func NewHandler(transferService contract.TransferApp) *Handler {
 	return instance
 }
 
-func (s *Handler) handleAddTransfer(c echo.Context) error {
+func (s *Handler) handleAddTransfer(c *echo.Context) error {
 	input := viewmodel.TransferReq{}
 
 	err := c.Bind(&input)
@@ -47,7 +47,7 @@ func (s *Handler) handleAddTransfer(c echo.Context) error {
 	return routeutils.ResponseCreated(c)
 }
 
-func (s *Handler) handleGetTransfers(c echo.Context) error {
+func (s *Handler) handleGetTransfers(c *echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	take, skip := routeutils.GetPagingParams(c, "page", "quantity")

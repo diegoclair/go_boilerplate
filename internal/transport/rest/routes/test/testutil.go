@@ -19,8 +19,8 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/internal/transport/rest/serverMiddleware"
 	"github.com/diegoclair/go_boilerplate/mocks"
-	"github.com/diegoclair/goswag"
-	echo "github.com/labstack/echo/v4"
+	"github.com/diegoclair/goswag/v2"
+	echo "github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/google/uuid"
 	"go.uber.org/mock/gomock"
@@ -47,7 +47,7 @@ func GetServerTest(t *testing.T) (m SvcMocks, server goswag.Echo, ctrl *gomock.C
 	}
 
 	server = goswag.NewEcho()
-	server.Echo().HTTPErrorHandler = func(err error, c echo.Context) {
+	server.Echo().HTTPErrorHandler = func(c *echo.Context, err error) {
 		_ = routeutils.HandleError(c, err)
 	}
 	appGroup := server.Group("/")

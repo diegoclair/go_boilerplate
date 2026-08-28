@@ -3,13 +3,14 @@ package rest
 import (
 	"context"
 	"fmt"
-	"net/http"
+	"time"
 
 	"github.com/diegoclair/go_boilerplate/infra/config"
 	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/internal/application/service"
 	"github.com/diegoclair/go_boilerplate/internal/domain"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
+	"github.com/diegoclair/go_boilerplate/internal/transport/rest/clientip"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/accountroute"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/authroute"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/pingroute"
@@ -17,43 +18,43 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routes/transferroute"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	servermiddleware "github.com/diegoclair/go_boilerplate/internal/transport/rest/serverMiddleware"
-	"github.com/diegoclair/goswag"
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/diegoclair/goswag/v2"
+	"github.com/diegoclair/logger"
+	echoprometheus "github.com/labstack/echo-prometheus"
+	echo "github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
+)
+
+const (
+	defaultPort     = "5000"
+	gracefulTimeout = 10 * time.Second
 )
 
 type Server struct {
 	routes []routeutils.IRoute
 	Router goswag.Echo
 	cache  contract.CacheManager
+	log    logger.Logger
+	port   string
 }
 
-func StartRestServer(ctx context.Context, cfg *config.Config, infra domain.Infrastructure, services *service.Apps, appName, port string) *Server {
-	server := NewRestServer(services, cfg.GetAuthToken(), infra.CacheManager(), appName)
+func NewServer(cfg *config.Config, infra domain.Infrastructure, services *service.Apps, appName, port string) *Server {
+	server := NewRestServer(services, cfg.GetAuthToken(), infra.CacheManager(), appName, cfg.App.ClientIPHeaders)
 	if port == "" {
-		port = "5000"
+		port = defaultPort
 	}
 
-	infra.Logger().Info(ctx, fmt.Sprintf("About to start the application on port: %s...", port))
-
-	go func() {
-		if err := server.Start(port); err != nil {
-			if err == http.ErrServerClosed {
-				infra.Logger().Info(ctx, "Server stopped")
-			} else {
-				infra.Logger().Error(ctx, fmt.Sprintf("Server error: %v", err))
-			}
-		}
-	}()
+	server.port = port
+	server.log = infra.Logger()
 
 	return server
 }
 
-func NewRestServer(services *service.Apps, authToken infraContract.AuthToken, cache contract.CacheManager, appName string) *Server {
+func NewRestServer(services *service.Apps, authToken infraContract.AuthToken, cache contract.CacheManager, appName string, clientIPHeaders []string) *Server {
 	router := goswag.NewEcho(routeutils.DefaultSwaggerErrors()...)
-	router.Echo().Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-	router.Echo().HTTPErrorHandler = func(err error, c echo.Context) {
+	router.Echo().IPExtractor = clientip.Extractor(clientIPHeaders, nil)
+	router.Echo().Use(middleware.CORS("*"))
+	router.Echo().HTTPErrorHandler = func(c *echo.Context, err error) {
 		_ = routeutils.HandleError(c, err)
 	}
 
@@ -103,6 +104,17 @@ func (r *Server) setupPrometheus(appName string) {
 	r.Router.Echo().Use(p)
 }
 
-func (r *Server) Start(port string) error {
-	return r.Router.Echo().Start(fmt.Sprintf(":%s", port))
+// Serve blocks until ctx is cancelled, then drains the requests in flight —
+// bounded by gracefulTimeout. Nothing the requests depend on may close before
+// it returns.
+func (r *Server) Serve(ctx context.Context) error {
+	r.log.Info(ctx, fmt.Sprintf("About to start the application on port: %s...", r.port))
+
+	return echo.StartConfig{
+		Address:         fmt.Sprintf(":%s", r.port),
+		GracefulTimeout: gracefulTimeout,
+		OnShutdownError: func(err error) {
+			r.log.Error(ctx, "Failed to shutdown rest server", logger.Err(err))
+		},
+	}.Start(ctx, r.Router.Echo())
 }

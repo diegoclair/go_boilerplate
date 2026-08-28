@@ -5,12 +5,12 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra"
 	infraContract "github.com/diegoclair/go_boilerplate/infra/contract"
 	"github.com/diegoclair/go_boilerplate/internal/domain/contract"
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 )
 
 func AuthMiddlewarePrivateRoute(authToken infraContract.AuthToken, cache contract.CacheManager) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
+		return func(ctx *echo.Context) error {
 
 			accessToken := ctx.Request().Header.Get(infra.TokenKey.String())
 			if len(accessToken) == 0 {

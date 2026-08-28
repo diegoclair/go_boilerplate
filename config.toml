@@ -2,6 +2,10 @@
 name = "go_boilerplate"
 environment = "local"
 port = "5000"
+# Which edge is in front, most specific first. Empty uses the built-in list.
+# Behind an AWS/GCP load balancer, where X-Forwarded-For is all there is, use
+# echo's own XFF extractor with its trusted-range options instead.
+client-ip-headers = []
 
   [app.auth]
   access-token-duration = "15m"

@@ -14,7 +14,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
 	"github.com/google/uuid"
 
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 )
 
 var (
@@ -38,7 +38,7 @@ func NewHandler(authService contract.AuthApp, authToken infraContract.AuthToken)
 	return instance
 }
 
-func (s *Handler) handleLogin(c echo.Context) error {
+func (s *Handler) handleLogin(c *echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.Login{}
@@ -91,7 +91,7 @@ func (s *Handler) handleLogin(c echo.Context) error {
 	return routeutils.ResponseAPIOk(c, response)
 }
 
-func (s *Handler) handleRefreshToken(c echo.Context) error {
+func (s *Handler) handleRefreshToken(c *echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.RefreshTokenRequest{}
@@ -143,7 +143,7 @@ func (s *Handler) handleRefreshToken(c echo.Context) error {
 	return routeutils.ResponseAPIOk(c, response)
 }
 
-func (s *Handler) handleLogout(c echo.Context) error {
+func (s *Handler) handleLogout(c *echo.Context) error {
 	accessToken := c.Request().Header.Get(infra.TokenKey.String())
 	ctx := routeutils.GetContext(c)
 

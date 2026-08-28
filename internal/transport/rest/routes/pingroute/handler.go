@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 )
 
 var (
@@ -26,7 +26,7 @@ type pingResponse struct {
 	Message string `json:"message"`
 }
 
-func (s *Handler) handlePing(c echo.Context) error {
+func (s *Handler) handlePing(c *echo.Context) error {
 	response := pingResponse{
 		Message: "pong",
 	}

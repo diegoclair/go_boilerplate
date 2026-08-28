@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
-	"github.com/diegoclair/goswag"
-	echo "github.com/labstack/echo/v4"
+	"github.com/diegoclair/goswag/v2"
+	echo "github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
 )
 

@@ -7,10 +7,10 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/apperr"
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 )
 
-func GetContext(c echo.Context) (ctx context.Context) {
+func GetContext(c *echo.Context) (ctx context.Context) {
 	ctx = c.Request().Context()
 	ctx = context.WithValue(ctx, infra.AccountUUIDKey, c.Get(infra.AccountUUIDKey.String()))
 	ctx = context.WithValue(ctx, infra.SessionKey, c.Get(infra.SessionKey.String()))
@@ -44,20 +44,20 @@ func GetRequiredParam[T comparable](rawValue string, converter ArrayConverter[T]
 }
 
 // Convenience functions using the generic base function with existing converters
-func GetRequiredInt64PathParam(c echo.Context, paramName string, errorMessage string) (int64, error) {
+func GetRequiredInt64PathParam(c *echo.Context, paramName string, errorMessage string) (int64, error) {
 	return GetRequiredParam(c.Param(paramName), Int64Converter, errorMessage)
 }
 
-func GetRequiredStringPathParam(c echo.Context, paramName string, errorMessage string) (string, error) {
+func GetRequiredStringPathParam(c *echo.Context, paramName string, errorMessage string) (string, error) {
 	return GetRequiredParam(c.Param(paramName), StringConverter, errorMessage)
 }
 
-func GetRequiredStringQueryParam(c echo.Context, paramName string, errorMessage string) (string, error) {
+func GetRequiredStringQueryParam(c *echo.Context, paramName string, errorMessage string) (string, error) {
 	return GetRequiredParam(c.QueryParam(paramName), StringConverter, errorMessage)
 }
 
 // GetPagingParams gets the standard paging params from the URL, returning how much data to take and skip
-func GetPagingParams(c echo.Context, pageParameter, quantityParameter string) (take int64, skip int64) {
+func GetPagingParams(c *echo.Context, pageParameter, quantityParameter string) (take int64, skip int64) {
 	if pageParameter == "" {
 		pageParameter = "page"
 	}
@@ -132,20 +132,20 @@ func BoolConverter(value string) (bool, error) {
 }
 
 // Convenience functions using the generic base function
-func GetStringArrayQueryParam(c echo.Context, paramName, separator string) []string {
+func GetStringArrayQueryParam(c *echo.Context, paramName, separator string) []string {
 	result, _ := GetArrayParam(c.QueryParam(paramName), separator, StringConverter)
 	return result
 }
 
-func GetInt64ArrayQueryParam(c echo.Context, paramName, separator string) ([]int64, error) {
+func GetInt64ArrayQueryParam(c *echo.Context, paramName, separator string) ([]int64, error) {
 	return GetArrayParam(c.QueryParam(paramName), separator, Int64Converter)
 }
 
-func GetIntArrayQueryParam(c echo.Context, paramName, separator string) ([]int, error) {
+func GetIntArrayQueryParam(c *echo.Context, paramName, separator string) ([]int, error) {
 	return GetArrayParam(c.QueryParam(paramName), separator, IntConverter)
 }
 
-func GetBoolQueryParam(c echo.Context, paramName string) bool {
+func GetBoolQueryParam(c *echo.Context, paramName string) bool {
 	param := c.QueryParam(paramName)
 	result, _ := BoolConverter(param)
 	return result

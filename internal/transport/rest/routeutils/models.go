@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/diegoclair/apperr/httpmap"
-	"github.com/diegoclair/goswag/models"
+	"github.com/diegoclair/goswag/v2/models"
 )
 
 // EchoGroups is the struct that holds the echo groups for the routes

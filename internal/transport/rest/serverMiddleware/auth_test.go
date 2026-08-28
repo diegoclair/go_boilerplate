@@ -11,7 +11,7 @@ import (
 	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/diegoclair/go_boilerplate/mocks"
 	"github.com/diegoclair/apperr/httpmap"
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -34,7 +34,7 @@ func TestAuthMiddleware(t *testing.T) {
 		}, nil)
 
 		cacheMock.EXPECT().GetString(gomock.Any(), "Bearer").Return("", nil)
-		err := middleware(func(c echo.Context) error {
+		err := middleware(func(c *echo.Context) error {
 			return nil
 		})(c)
 
@@ -47,7 +47,7 @@ func TestAuthMiddleware(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
-		err := middleware(func(c echo.Context) error {
+		err := middleware(func(c *echo.Context) error {
 			return nil
 		})(c)
 
@@ -64,7 +64,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{}, apperr.ErrTokenInvalid)
 
-		err := middleware(func(c echo.Context) error {
+		err := middleware(func(c *echo.Context) error {
 			return nil
 		})(c)
 
@@ -85,7 +85,7 @@ func TestAuthMiddleware(t *testing.T) {
 		}, nil)
 
 		cacheMock.EXPECT().GetString(gomock.Any(), "Bearer").Return("invalid", nil)
-		err := middleware(func(c echo.Context) error {
+		err := middleware(func(c *echo.Context) error {
 			return nil
 		})(c)
 

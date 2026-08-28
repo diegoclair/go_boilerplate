@@ -53,7 +53,12 @@ func main() {
 		return
 	}
 
-	server := rest.StartRestServer(ctx, cfg, infra, apps, appName, cfg.GetHttpPort())
+	server := rest.NewServer(cfg, infra, apps, appName, cfg.GetHttpPort())
 
-	shutdown.GracefulShutdown(ctx, log, shutdown.WithRestServer(server.Router.Echo()))
+	ctx = shutdown.Context(ctx, log)
+	if err := server.Serve(ctx); err != nil {
+		log.Error(ctx, "error serving the rest api", logger.Err(err))
+	}
+
+	shutdown.Stop(ctx, log)
 }

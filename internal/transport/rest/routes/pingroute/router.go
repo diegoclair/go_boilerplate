@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
-	"github.com/diegoclair/goswag/models"
+	"github.com/diegoclair/goswag/v2/models"
 )
 
 const GroupRouteName = "ping"

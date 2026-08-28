@@ -9,11 +9,11 @@ import (
 
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 )
 
-func setupEchoContext(queryParams map[string]string) echo.Context {
+func setupEchoContext(queryParams map[string]string) *echo.Context {
 	e := echo.New()
 
 	// Build URL with proper encoding
@@ -291,8 +291,7 @@ func TestGetRequiredInt64PathParam(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			c.SetParamNames(tt.paramName)
-			c.SetParamValues(tt.paramValue)
+			c.SetPathValues(echo.PathValues{{Name: tt.paramName, Value: tt.paramValue}})
 
 			got, err := routeutils.GetRequiredInt64PathParam(c, tt.paramName, "Invalid "+tt.paramName)
 
@@ -343,8 +342,7 @@ func TestGetRequiredStringPathParam(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			c.SetParamNames(tt.paramName)
-			c.SetParamValues(tt.paramValue)
+			c.SetPathValues(echo.PathValues{{Name: tt.paramName, Value: tt.paramValue}})
 
 			got, err := routeutils.GetRequiredStringPathParam(c, tt.paramName, "Invalid "+tt.paramName)
 

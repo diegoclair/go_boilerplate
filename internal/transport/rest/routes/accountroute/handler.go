@@ -7,7 +7,7 @@ import (
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
 
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 )
 
 var (
@@ -29,7 +29,7 @@ func NewHandler(accountService contract.AccountApp) *Handler {
 	return instance
 }
 
-func (s *Handler) handleAddAccount(c echo.Context) error {
+func (s *Handler) handleAddAccount(c *echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.AddAccount{}
@@ -46,7 +46,7 @@ func (s *Handler) handleAddAccount(c echo.Context) error {
 	return routeutils.ResponseCreated(c)
 }
 
-func (s *Handler) handleAddBalance(c echo.Context) error {
+func (s *Handler) handleAddBalance(c *echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	input := viewmodel.AddBalance{}
@@ -68,7 +68,7 @@ func (s *Handler) handleAddBalance(c echo.Context) error {
 	return routeutils.ResponseCreated(c)
 }
 
-func (s *Handler) handleGetAccounts(c echo.Context) error {
+func (s *Handler) handleGetAccounts(c *echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	take, skip := routeutils.GetPagingParams(c, "page", "quantity")
@@ -90,7 +90,7 @@ func (s *Handler) handleGetAccounts(c echo.Context) error {
 	return routeutils.ResponseAPIOk(c, responsePaginated)
 }
 
-func (s *Handler) handleGetAccountByID(c echo.Context) error {
+func (s *Handler) handleGetAccountByID(c *echo.Context) error {
 	ctx := routeutils.GetContext(c)
 
 	accountUUID, err := routeutils.GetRequiredStringPathParam(c, "account_uuid", "Invalid account_uuid")

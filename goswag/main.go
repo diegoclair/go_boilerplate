@@ -18,6 +18,6 @@ func main() {
 	//	@schemes		http
 	//	@servers.url	http://localhost:5000
 
-	server := rest.NewRestServer(&service.Apps{}, nil, nil, "")
+	server := rest.NewRestServer(&service.Apps{}, nil, nil, "", nil)
 	server.Router.GenerateSwagger()
 }

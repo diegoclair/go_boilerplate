@@ -6,8 +6,8 @@ import (
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/routeutils"
 	"github.com/diegoclair/go_boilerplate/internal/transport/rest/viewmodel"
-	"github.com/diegoclair/goswag"
-	"github.com/diegoclair/goswag/models"
+	"github.com/diegoclair/goswag/v2"
+	"github.com/diegoclair/goswag/v2/models"
 )
 
 const GroupRouteName = "transfers"

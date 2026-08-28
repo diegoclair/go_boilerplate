@@ -38,6 +38,8 @@ type AppConfig struct {
 	Environment string     `mapstructure:"environment"`
 	Port        string     `mapstructure:"port"`
 	Auth        AuthConfig `mapstructure:"auth"`
+	// Empty falls back to clientip.DefaultHeaders.
+	ClientIPHeaders []string `mapstructure:"client-ip-headers"`
 }
 type AuthConfig struct {
 	AccessTokenDuration  time.Duration `mapstructure:"access-token-duration"`

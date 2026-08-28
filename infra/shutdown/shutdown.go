@@ -6,50 +6,46 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/diegoclair/logger"
-	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
 )
 
-const gracefulShutdownTimeout = 10 * time.Second
+type Option func(s *stopper)
 
-type ShutdownOptions func(s *shutdown)
-
-type shutdown struct {
-	restServer *echo.Echo
+type stopper struct {
 	grpcServer *grpc.Server
 	listener   net.Listener
 }
 
-func GracefulShutdown(ctx context.Context, log logger.Logger, opts ...ShutdownOptions) {
-	s := &shutdown{}
+// Context returns a context cancelled when the process is asked to terminate.
+// The REST server drains on that cancellation, so whatever must outlive the
+// requests in flight is stopped by Stop, after serving returns.
+func Context(ctx context.Context, log logger.Logger) context.Context {
+	ctx, cancel := context.WithCancel(ctx)
 
-	for _, opt := range opts {
-		opt(s)
-	}
-
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop,
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals,
 		syscall.SIGINT,
 		syscall.SIGTERM,
 		syscall.SIGHUP,
 		syscall.SIGQUIT,
 		os.Interrupt,
 	)
-	<-stop
 
-	log.Info(ctx, "Shutting down server...")
+	go func() {
+		<-signals
+		log.Info(ctx, "Shutting down server...")
+		cancel()
+	}()
 
-	if s.restServer != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
-		defer cancel()
+	return ctx
+}
 
-		err := s.restServer.Shutdown(ctx)
-		if err != nil {
-			log.Error(ctx, "Failed to shutdown rest server", logger.Err(err))
-		}
+func Stop(ctx context.Context, log logger.Logger, opts ...Option) {
+	s := &stopper{}
+	for _, opt := range opts {
+		opt(s)
 	}
 
 	if s.grpcServer != nil {
@@ -57,24 +53,20 @@ func GracefulShutdown(ctx context.Context, log logger.Logger, opts ...ShutdownOp
 	}
 
 	if s.listener != nil {
-		s.listener.Close()
+		if err := s.listener.Close(); err != nil {
+			log.Error(ctx, "Failed to close the listener", logger.Err(err))
+		}
 	}
 }
 
-func WithRestServer(restServer *echo.Echo) ShutdownOptions {
-	return func(s *shutdown) {
-		s.restServer = restServer
-	}
-}
-
-func WithGrpcServer(grpcServer *grpc.Server) ShutdownOptions {
-	return func(s *shutdown) {
+func WithGrpcServer(grpcServer *grpc.Server) Option {
+	return func(s *stopper) {
 		s.grpcServer = grpcServer
 	}
 }
 
-func WithListener(listener net.Listener) ShutdownOptions {
-	return func(s *shutdown) {
+func WithListener(listener net.Listener) Option {
+	return func(s *stopper) {
 		s.listener = listener
 	}
 }
