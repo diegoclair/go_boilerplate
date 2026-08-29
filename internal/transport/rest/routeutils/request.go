@@ -48,6 +48,13 @@ func GetRequiredInt64PathParam(c *echo.Context, paramName string, errorMessage s
 	return GetRequiredParam(c.Param(paramName), Int64Converter, errorMessage)
 }
 
+// GetRequiredIDPathParam is the narrow read for a generated id: zero and
+// negative never named a row, so neither may reach a service and read back as
+// "not found".
+func GetRequiredIDPathParam(c *echo.Context, paramName string, errorMessage string) (int64, error) {
+	return GetRequiredParam(c.Param(paramName), IDConverter, errorMessage)
+}
+
 func GetRequiredStringPathParam(c *echo.Context, paramName string, errorMessage string) (string, error) {
 	return GetRequiredParam(c.Param(paramName), StringConverter, errorMessage)
 }
@@ -119,6 +126,21 @@ func StringConverter(value string) (string, error) {
 // Int64 converter
 func Int64Converter(value string) (int64, error) {
 	return strconv.ParseInt(value, 10, 64)
+}
+
+// IDConverter rejects what Int64Converter accepts but a generated id never is:
+// zero and negative.
+func IDConverter(value string) (int64, error) {
+	id, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	if id < 1 {
+		return 0, apperr.ErrInvalidInput
+	}
+
+	return id, nil
 }
 
 // Int converter

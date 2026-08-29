@@ -896,3 +896,83 @@ func TestGetTakeSkipFromPageQuantity(t *testing.T) {
 		})
 	}
 }
+
+func TestIDConverter(t *testing.T) {
+	tests := []struct {
+		name      string
+		value     string
+		want      int64
+		wantError bool
+	}{
+		{name: "Valid id", value: "123", want: 123},
+		{name: "Zero is not an id", value: "0", wantError: true},
+		{name: "Negative is not an id", value: "-3", wantError: true},
+		{name: "Not a number", value: "abc", wantError: true},
+		{name: "Empty", value: "", wantError: true},
+		{name: "Past int64", value: "9223372036854775808", wantError: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := routeutils.IDConverter(tt.value)
+
+			if tt.wantError {
+				assert.Error(t, err)
+				assert.Zero(t, got)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// A generated id is never negative, so the narrow read refuses what the plain
+// int64 read lets through — otherwise a path that never named a row comes back
+// as a row that once existed.
+func TestGetRequiredIDPathParam(t *testing.T) {
+	tests := []struct {
+		name       string
+		paramValue string
+		wantValue  int64
+		wantError  bool
+	}{
+		{name: "Valid id", paramValue: "123", wantValue: 123},
+		{name: "Zero value should return error", paramValue: "0", wantError: true},
+		{name: "Negative value should return error", paramValue: "-3", wantError: true},
+		{name: "Invalid id parameter", paramValue: "invalid", wantError: true},
+		{name: "Empty parameter", paramValue: "", wantError: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPathValues(echo.PathValues{{Name: "id", Value: tt.paramValue}})
+
+			got, err := routeutils.GetRequiredIDPathParam(c, "id", "id is required")
+
+			if tt.wantError {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantValue, got)
+		})
+	}
+}
+
+func TestGetRequiredIDPathParam_IsNarrowerThanTheInt64Read(t *testing.T) {
+	e := echo.New()
+	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c.SetPathValues(echo.PathValues{{Name: "id", Value: "-3"}})
+
+	asInt64, err := routeutils.GetRequiredInt64PathParam(c, "id", "id is required")
+	assert.NoError(t, err)
+	assert.Equal(t, int64(-3), asInt64)
+
+	_, err = routeutils.GetRequiredIDPathParam(c, "id", "id is required")
+	assert.Error(t, err)
+}
