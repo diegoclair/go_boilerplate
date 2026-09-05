@@ -22,7 +22,7 @@ services:
 
   cache:
     container_name: go-boilerplate-cache-redis
-    image: redis:7.4.2-alpine
+    image: redis:8.10.1-alpine
     restart: unless-stopped
     ports:
       - '6379:6379'

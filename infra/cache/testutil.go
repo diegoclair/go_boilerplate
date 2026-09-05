@@ -15,7 +15,7 @@ import (
 func SetRedisTestContainerConfig(ctx context.Context, cfg *configmock.ConfigMock) (closeFunc func()) {
 
 	req := testcontainers.ContainerRequest{
-		Image:        "redis:7.4-alpine",
+		Image:        "redis:8.10.1-alpine",
 		ExposedPorts: []string{"6379/tcp"},
 		WaitingFor:   wait.ForLog("Server initialized"),
 		// this commands are the same as the command from docker-compose.yml
