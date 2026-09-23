@@ -20,6 +20,7 @@ func fromContractTokenPayloadInput(input contract.TokenPayloadInput) tokenPayloa
 
 // tokenPayload represents the payload of a JWT token
 type tokenPayload struct {
+	Kind         contract.TokenKind
 	AccountUUID  string
 	SessionUUID  string
 	RefreshToken string
@@ -29,6 +30,7 @@ type tokenPayload struct {
 
 func (t *tokenPayload) toContract() contract.TokenPayload {
 	return contract.TokenPayload{
+		Kind:         t.Kind,
 		AccountUUID:  t.AccountUUID,
 		SessionUUID:  t.SessionUUID,
 		RefreshToken: t.RefreshToken,
@@ -37,8 +39,9 @@ func (t *tokenPayload) toContract() contract.TokenPayload {
 	}
 }
 
-func newPayload(input tokenPayloadInput, duration time.Duration) *tokenPayload {
+func newPayload(kind contract.TokenKind, input tokenPayloadInput, duration time.Duration) *tokenPayload {
 	return &tokenPayload{
+		Kind:        kind,
 		SessionUUID: input.SessionUUID,
 		AccountUUID: input.AccountUUID,
 		IssuedAt:    time.Now(),

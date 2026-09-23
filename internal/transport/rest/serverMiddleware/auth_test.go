@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/diegoclair/apperr"
+	"github.com/diegoclair/apperr/httpmap"
 	"github.com/diegoclair/go_boilerplate/infra"
 	"github.com/diegoclair/go_boilerplate/infra/contract"
 	infraMocks "github.com/diegoclair/go_boilerplate/infra/mocks"
 	"github.com/diegoclair/go_boilerplate/mocks"
-	"github.com/diegoclair/apperr/httpmap"
 	echo "github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -29,6 +29,7 @@ func TestAuthMiddleware(t *testing.T) {
 		c := echo.New().NewContext(req, rec)
 
 		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{
+			Kind:        contract.TokenKindAccess,
 			AccountUUID: "uuid",
 			SessionUUID: "session",
 		}, nil)
@@ -80,6 +81,7 @@ func TestAuthMiddleware(t *testing.T) {
 		c := echo.New().NewContext(req, rec)
 
 		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{
+			Kind:        contract.TokenKindAccess,
 			AccountUUID: "uuid",
 			SessionUUID: "session",
 		}, nil)
@@ -93,4 +95,34 @@ func TestAuthMiddleware(t *testing.T) {
 		status, _ := httpmap.ToHTTP(err)
 		assert.Equal(t, http.StatusUnauthorized, status)
 	})
+}
+
+// A refresh token verifies with the same key and lives far longer, so the
+// guard has to read what the token is for and not only whether it is valid.
+func TestAuthMiddleware_RefusesATokenThatIsNotForAccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockAuthToken := infraMocks.NewMockAuthToken(ctrl)
+	cacheMock := mocks.NewMockCacheManager(ctrl)
+	middleware := AuthMiddlewarePrivateRoute(mockAuthToken, cacheMock)
+
+	for _, kind := range []contract.TokenKind{contract.TokenKindRefresh, ""} {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set(infra.TokenKey.String(), "Bearer")
+		c := echo.New().NewContext(req, httptest.NewRecorder())
+
+		mockAuthToken.EXPECT().VerifyToken(gomock.Any(), "Bearer").Return(contract.TokenPayload{
+			Kind:        kind,
+			AccountUUID: "uuid",
+			SessionUUID: "session",
+		}, nil)
+
+		reached := false
+		err := middleware(func(c *echo.Context) error {
+			reached = true
+			return nil
+		})(c)
+
+		assert.ErrorIs(t, err, apperr.ErrTokenInvalid)
+		assert.False(t, reached)
+	}
 }

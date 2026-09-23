@@ -22,6 +22,12 @@ func AuthMiddlewarePrivateRoute(authToken infraContract.AuthToken, cache contrac
 				return err
 			}
 
+			// A refresh token verifies just as well and lives far longer, so the
+			// kind is what keeps it from opening what it was never meant to.
+			if payload.Kind != infraContract.TokenKindAccess {
+				return apperr.ErrTokenInvalid
+			}
+
 			valid, _ := cache.GetString(ctx.Request().Context(), accessToken)
 			if valid != "" {
 				return apperr.ErrTokenInvalid

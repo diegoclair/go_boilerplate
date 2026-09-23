@@ -37,7 +37,7 @@ func newPasetoAuth(symmetricKey string, log logger.Logger) (*pasetoAuth, error) 
 }
 
 func (p *pasetoAuth) CreateAccessToken(ctx context.Context, input contract.TokenPayloadInput) (tokenString string, resp contract.TokenPayload, err error) {
-	payload := newPayload(fromContractTokenPayloadInput(input), accessTokenDurationTime)
+	payload := newPayload(contract.TokenKindAccess, fromContractTokenPayloadInput(input), accessTokenDurationTime)
 
 	tokenString, err = p.createToken(ctx, payload)
 	if err != nil {
@@ -48,7 +48,7 @@ func (p *pasetoAuth) CreateAccessToken(ctx context.Context, input contract.Token
 }
 
 func (p *pasetoAuth) CreateRefreshToken(ctx context.Context, input contract.TokenPayloadInput) (tokenString string, resp contract.TokenPayload, err error) {
-	payload := newPayload(fromContractTokenPayloadInput(input), refreshTokenDurationTime)
+	payload := newPayload(contract.TokenKindRefresh, fromContractTokenPayloadInput(input), refreshTokenDurationTime)
 
 	tokenString, err = p.createToken(ctx, payload)
 	if err != nil {
